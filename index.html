@@ -170,7 +170,7 @@
        TARJETA — Componente reutilizable
        ═══════════════════════════════════════════════════════════════════════
        Cada tarjeta tiene la misma estructura HTML:
-         .card > .card-accent + .card-body + .card-tags + .card-link
+         .card > .card-accent + .card-body + .card-tags + .card-actions
 
        La tarjeta es un flex container en columna. Esto permite que
        .card-body tenga flex: 1 para ocupar el espacio sobrante,
@@ -350,6 +350,237 @@
       header h1 { font-size: 1.6rem; }
       .grid { grid-template-columns: 1fr; gap: 1.25rem; }
     }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       ACCIONES DE TARJETA — Ejercicio + Conceptos
+       ═══════════════════════════════════════════════════════════════════════ */
+    .card-actions {
+      display: flex;
+      border-top: 1px solid #eee;
+    }
+
+    .card-actions .card-link {
+      flex: 1;
+      border-top: none;
+    }
+
+    .card-conceptos-btn {
+      flex: 1;
+      margin: 0;
+      padding: 0.85rem;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-align: center;
+      cursor: pointer;
+      border: none;
+      border-left: 1px solid #eee;
+      background: var(--blanco);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .card .card-conceptos-btn {
+      color: var(--accent);
+    }
+
+    .card .card-conceptos-btn:hover {
+      background: var(--accent);
+      color: var(--blanco) !important;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       MODAL — Visor de CONCEPTOS.md
+       ═══════════════════════════════════════════════════════════════════════ */
+    .conceptos-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: stretch;
+      justify-content: flex-end;
+      padding: 0;
+    }
+
+    .conceptos-modal[hidden] {
+      display: none !important;
+    }
+
+    .conceptos-modal__backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(26, 26, 46, 0.45);
+      cursor: pointer;
+    }
+
+    .conceptos-modal__dialog {
+      position: relative;
+      width: min(100%, 640px);
+      max-height: 100vh;
+      margin-left: auto;
+      background: var(--blanco);
+      box-shadow: -8px 0 40px rgba(0, 0, 0, 0.15);
+      display: flex;
+      flex-direction: column;
+      animation: conceptos-slide-in 0.25s ease;
+    }
+
+    @keyframes conceptos-slide-in {
+      from { transform: translateX(100%); opacity: 0.9; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .conceptos-modal__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid #eee;
+      background: linear-gradient(135deg, var(--azul-oscuro), var(--azul-acento));
+      color: var(--blanco);
+      flex-shrink: 0;
+    }
+
+    .conceptos-modal__header h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .conceptos-modal__close {
+      flex-shrink: 0;
+      width: 2.25rem;
+      height: 2.25rem;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--blanco);
+      font-size: 1.5rem;
+      line-height: 1;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .conceptos-modal__close:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    .conceptos-modal__status {
+      padding: 0.5rem 1.25rem;
+      font-size: 0.9rem;
+      color: #666;
+      flex-shrink: 0;
+    }
+
+    .conceptos-modal__status a {
+      color: var(--azul-acento);
+      font-weight: 600;
+    }
+
+    .conceptos-md {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 1.25rem 2rem;
+      line-height: 1.55;
+      color: #333;
+    }
+
+    .conceptos-md h1 {
+      font-size: 1.35rem;
+      margin: 0.5rem 0 0.5rem;
+    }
+
+    .conceptos-md h2 {
+      font-size: 1.15rem;
+      margin: 1.1rem 0 0.45rem;
+      padding-bottom: 0.25rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      color: var(--azul-oscuro);
+    }
+
+    .conceptos-md h3 {
+      font-size: 1.02rem;
+      margin: 0.9rem 0 0.35rem;
+    }
+
+    .conceptos-md p,
+    .conceptos-md li {
+      margin: 0.45rem 0;
+      font-size: 0.92rem;
+    }
+
+    .conceptos-md ul,
+    .conceptos-md ol {
+      margin: 0.45rem 0;
+      padding-left: 1.4rem;
+    }
+
+    .conceptos-md blockquote {
+      margin: 0.65rem 0;
+      padding: 0.35rem 0.75rem;
+      border-left: 4px solid var(--azul-acento);
+      background: #f7f9fc;
+    }
+
+    .conceptos-md pre {
+      overflow-x: auto;
+      padding: 0.65rem 0.85rem;
+      border-radius: 8px;
+      background: #1e1e2e;
+      color: #f0f0f0;
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    .conceptos-md code {
+      font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+      font-size: 0.88em;
+    }
+
+    .conceptos-md :not(pre) > code {
+      padding: 0.12em 0.35em;
+      border-radius: 4px;
+      background: rgba(15, 52, 96, 0.08);
+    }
+
+    .conceptos-md table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.65rem 0;
+      font-size: 0.82rem;
+    }
+
+    .conceptos-md th,
+    .conceptos-md td {
+      border: 1px solid #ddd;
+      padding: 0.35rem 0.45rem;
+      text-align: left;
+    }
+
+    .conceptos-md th {
+      background: #f0f4f8;
+    }
+
+    .conceptos-md hr {
+      margin: 0.9rem 0;
+      border: none;
+      border-top: 1px solid #ddd;
+    }
+
+    @media (max-width: 520px) {
+      .conceptos-modal__dialog {
+        width: 100%;
+      }
+
+      .card-actions {
+        flex-direction: column;
+      }
+
+      .card-conceptos-btn {
+        border-left: none;
+        border-top: 1px solid #eee;
+      }
+    }
   </style>
 </head>
 <body>
@@ -375,7 +606,7 @@
       div.card-accent  ← barra de color (6px)
       div.card-body    ← número + título + descripción
       div.card-tags    ← etiquetas de tecnología
-      a.card-link      ← enlace al ejercicio
+      div.card-actions ← enlace al ejercicio + botón Conceptos (CONCEPTOS.md)
   ═══════════════════════════════════════════════════════════════════════
   -->
   <main class="grid">
@@ -393,7 +624,10 @@
         <span class="tag">Semántica</span>
         <span class="tag">Formularios</span>
       </div>
-      <a class="card-link" href="01-fundamentos-html/index.html">Ver ejercicio</a>
+      <div class="card-actions">
+        <a class="card-link" href="01-fundamentos-html/index.html">Ver ejercicio</a>
+        <button type="button" class="card-conceptos-btn" data-md="01-fundamentos-html/CONCEPTOS.md" data-title="Fundamentos HTML">Conceptos</button>
+      </div>
     </article>
 
     <!-- 02 — Se agrega CSS: misma estructura, ahora con estilos -->
@@ -409,7 +643,10 @@
         <span class="tag">Box Model</span>
         <span class="tag">Tipografía</span>
       </div>
-      <a class="card-link" href="02-fundamentos-css/index.html">Ver ejercicio</a>
+      <div class="card-actions">
+        <a class="card-link" href="02-fundamentos-css/index.html">Ver ejercicio</a>
+        <button type="button" class="card-conceptos-btn" data-md="02-fundamentos-css/CONCEPTOS.md" data-title="Fundamentos CSS">Conceptos</button>
+      </div>
     </article>
 
     <!-- 03 — Primera página real: múltiples archivos, imágenes, links -->
@@ -425,7 +662,10 @@
         <span class="tag">Imágenes</span>
         <span class="tag">Enlaces</span>
       </div>
-      <a class="card-link" href="03-pagina-web-basica/index.html">Ver ejercicio</a>
+      <div class="card-actions">
+        <a class="card-link" href="03-pagina-web-basica/index.html">Ver ejercicio</a>
+        <button type="button" class="card-conceptos-btn" data-md="03-pagina-web-basica/CONCEPTOS.md" data-title="Página Web Básica">Conceptos</button>
+      </div>
     </article>
 
     <!-- 04 — Flexbox: el sistema de layout más importante de CSS moderno -->
@@ -441,7 +681,10 @@
         <span class="tag">Alineación</span>
         <span class="tag">Layout</span>
       </div>
-      <a class="card-link" href="04-flexbox-dados/dados.html">Ver ejercicio</a>
+      <div class="card-actions">
+        <a class="card-link" href="04-flexbox-dados/dados.html">Ver ejercicio</a>
+        <button type="button" class="card-conceptos-btn" data-md="04-flexbox-dados/CONCEPTOS.md" data-title="Flexbox — Dados">Conceptos</button>
+      </div>
     </article>
 
     <!-- 05 — Pensamiento en componentes: patrones reutilizables -->
@@ -457,7 +700,10 @@
         <span class="tag">Gradientes</span>
         <span class="tag">Box Shadow</span>
       </div>
-      <a class="card-link" href="05-componentes-css/index.html">Ver ejercicio</a>
+      <div class="card-actions">
+        <a class="card-link" href="05-componentes-css/index.html">Ver ejercicio</a>
+        <button type="button" class="card-conceptos-btn" data-md="05-componentes-css/CONCEPTOS.md" data-title="Componentes CSS">Conceptos</button>
+      </div>
     </article>
 
     <!-- 06 — Responsive con Flexbox: diseño mobile-first -->
@@ -473,7 +719,10 @@
         <span class="tag">Media Queries</span>
         <span class="tag">Mobile-first</span>
       </div>
-      <a class="card-link" href="06-responsive-fundamentos/index.html">Ver ejercicio</a>
+      <div class="card-actions">
+        <a class="card-link" href="06-responsive-fundamentos/index.html">Ver ejercicio</a>
+        <button type="button" class="card-conceptos-btn" data-md="06-responsive-fundamentos/CONCEPTOS.md" data-title="Responsive — Fundamentos">Conceptos</button>
+      </div>
     </article>
 
     <!-- 07 — CSS Grid: el segundo sistema de layout, ideal para 2D -->
@@ -489,7 +738,10 @@
         <span class="tag">Responsive</span>
         <span class="tag">Columnas</span>
       </div>
-      <a class="card-link" href="07-responsive-css-grid/index.html">Ver ejercicio</a>
+      <div class="card-actions">
+        <a class="card-link" href="07-responsive-css-grid/index.html">Ver ejercicio</a>
+        <button type="button" class="card-conceptos-btn" data-md="07-responsive-css-grid/CONCEPTOS.md" data-title="Responsive — CSS Grid">Conceptos</button>
+      </div>
     </article>
 
     <!-- 08 — Proyecto integrador: todo junto en un sitio real -->
@@ -505,7 +757,10 @@
         <span class="tag">Tarjetas</span>
         <span class="tag">Responsive</span>
       </div>
-      <a class="card-link" href="08-proyecto-web-servicios/index.html">Ver ejercicio</a>
+      <div class="card-actions">
+        <a class="card-link" href="08-proyecto-web-servicios/index.html">Ver ejercicio</a>
+        <button type="button" class="card-conceptos-btn" data-md="08-proyecto-web-servicios/CONCEPTOS.md" data-title="Proyecto Web — Servicios">Conceptos</button>
+      </div>
     </article>
 
     <!-- 09 — Portfolio con JavaScript: transiciones, animaciones, interactividad -->
@@ -521,7 +776,10 @@
         <span class="tag">JavaScript</span>
         <span class="tag">Capstone</span>
       </div>
-      <a class="card-link" href="09-portfolio-profesional/portfolioYo.html">Ver ejercicio</a>
+      <div class="card-actions">
+        <a class="card-link" href="09-portfolio-profesional/portfolioYo.html">Ver ejercicio</a>
+        <button type="button" class="card-conceptos-btn" data-md="09-portfolio-profesional/CONCEPTOS.md" data-title="Portfolio Profesional">Conceptos</button>
+      </div>
     </article>
 
     <!-- 10 — Landing profesional: arquitectura CSS, diseño de sistema, IntersectionObserver -->
@@ -537,10 +795,31 @@
         <span class="tag">Portfolio</span>
         <span class="tag">Mobile-first</span>
       </div>
-      <a class="card-link" href="10-landing-personal/index.html">Ver ejercicio</a>
+      <div class="card-actions">
+        <a class="card-link" href="10-landing-personal/index.html">Ver ejercicio</a>
+        <button type="button" class="card-conceptos-btn" data-md="10-landing-personal/CONCEPTOS.md" data-title="Landing Personal">Conceptos</button>
+      </div>
     </article>
 
   </main>
+
+  <!-- Visor modal de CONCEPTOS.md por módulo -->
+  <div id="conceptos-modal" class="conceptos-modal" hidden aria-hidden="true">
+    <div class="conceptos-modal__backdrop" data-conceptos-close tabindex="-1" aria-label="Cerrar"></div>
+    <div
+      class="conceptos-modal__dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="conceptos-modal-title"
+    >
+      <header class="conceptos-modal__header">
+        <h2 id="conceptos-modal-title">Conceptos</h2>
+        <button type="button" class="conceptos-modal__close" data-conceptos-close aria-label="Cerrar">&times;</button>
+      </header>
+      <p id="conceptos-modal-status" class="conceptos-modal__status" role="status" aria-live="polite"></p>
+      <article id="conceptos-modal-body" class="conceptos-md"></article>
+    </div>
+  </div>
 
   <footer>
     DGTIC — UNAM &middot; Curso de Desarrollo Web
@@ -549,6 +828,101 @@
          podrían confundirse con código HTML o no estar en el teclado.
          Otras comunes: &amp; (&), &lt; (<), &gt; (>), &copy; (©) -->
   </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+  (function () {
+    var modal = document.getElementById('conceptos-modal');
+    var titleEl = document.getElementById('conceptos-modal-title');
+    var statusEl = document.getElementById('conceptos-modal-status');
+    var bodyEl = document.getElementById('conceptos-modal-body');
+    var lastFocus = null;
+    var cache = {};
+
+    function openModal() {
+      lastFocus = document.activeElement;
+      modal.hidden = false;
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      var closeBtn = modal.querySelector('.conceptos-modal__close');
+      if (closeBtn) {
+        closeBtn.focus();
+      }
+    }
+
+    function closeModal() {
+      modal.hidden = true;
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      bodyEl.innerHTML = '';
+      statusEl.textContent = '';
+      if (lastFocus && typeof lastFocus.focus === 'function') {
+        lastFocus.focus();
+      }
+    }
+
+    function showError(mdPath) {
+      statusEl.innerHTML =
+        'No se pudo cargar el archivo (p. ej. al abrir index.html como archivo local). ' +
+        '<a href="' + mdPath + '">Abrir CONCEPTOS.md</a>';
+    }
+
+    function loadMarkdown(mdPath, title) {
+      titleEl.textContent = title || 'Conceptos';
+      bodyEl.innerHTML = '';
+      statusEl.textContent = 'Cargando…';
+      openModal();
+
+      if (cache[mdPath]) {
+        bodyEl.innerHTML = cache[mdPath];
+        statusEl.textContent = '';
+        return;
+      }
+
+      fetch(mdPath)
+        .then(function (res) {
+          if (!res.ok) {
+            throw new Error('HTTP ' + res.status);
+          }
+          return res.text();
+        })
+        .then(function (md) {
+          if (typeof marked === 'undefined' || !marked.parse) {
+            throw new Error('marked no disponible');
+          }
+          var html = marked.parse(md);
+          cache[mdPath] = html;
+          bodyEl.innerHTML = html;
+          statusEl.textContent = '';
+        })
+        .catch(function () {
+          showError(mdPath);
+        });
+    }
+
+    document.querySelectorAll('.card-conceptos-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var md = btn.getAttribute('data-md');
+        var t = btn.getAttribute('data-title') || 'Conceptos';
+        if (md) {
+          loadMarkdown(md, t);
+        }
+      });
+    });
+
+    modal.querySelectorAll('[data-conceptos-close]').forEach(function (el) {
+      el.addEventListener('click', function () {
+        closeModal();
+      });
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !modal.hidden) {
+        closeModal();
+      }
+    });
+  })();
+  </script>
 
 </body>
 </html>
