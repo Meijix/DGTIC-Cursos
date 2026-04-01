@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DGTIC Cursos — Tabla de Contenidos</title>
+
+  <!--
+  ╔══════════════════════════════════════════════════════════════════════════════╗
+  ║  INDEX.HTML — TABLA DE CONTENIDOS DEL CURSO                                ║
+  ║                                                                            ║
+  ║  Este archivo es la PÁGINA DE ENTRADA al repositorio. Funciona como un     ║
+  ║  índice que enlaza a cada uno de los 10 ejercicios del curso.              ║
+  ║                                                                            ║
+  ║  CONCEPTOS CLAVE DEMOSTRADOS:                                              ║
+  ║  • CSS Grid con auto-fill para layout adaptable                            ║
+  ║  • Variables CSS con scope por componente (--accent por tarjeta)            ║
+  ║  • Tarjetas como componentes reutilizables con estructura consistente      ║
+  ║  • CSS embebido (en <style>) vs externo: aquí se usa embebido porque       ║
+  ║    es una sola página independiente, no comparte estilos con otras         ║
+  ║  ╚══════════════════════════════════════════════════════════════════════════╝
+  -->
+
+  <style>
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       RESET UNIVERSAL
+       ═══════════════════════════════════════════════════════════════════════
+       El selector * aplica a TODOS los elementos. Junto con ::before y
+       ::after cubre también los pseudo-elementos.
+
+       ¿Por qué box-sizing: border-box?
+       - Por defecto, CSS usa content-box: padding y border se SUMAN al
+         width/height declarado. Esto causa desbordamientos inesperados.
+       - Con border-box, el width incluye padding + border. Si dices
+         width: 100px y padding: 10px, el contenido se reduce a 80px
+         pero la caja total sigue siendo 100px.
+       - Es el comportamiento más intuitivo y el estándar en desarrollo
+         moderno. Casi todas las hojas de estilos lo activan globalmente.
+    */
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       VARIABLES CSS (Custom Properties)
+       ═══════════════════════════════════════════════════════════════════════
+       Definidas en :root para que estén disponibles en todo el documento.
+
+       Patrón avanzado aquí: --accent NO se define en :root, sino que
+       cada clase .c1, .c2, etc. define su propio --accent. Esto es
+       posible porque las variables CSS HEREDAN por el DOM: cuando
+       .card usa var(--accent), busca el valor en sí misma primero,
+       luego sube al padre hasta encontrarlo. Como .c1 lo define,
+       todos los hijos de .c1 obtienen ese color.
+
+       Esto permite que UNA sola regla (.card .card-accent { background:
+       var(--accent) }) funcione para 10 colores diferentes. Sin variables,
+       necesitarías 10 reglas separadas.
+    */
+    :root {
+      --azul-oscuro: #1a1a2e;
+      --azul-medio: #16213e;
+      --azul-acento: #0f3460;
+      --cyan: #00d2ff;
+      --gris-claro: #e8e8e8;
+      --blanco: #ffffff;
+      --radio: 12px;
+      --sombra: 0 4px 20px rgba(0, 0, 0, 0.08);
+      /* --sombra usa rgba: el cuarto valor (0.08) es opacidad.
+         Sombras sutiles con baja opacidad lucen más naturales que
+         sombras oscuras y gruesas. */
+    }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      /* Font stack: intenta Segoe UI (Windows), luego system-ui (fuente
+         del sistema operativo), luego -apple-system (Safari), y sans-serif
+         como último recurso. Esto garantiza tipografía nativa y rápida. */
+
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      /* Gradiente diagonal (135°). Los % indican dónde empieza/termina
+         cada color. 0% = esquina superior izquierda, 100% = inferior derecha.
+         Un fondo gradiente le da profundidad visual sin imágenes. */
+
+      min-height: 100vh;
+      /* vh = viewport height. 100vh = toda la altura visible del navegador.
+         min-height (no height) permite que el contenido crezca si es más largo. */
+
+      color: #333;
+      /* Color base del texto: gris oscuro. #333 en fondo claro da un
+         contraste de ~12:1, muy por encima del mínimo WCAG AA (4.5:1).
+         Usamos #333 y no #000 porque el negro puro sobre blanco puro
+         genera un contraste tan alto que puede causar fatiga visual. */
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, var(--azul-oscuro), var(--azul-acento));
+      color: var(--blanco);
+      text-align: center;
+      padding: 3rem 1.5rem 2.5rem;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      /* letter-spacing negativo acerca las letras ligeramente.
+         Se usa en títulos grandes porque a mayor tamaño, el espaciado
+         natural se percibe excesivo. Es un ajuste tipográfico sutil. */
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      font-size: 1.1rem;
+      opacity: 0.85;
+      /* opacity < 1 crea texto ligeramente translúcido, dando jerarquía
+         visual: el título se ve más prominente que el subtítulo sin
+         necesidad de cambiar el color. */
+      max-width: 520px;
+      margin: 0 auto;
+      /* margin: 0 auto centra horizontalmente un elemento de bloque.
+         Funciona porque auto en márgenes laterales divide el espacio
+         sobrante equitativamente. Requiere que el elemento tenga un
+         ancho menor al de su padre (aquí lo da max-width). */
+      line-height: 1.5;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       GRID DE TARJETAS — El corazón del layout
+       ═══════════════════════════════════════════════════════════════════════
+
+       ¿Por qué CSS Grid y no Flexbox aquí?
+       - Queremos un layout de 2 dimensiones (filas Y columnas alineadas)
+       - Grid auto-fill crea columnas automáticamente según el espacio
+       - Flexbox requeriría más código para lograr el mismo resultado
+
+       repeat(auto-fill, minmax(300px, 1fr)) — desglose:
+       ┌─────────────────────────────────────────────────────┐
+       │ auto-fill: crea tantas columnas como quepan         │
+       │ minmax(300px, 1fr):                                  │
+       │   - Mínimo 300px por columna                         │
+       │   - Máximo 1fr (fracción del espacio restante)       │
+       │                                                      │
+       │ Resultado:                                           │
+       │ - En 1200px de ancho: 3 columnas de ~366px           │
+       │ - En 700px de ancho: 2 columnas de 350px             │
+       │ - En 400px de ancho: 1 columna de 400px              │
+       │ ¡Sin media queries! El grid se adapta solo.           │
+       └─────────────────────────────────────────────────────┘
+
+       Alternativa: auto-fit se comporta similar, pero COLAPSA columnas
+       vacías. auto-fill las mantiene (relevante si hay pocas tarjetas).
+    */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      max-width: 1100px;
+      margin: 2.5rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       TARJETA — Componente reutilizable
+       ═══════════════════════════════════════════════════════════════════════
+       Cada tarjeta tiene la misma estructura HTML:
+         .card > .card-accent + .card-body + .card-tags + .card-link
+
+       La tarjeta es un flex container en columna. Esto permite que
+       .card-body tenga flex: 1 para ocupar el espacio sobrante,
+       empujando los tags y el link al fondo de la tarjeta.
+       Así todas las tarjetas quedan alineadas visualmente aunque
+       sus descripciones tengan diferente longitud.
+    */
+    .card {
+      background: var(--blanco);
+      border-radius: var(--radio);
+      box-shadow: var(--sombra);
+      overflow: hidden;
+      /* overflow: hidden corta cualquier contenido que sobresalga del
+         border-radius. Sin esto, los hijos (como .card-accent) se verían
+         con esquinas rectas sobre las esquinas redondeadas del padre. */
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      /* Animamos solo transform y box-shadow en hover. Estas propiedades
+         son "baratas" de animar porque no causan reflow del layout.
+         Nunca animes width, height o margin — son costosos. */
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      /* translateY negativo "levanta" la tarjeta. Al combinarse con una
+         sombra más pronunciada, crea la ilusión de que la tarjeta se
+         eleva del fondo. Esto se llama "material elevation". */
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    }
+
+    /* La barra de color superior. Solo tiene height, sin contenido.
+       Su color viene de var(--accent), definido por la clase .c1-.c10 */
+    .card-accent {
+      height: 6px;
+    }
+
+    .card-body {
+      padding: 1.5rem 1.5rem 1rem;
+      flex: 1;
+      /* flex: 1 es equivalente a flex-grow: 1; flex-shrink: 1; flex-basis: 0%.
+         Esto hace que el body crezca para llenar el espacio disponible,
+         alineando los tags y links al fondo en tarjetas de diferente altura. */
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Número circular con color de acento */
+    .card-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      /* 50% en un elemento cuadrado (mismo width y height) = círculo perfecto */
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--blanco);
+      margin-bottom: 0.75rem;
+      flex-shrink: 0;
+      /* flex-shrink: 0 impide que el círculo se encoja si el espacio es
+         limitado. Sin esto, Flexbox podría reducirlo para dar espacio a otros. */
+    }
+
+    .card-body h2 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--azul-oscuro);
+    }
+
+    .card-body p {
+      font-size: 0.9rem;
+      line-height: 1.55;
+      color: #555;
+      flex: 1;
+      /* flex: 1 aquí empuja los tags hacia abajo, asegurando que
+         tarjetas con descripciones cortas tengan el mismo layout
+         que las de descripciones largas. */
+    }
+
+    /* Tags: chips/badges con las tecnologías del ejercicio */
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      padding: 0 1.5rem 1.25rem;
+    }
+
+    .tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      /* letter-spacing positivo en texto pequeño y mayúsculas mejora
+         la legibilidad. Es una convención tipográfica para etiquetas. */
+      padding: 0.25rem 0.6rem;
+      border-radius: 50px;
+      /* border-radius: 50px (un valor grande) en un elemento con
+         height pequeño crea forma de "píldora". */
+      background: #f0f0f0;
+      color: #555;
+    }
+
+    /* Link de acción al fondo de la tarjeta */
+    .card-link {
+      display: block;
+      text-align: center;
+      padding: 0.85rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      border-top: 1px solid #eee;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .card-link:hover {
+      color: var(--blanco) !important;
+      /* !important aquí sobreescribe el color específico de .card .card-link.
+         Normalmente se evita !important, pero en este caso es un atajo
+         intencional para que el hover de TODAS las tarjetas use blanco,
+         sin importar el color de acento individual. */
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       COLORES POR MÓDULO — Patrón de variables con scope
+       ═══════════════════════════════════════════════════════════════════════
+
+       Cada clase .c1–.c10 define --accent en su scope. Cuando los hijos
+       de .card usan var(--accent), obtienen el valor de su clase padre.
+
+       Esto es el PODER de las variables CSS vs preprocesadores (SASS):
+       - En SASS, $accent es un valor fijo al compilar
+       - En CSS nativo, --accent cambia según el contexto del DOM
+
+       Las 4 reglas de abajo aplican --accent a 4 elementos diferentes,
+       pero funcionan para las 10 tarjetas con un solo bloque de código:
+    */
+    .c1  { --accent: #e63946; }
+    .c2  { --accent: #f4a261; }
+    .c3  { --accent: #2a9d8f; }
+    .c4  { --accent: #e76f51; }
+    .c5  { --accent: #6a4c93; }
+    .c6  { --accent: #1982c4; }
+    .c7  { --accent: #06d6a0; }
+    .c8  { --accent: #118ab2; }
+    .c9  { --accent: #ef476f; }
+    .c10 { --accent: #64ffda; }
+
+    .card .card-accent { background: var(--accent); }
+    .card .card-number { background: var(--accent); }
+    .card .card-link   { color: var(--accent); }
+    .card .card-link:hover { background: var(--accent); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.85rem;
+      color: #888;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       RESPONSIVE
+       ═══════════════════════════════════════════════════════════════════════
+       El grid con auto-fill ya es responsivo por sí solo. Este media query
+       solo ajusta detalles para pantallas muy pequeñas (<480px):
+       - Fuerza 1 columna (por si minmax(300px) no alcanza)
+       - Reduce el tamaño del título
+
+       Nota: este es un enfoque "desktop-first" (max-width). El grid
+       con auto-fill actúa como un enfoque "intrínseco" — ni mobile-first
+       ni desktop-first, simplemente se adapta al espacio disponible.
+    */
+    @media (max-width: 480px) {
+      header h1 { font-size: 1.6rem; }
+      .grid { grid-template-columns: 1fr; gap: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>DGTIC — Cursos Web</h1>
+    <p>Ejercicios progresivos de HTML, CSS y diseño web responsivo.</p>
+  </header>
+
+  <!--
+  ═══════════════════════════════════════════════════════════════════════
+  GRID DE TARJETAS
+
+  Usamos <main> como contenedor semántico del contenido principal.
+  La clase "grid" le aplica display: grid con auto-fill.
+
+  Cada <article> representa un ejercicio independiente — es semánticamente
+  correcto porque cada tarjeta es contenido autocontenido que podría
+  existir fuera de este contexto.
+
+  La estructura de cada tarjeta es idéntica (principio de componentes):
+    article.card.c[N]  ← contenedor + clase de color
+      div.card-accent  ← barra de color (6px)
+      div.card-body    ← número + título + descripción
+      div.card-tags    ← etiquetas de tecnología
+      a.card-link      ← enlace al ejercicio
+  ═══════════════════════════════════════════════════════════════════════
+  -->
+  <main class="grid">
+
+    <!-- 01 — Fundamentos HTML: el punto de partida, solo estructura -->
+    <article class="card c1">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-number">01</div>
+        <h2>Fundamentos HTML</h2>
+        <p>Estructura semántica con HTML5: header, nav, main, section, article, aside, formularios y listas de definición.</p>
+      </div>
+      <div class="card-tags">
+        <span class="tag">HTML5</span>
+        <span class="tag">Semántica</span>
+        <span class="tag">Formularios</span>
+      </div>
+      <a class="card-link" href="01-fundamentos-html/index.html">Ver ejercicio</a>
+    </article>
+
+    <!-- 02 — Se agrega CSS: misma estructura, ahora con estilos -->
+    <article class="card c2">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-number">02</div>
+        <h2>Fundamentos CSS</h2>
+        <p>Variables CSS, modelo de caja, tipografía, colores de fondo y estilización de elementos semánticos.</p>
+      </div>
+      <div class="card-tags">
+        <span class="tag">CSS Variables</span>
+        <span class="tag">Box Model</span>
+        <span class="tag">Tipografía</span>
+      </div>
+      <a class="card-link" href="02-fundamentos-css/index.html">Ver ejercicio</a>
+    </article>
+
+    <!-- 03 — Primera página real: múltiples archivos, imágenes, links -->
+    <article class="card c3">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-number">03</div>
+        <h2>Página Web Básica</h2>
+        <p>Sitio multi-página con navegación, imágenes locales y externas, y organización de estilos con clases.</p>
+      </div>
+      <div class="card-tags">
+        <span class="tag">Multi-página</span>
+        <span class="tag">Imágenes</span>
+        <span class="tag">Enlaces</span>
+      </div>
+      <a class="card-link" href="03-pagina-web-basica/index.html">Ver ejercicio</a>
+    </article>
+
+    <!-- 04 — Flexbox: el sistema de layout más importante de CSS moderno -->
+    <article class="card c4">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-number">04</div>
+        <h2>Flexbox — Dados</h2>
+        <p>Demostración visual de Flexbox creando las 6 caras de un dado con justify-content, align-items, flex-direction y gap.</p>
+      </div>
+      <div class="card-tags">
+        <span class="tag">Flexbox</span>
+        <span class="tag">Alineación</span>
+        <span class="tag">Layout</span>
+      </div>
+      <a class="card-link" href="04-flexbox-dados/dados.html">Ver ejercicio</a>
+    </article>
+
+    <!-- 05 — Pensamiento en componentes: patrones reutilizables -->
+    <article class="card c5">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-number">05</div>
+        <h2>Componentes CSS</h2>
+        <p>Tarjetas estilizadas con gradientes, border-radius, box-shadow y diseño basado en componentes reutilizables.</p>
+      </div>
+      <div class="card-tags">
+        <span class="tag">Componentes</span>
+        <span class="tag">Gradientes</span>
+        <span class="tag">Box Shadow</span>
+      </div>
+      <a class="card-link" href="05-componentes-css/index.html">Ver ejercicio</a>
+    </article>
+
+    <!-- 06 — Responsive con Flexbox: diseño mobile-first -->
+    <article class="card c6">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-number">06</div>
+        <h2>Responsive — Fundamentos</h2>
+        <p>Diseño mobile-first con media queries, anchos flexibles y principios de diseño adaptable.</p>
+      </div>
+      <div class="card-tags">
+        <span class="tag">Responsive</span>
+        <span class="tag">Media Queries</span>
+        <span class="tag">Mobile-first</span>
+      </div>
+      <a class="card-link" href="06-responsive-fundamentos/index.html">Ver ejercicio</a>
+    </article>
+
+    <!-- 07 — CSS Grid: el segundo sistema de layout, ideal para 2D -->
+    <article class="card c7">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-number">07</div>
+        <h2>Responsive — CSS Grid</h2>
+        <p>Layout con CSS Grid, grid-template-columns y diseño multi-columna que se adapta a distintos breakpoints.</p>
+      </div>
+      <div class="card-tags">
+        <span class="tag">CSS Grid</span>
+        <span class="tag">Responsive</span>
+        <span class="tag">Columnas</span>
+      </div>
+      <a class="card-link" href="07-responsive-css-grid/index.html">Ver ejercicio</a>
+    </article>
+
+    <!-- 08 — Proyecto integrador: todo junto en un sitio real -->
+    <article class="card c8">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-number">08</div>
+        <h2>Proyecto Web — Servicios</h2>
+        <p>Sitio profesional de servicios con tarjetas, íconos, gradientes y diseño responsive con múltiples breakpoints.</p>
+      </div>
+      <div class="card-tags">
+        <span class="tag">Proyecto</span>
+        <span class="tag">Tarjetas</span>
+        <span class="tag">Responsive</span>
+      </div>
+      <a class="card-link" href="08-proyecto-web-servicios/index.html">Ver ejercicio</a>
+    </article>
+
+    <!-- 09 — Portfolio con JavaScript: transiciones, animaciones, interactividad -->
+    <article class="card c9">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-number">09</div>
+        <h2>Portfolio Profesional</h2>
+        <p>Proyecto final: portfolio con navegación fija, scroll suave, variables CSS, Flexbox, transiciones y animaciones.</p>
+      </div>
+      <div class="card-tags">
+        <span class="tag">Portfolio</span>
+        <span class="tag">JavaScript</span>
+        <span class="tag">Capstone</span>
+      </div>
+      <a class="card-link" href="09-portfolio-profesional/portfolioYo.html">Ver ejercicio</a>
+    </article>
+
+    <!-- 10 — Landing profesional: arquitectura CSS, diseño de sistema, IntersectionObserver -->
+    <article class="card c10">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-number">10</div>
+        <h2>Landing Personal</h2>
+        <p>Landing page tipo portfolio con hero section, sobre mí, proyectos destacados y contacto. Diseño moderno mobile-first.</p>
+      </div>
+      <div class="card-tags">
+        <span class="tag">Landing</span>
+        <span class="tag">Portfolio</span>
+        <span class="tag">Mobile-first</span>
+      </div>
+      <a class="card-link" href="10-landing-personal/index.html">Ver ejercicio</a>
+    </article>
+
+  </main>
+
+  <footer>
+    DGTIC — UNAM &middot; Curso de Desarrollo Web
+    <!-- &middot; es la entidad HTML para el punto medio (·).
+         Las entidades HTML representan caracteres especiales que
+         podrían confundirse con código HTML o no estar en el teclado.
+         Otras comunes: &amp; (&), &lt; (<), &gt; (>), &copy; (©) -->
+  </footer>
+
+</body>
+</html>
