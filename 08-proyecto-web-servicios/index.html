@@ -1,5 +1,40 @@
+<!--
+  ==========================================================================
+  EJERCICIO 08 — Proyecto integrador: Pagina de servicios web
+  ==========================================================================
+
+  Este es el PRIMER "proyecto real" del curso. Integra TODOS los conceptos
+  aprendidos en los ejercicios 01 a 07:
+    - Estructura semantica HTML (ej. 01-03)
+    - Accesibilidad con roles ARIA (ej. 03)
+    - Formularios y elementos interactivos (ej. 04-05)
+    - Flexbox para layout responsivo (ej. 06)
+    - CSS Grid y media queries multiples (ej. 07)
+
+  La pagina simula un sitio web de una empresa B2B (Business-to-Business)
+  que ofrece servicios de tecnologia. Esta estructura es MUY comun en
+  sitios reales de empresas de servicios:
+    - Header con logo
+    - Navegacion principal
+    - Tarjetas de servicios (el contenido central)
+    - Footer con copyright
+
+  ==========================================================================
+  ESTRUCTURA SEMANTICA:
+  ==========================================================================
+    <header>  → Encabezado de la pagina (logo de la empresa)
+    <nav>     → Navegacion principal del sitio
+    <main>    → Contenido principal (las tarjetas de servicios)
+    <footer>  → Pie de pagina (copyright)
+
+  Cada tarjeta de servicio usa <article> en lugar de un simple <div>.
+  Se usa <article> porque cada tarjeta es un bloque de contenido
+  AUTOCONTENIDO: tiene sentido por si solo, y podria aparecer en otro
+  contexto (un newsletter, un feed RSS, otra pagina) sin perder significado.
+  ==========================================================================
+-->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,47 +42,99 @@
     <title>Proyecto Final Natalia Mejia</title>
 </head>
 <body>
-    <header>
-        <img src="images/logo.png" alt="Imagen" class="logo">
+    <!--
+      HEADER — Contiene unicamente el logo de la empresa.
+      role="banner" → Indica a tecnologias asistivas que este es el
+      encabezado principal del sitio (equivalente al rol implicito de
+      <header> cuando es hijo directo de <body>).
+    -->
+    <header role="banner">
+        <!--
+          BUENAS PRACTICAS DE ALT TEXT:
+          El atributo alt="Logo de WebB2B" describe lo que la imagen REPRESENTA,
+          no solo lo que es ("imagen" o "logo" a secas seria insuficiente).
+          Un buen alt text debe responder: "Si no pudiera ver esta imagen,
+          que informacion me estaria perdiendo?"
+          Aqui, el usuario necesita saber que es el logo de la empresa WebB2B.
+        -->
+        <img src="images/logo.png" alt="Logo de WebB2B" class="logo">
     </header>
-    <nav>
+
+    <!--
+      NAV — Navegacion principal.
+      aria-label="Navegación principal" → Diferencia esta nav de otras
+      posibles navegaciones en la pagina (breadcrumbs, nav de footer, etc.).
+    -->
+    <nav aria-label="Navegación principal">
         <ul>
-            <li><a>NOSOTROS</a></li>
-            <li><a>SERVICIOS</a></li>
-            <li><a></a>CONTACTO</a></li>
-            <li><a></a>PROYECTOS</a></li>
+            <li><a href="#">NOSOTROS</a></li>
+            <li><a href="#">SERVICIOS</a></li>
+            <li><a href="#">CONTACTO</a></li>
+            <li><a href="#">PROYECTOS</a></li>
         </ul>
     </nav>
+
+    <!--
+      MAIN — Contiene el contenido principal de la pagina.
+      Solo debe haber UN <main> por pagina.
+    -->
     <main>
+        <!--
+          .contenedor — Wrapper flex que organiza las tarjetas.
+          En movil: columna (una tarjeta por fila).
+          En tablet: 2 columnas (2 tarjetas por fila).
+          En desktop: 4 columnas (todas en una fila).
+        -->
         <div class="contenedor" >
-            <div class="cajita sistemas">
+            <!--
+              Cada TARJETA DE SERVICIO es un <article> con dos clases:
+              - .cajita  → Estilos comunes a todas las tarjetas (border-radius,
+                           margin, padding, flex-basis).
+              - .sistemas/.aplicaciones/.web/.consultorias → Color de fondo
+                unico (gradiente) que distingue visualmente cada servicio.
+
+              Los alt text de los iconos describen lo que el icono REPRESENTA
+              en el contexto del servicio, no solo "icono" a secas.
+            -->
+            <article class="cajita sistemas">
                 <h2 class="titulo-cajita">DESARROLLO DE SISTEMAS</h2>
-                <img src="images/ico_sistemas.png" alt="Imagen">
+                <img src="images/ico_sistemas.png" alt="Icono de desarrollo de sistemas">
                 <p>Nuestros servicios están basados en el sentido de la responsabilidad y trabajo en equipo de los profesionales que conforman la empresa y en la confianza de nuestra cartera de clientes entre los que se cuentan desde pequeñas empresas y particulares hasta corporativos a nivel nacional.</p>
-            </div>
+            </article>
 
-            <div class="cajita aplicaciones">
+            <article class="cajita aplicaciones">
                 <h2 class="titulo-cajita">DESARROLLO DE APLICACIONES</h2>
-                <img src="images/ico_apps.png" alt="Imagen">
+                <img src="images/ico_apps.png" alt="Icono de desarrollo de aplicaciones">
                 <p>Desarrollamos aplicaciones web para implementar sus necesidades, objetivos o ideas en Internet utilizando las tecnologías más idóneas según su proyecto. Las aplicaciones web pueden ser de acceso público o restringido orientadas a mejorar el servicio con sus colaboradores o clientes.</p>
-            </div>
+            </article>
 
-            <div class="cajita web">
+            <article class="cajita web">
                 <h2 class="titulo-cajita">DESARROLLO WEB</h2>
-                <img src="images/ico_web.png" alt="Imagen">
+                <img src="images/ico_web.png" alt="Icono de desarrollo web">
                 <p>Ya sea un sitio web de comercio electrónico, pagina web, portal de noticias o multimedia, utilizamos técnicas, procesos de calidad y metodologías probadas para ejecutarlas con los mejores resultados. Desde el proceso de trabajo del cliente hasta la manera de mejorarlo. Todo es considerado.</p>
-            </div>
+            </article>
 
-            <div class="cajita consultorias">
+            <article class="cajita consultorias">
                 <h2 class="titulo-cajita">CONSULTORÍA</h2>
-                <img src="images/ico_consultoria.png"Imagen">
+                <img src="images/ico_consultoria.png" alt="Icono de consultoría">
                 <p>Ya tienes un sitio web y ninguna de nuestras anteriores ofertas se ajusta a tus necesidades, pero tienes un problema que necesita ser resulto, acércate con nosotros porque estamos seguros que podremos ayudarte.</p>
-            </div>
+            </article>
 
 
         </div>
     </main>
-    <footer> &copy WebB2B 2021</footer>
+
+    <!--
+      FOOTER — Pie de pagina con copyright.
+      role="contentinfo" → Rol ARIA para el pie de pagina del sitio.
+
+      &copy; es una ENTIDAD HTML que representa el simbolo de copyright (©).
+      Las entidades HTML se usan para caracteres especiales que podrian
+      causar conflictos con la sintaxis HTML o que no estan en el teclado.
+      Otras entidades comunes: &amp; (→ &), &lt; (→ <), &gt; (→ >),
+      &nbsp; (→ espacio que no se rompe).
+    -->
+    <footer role="contentinfo">&copy; WebB2B 2021</footer>
 
 </body>
 </html>

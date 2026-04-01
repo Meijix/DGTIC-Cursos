@@ -1,3 +1,68 @@
+/*
+  ==========================================================================
+  EJERCICIO 07 — CSS Grid + Flexbox combinados
+  ==========================================================================
+
+  CONCEPTOS FUNDAMENTALES DE CSS GRID:
+  ====================================
+
+  1. display: grid;
+     Convierte un elemento en un CONTENEDOR GRID. Sus hijos directos se
+     convierten en ITEMS GRID y se colocan automaticamente en la cuadricula.
+
+  2. grid-template-columns: repeat(6, 16.66%);
+     Define las COLUMNAS del grid. En este caso: 6 columnas, cada una de
+     16.66% del ancho del contenedor (≈100% / 6).
+     - repeat(6, 16.66%) es equivalente a escribir:
+       grid-template-columns: 16.66% 16.66% 16.66% 16.66% 16.66% 16.66%;
+
+  3. LINEAS vs TRACKS (esto es CRITICO para entender grid-column):
+     Para 6 columnas, hay 7 LINEAS verticales:
+       Linea:    1     2     3     4     5     6     7
+                 |col1 |col2 |col3 |col4 |col5 |col6 |
+     Un grid con N columnas tiene N+1 lineas.
+     Los TRACKS son los espacios ENTRE las lineas (las columnas reales).
+
+  4. grid-column: 1 / 4;
+     Significa: "Este item empieza en la LINEA 1 y termina en la LINEA 4".
+     Eso equivale a ocupar 3 TRACKS (columnas 1, 2 y 3).
+     OJO: los numeros son LINEAS, no columnas. Es un error comun confundirlos.
+
+  5. row-gap, column-gap, gap:
+     - row-gap: espacio entre filas.
+     - column-gap: espacio entre columnas.
+     - gap: shorthand para ambos. gap: 10px 20px; (fila columna).
+       Si solo se pone un valor, aplica a ambos ejes.
+
+  POR QUE COMBINAR GRID + FLEXBOX:
+  =================================
+  En este archivo usamos AMBOS sistemas. Esto es un patron comun en la
+  industria:
+    - .contenedor usa FLEXBOX → para el layout de pagina (section + aside
+      en una fila). Flexbox es ideal aqui porque solo necesitamos distribuir
+      elementos en UN eje horizontal.
+    - .grid (fieldset) usa CSS GRID → para el formulario. Grid es ideal
+      aqui porque necesitamos alinear campos en FILAS y COLUMNAS a la vez,
+      controlando exactamente cuantas columnas ocupa cada campo.
+
+  RESPONSIVE (MOBILE-FIRST):
+  ===========================
+  - MOVIL: El grid no tiene grid-template-columns definido, asi que
+    cada item ocupa una fila completa (una sola columna). Este es el
+    comportamiento por defecto de un grid sin columnas explicitas.
+  - DESKTOP (min-width: 798px): Se activa la cuadricula de 6 columnas
+    y los campos se posicionan con grid-column.
+
+  ==========================================================================
+*/
+
+/*
+  ==========================================================================
+  VARIABLES CSS (Custom Properties)
+  ==========================================================================
+  Igual que en ejercicios anteriores, centralizamos colores y tamanios
+  en :root para reutilizarlos con var(--nombre).
+*/
 :root {
   --azulclaro: #7ee8fd;
   --azulmarino: #101348;
@@ -6,11 +71,18 @@
   --mediano: 12px;
 }
 
+/*
+  ==========================================================================
+  NAVEGACION — Flexbox para la lista horizontal de enlaces
+  ==========================================================================
+  La navegacion sigue usando Flexbox: los items del menu se distribuyen
+  en UNA fila horizontal con espacio entre ellos. Flex es perfecto aqui.
+*/
 ul {
   list-style: none;
   display: flex;
-  gap: 2rem;
-  justify-content: center;
+  gap: 2rem;              /* Espacio uniforme de 2rem entre cada <li> */
+  justify-content: center; /* Centra los items en el eje principal */
 }
 
 li {
@@ -20,28 +92,53 @@ li {
   border-radius: 0.5rem;
 }
 
+/*
+  ==========================================================================
+  BODY — Estilos base
+  ==========================================================================
+*/
 body {
   font-family: 'Arial', sans-serif;
   font-size: var(--grande);
   font-weight: bold;
   background: var(--azulmarino);
   color: var(--azulclaro);
+  padding: 0.5rem;
 }
 
+/*
+  ==========================================================================
+  SECTION — Contenido principal (dentro de .contenedor flex)
+  ==========================================================================
+  flex: 1 1 100%; → En movil ocupa el 100% del ancho.
+  box-sizing: border-box; → El padding se INCLUYE dentro del ancho total.
+
+  NOTA SOBRE box-sizing:
+  Sin border-box, un elemento con width: 100% y padding: 0.5rem tendria
+  un ancho TOTAL de 100% + 1rem, desbordando su contenedor.
+  Con border-box, el padding se resta del ancho: el contenido se reduce
+  para que el total sea exactamente 100%. Esto es ESENCIAL cuando se
+  trabaja con porcentajes en grid y flex.
+*/
 section {
   font-size: var(--mediano);
   background: #d2a8fd;
   color: var(--azulmarino);
-  flex: 1 1 100%;
+  flex: 1 1 100%;          /* Movil: ocupa todo el ancho */
   padding: 0.5rem;
-  box-sizing: border-box;
+  box-sizing: border-box;  /* Padding incluido en el ancho */
 }
 
 article {
   background: var(--moradooscuro);
+  color: #f0f0f0;
   padding: 1rem;
 }
 
+/*
+  aside tambien usa flex: 1 1 100% para movil (columna completa),
+  y en desktop cambiara a flex: 1 1 33.33% (un tercio del ancho).
+*/
 aside {
   background: var(--azulclaro);
   color: var(--azulmarino);
@@ -50,6 +147,7 @@ aside {
   box-sizing: border-box;
 }
 
+/* Efectos hover para interactividad visual */
 a:hover {
   color: white;
 }
@@ -58,22 +156,65 @@ li:hover{
   background-color: var(--moradooscuro);
 }
 
+/*
+  ==========================================================================
+  .contenedor — Layout de pagina con FLEXBOX
+  ==========================================================================
+  Este contenedor usa Flexbox (NO Grid) para organizar section y aside.
+  - flex-wrap: wrap; permite que los elementos salten a la siguiente linea
+    si no caben en una fila.
+  - En movil: section y aside ocupan 100% cada uno (se apilan).
+  - En desktop: section ocupa 66.66% y aside 33.33% (lado a lado).
+
+  Se eligio Flex aqui porque solo necesitamos una distribucion en un eje.
+  Grid seria excesivo para este caso tan simple.
+*/
 .contenedor {
   display: flex;
   flex-wrap: wrap;
 }
 
+/*
+  ==========================================================================
+  .grid — CONTENEDOR CSS GRID (el fieldset del formulario)
+  ==========================================================================
+  display: grid; → Activa CSS Grid en este contenedor.
+
+  row-gap: 10px; → Espacio de 10px entre cada FILA del grid.
+  (No se define column-gap aqui; el espacio horizontal entre campos se
+  maneja con el padding de .campo.)
+
+  En MOVIL (sin media query), NO se define grid-template-columns.
+  Cuando un grid no tiene columnas explicitas, cada item ocupa una fila
+  completa. Resultado: los campos del formulario se apilan verticalmente.
+*/
 .grid {
   display: grid;
   row-gap: 10px;
 }
 
+/*
+  ==========================================================================
+  .campo — Cada campo del formulario (item de grid)
+  ==========================================================================
+  Cada .campo es un ITEM GRID (hijo directo de .grid).
+  Internamente usa display: flex con flex-direction: column para apilar
+  el label encima del input.
+
+  Esto demuestra un patron importante:
+  Un elemento puede ser ITEM de un sistema (grid item) y a la vez
+  CONTENEDOR de otro sistema (flex container). No son excluyentes.
+*/
 .campo {
   display: flex;
-  flex-direction: column;
-  padding: 0 5px;
+  flex-direction: column;  /* Label arriba, input abajo */
+  padding: 0 5px;          /* Espacio horizontal entre campos */
 }
 
+/*
+  Estilos para los radio buttons de procedencia:
+  Se alinean en fila horizontal con gap entre ellos.
+*/
 .op-procede {
   display: flex;
   flex-direction: row;
@@ -81,34 +222,89 @@ li:hover{
   align-items: center; /* Alinea verticalmente el radio button y el label */
 }
 
+/*
+  ==========================================================================
+  MEDIA QUERY — DESKTOP (min-width: 798px)
+  ==========================================================================
+  A partir de 798px de ancho de pantalla, se activan estos estilos:
+
+  LAYOUT DE PAGINA (Flexbox):
+    - section ocupa 66.66% (dos tercios)
+    - aside ocupa 33.33% (un tercio)
+    Ambos aparecen lado a lado en una fila.
+
+  FORMULARIO (CSS Grid):
+    Se define una cuadricula de 6 columnas con grid-template-columns.
+
+    grid-template-columns: repeat(6, 16.66%);
+    Crea 6 columnas iguales. Esto genera 7 LINEAS verticales:
+      1     2     3     4     5     6     7
+      |16.6%|16.6%|16.6%|16.6%|16.6%|16.6%|
+
+    Luego, cada campo se posiciona usando grid-column con NUMEROS DE LINEA:
+
+    .nombre  → grid-column: 1 / 4  → Ocupa lineas 1 a 4 = 3 columnas (mitad izq)
+    .correo  → grid-column: 4 / 7  → Ocupa lineas 4 a 7 = 3 columnas (mitad der)
+    .procede → grid-column: 1 / 3  → Ocupa lineas 1 a 3 = 2 columnas (un tercio)
+    .sabor   → grid-column: 3 / 7  → Ocupa lineas 3 a 7 = 4 columnas (dos tercios)
+
+    Visualizacion de la cuadricula en desktop:
+    Fila 1: [  nombre (cols 1-3)  ][  correo (cols 4-6)  ]
+    Fila 2: [procede (1-2)][ sabor (cols 3-6)            ]
+*/
 @media (min-width: 798px) {
   .contenedor {
     display: flex;
   }
 
   section {
-    flex: 1 1 66.66%;
+    flex: 1 1 66.66%;       /* Dos tercios del ancho */
   }
 
   aside {
-    flex: 1 1 33.33%;
+    flex: 1 1 33.33%;       /* Un tercio del ancho */
   }
 
+  /*
+    Aqui se activa la cuadricula de 6 columnas.
+    repeat(6, 16.66%) = 6 columnas de ~16.66% cada una.
+    Nota: 6 x 16.66% = 99.96%, no exactamente 100%. En la practica
+    esto funciona porque el navegador distribuye el espacio restante.
+    Una alternativa mas precisa seria: repeat(6, 1fr) usando unidades
+    fraccionales (fr), que dividen el espacio disponible exactamente.
+  */
   .grid {
     grid-template-columns: repeat(6, 16.66%);
   }
 
+  /*
+    grid-column: 1 / 4 → "desde la LINEA 1 hasta la LINEA 4"
+    Ocupa 3 tracks (columnas). Recuerda: son LINEAS, no columnas.
+  */
   .nombre {
     grid-column: 1 / 4;}
 
+  /*
+    grid-column: 4 / 7 → desde la linea 4 hasta la linea 7.
+    Ocupa las 3 columnas restantes. Queda al lado de .nombre.
+  */
   .correo {
     grid-column: 4 / 7;
   }
 
+  /*
+    grid-column: 1/3 → desde la linea 1 hasta la linea 3.
+    Ocupa 2 columnas (un tercio del grid).
+  */
   .procede {
     grid-column: 1/3;
   }
 
+  /*
+    grid-column: 3/7 → desde la linea 3 hasta la linea 7.
+    Ocupa 4 columnas (dos tercios del grid).
+    Junto con .procede, llenan la segunda fila completa.
+  */
   .sabor {
     grid-column: 3/7;
   }

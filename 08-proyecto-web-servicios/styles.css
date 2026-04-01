@@ -1,3 +1,61 @@
+/*
+  ==========================================================================
+  EJERCICIO 08 — Proyecto integrador: CSS responsivo con multiples breakpoints
+  ==========================================================================
+
+  Este es el primer ejercicio con MULTIPLES BREAKPOINTS (puntos de quiebre):
+    - Movil:   < 560px   → 1 columna (estilos base, sin media query)
+    - Tablet:  560-768px  → 2 columnas
+    - Desktop: > 768px    → 4 columnas (una fila)
+
+  ==========================================================================
+  BUG DE ORDEN EN MEDIA QUERIES — OPORTUNIDAD DE APRENDIZAJE
+  ==========================================================================
+  En este archivo, la media query de desktop (min-width: 768px) esta
+  ANTES de la media query de tablet (min-width: 560px and max-width: 768px).
+
+  Esto causa un problema: cuando la pantalla tiene EXACTAMENTE 768px de ancho,
+  AMBAS queries se cumplen (768 >= 768, y 560 <= 768 <= 768).
+  Como CSS aplica la ULTIMA regla que coincida en el orden del codigo fuente,
+  los estilos de tablet SOBREESCRIBEN a los de desktop a 768px.
+
+  El resultado: a 768px se ven 2 columnas (tablet) en vez de 4 (desktop).
+
+  SOLUCION CORRECTA: Poner la query de tablet PRIMERO y la de desktop DESPUES,
+  o usar rangos que no se solapen. Ejemplo:
+    @media (min-width: 560px) and (max-width: 767px) { ... }  /* Tablet */
+    @media (min-width: 768px) { ... }                          /* Desktop */
+
+  Se deja el bug a proposito como ejercicio de depuracion.
+
+  ==========================================================================
+  OTROS BUGS Y OBSERVACIONES EN ESTE ARCHIVO:
+  ==========================================================================
+
+  1. flex: 1, 1, 25% (en li) — SINTAXIS INCORRECTA.
+     El shorthand flex usa ESPACIOS, no comas:
+       Correcto: flex: 1 1 25%;
+       Incorrecto: flex: 1, 1, 25%;
+     Con comas, el navegador no lo interpreta correctamente y usa los
+     valores por defecto de flex.
+
+  2. justify-content: left (en header del media query desktop) — NO ES
+     UN VALOR VALIDO para justify-content en Flexbox.
+     Los valores validos son: flex-start, flex-end, center, space-between,
+     space-around, space-evenly.
+     "left" funciona en algunos navegadores como alias de flex-start, pero
+     NO es parte de la especificacion Flexbox. Lo correcto seria:
+       justify-content: flex-start;
+
+  ==========================================================================
+*/
+
+/*
+  ==========================================================================
+  VARIABLES CSS (Custom Properties)
+  ==========================================================================
+  Colores tematicos para cada tarjeta de servicio y tamanio de fuente base.
+*/
 :root{
   --azulclaro: #b0e1ff;
   --naranja:#fbb273;
@@ -7,19 +65,43 @@
   --mediano: 1rem;
 }
 
+/*
+  ==========================================================================
+  HEADER — Centrar el logo con Flexbox
+  ==========================================================================
+  display: flex + justify-content: center + align-items: center
+  Es el patron clasico para centrar un elemento HORIZONTAL y VERTICALMENTE
+  dentro de su contenedor.
+*/
 /* Centrar logo */
 header {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: center;   /* Centra horizontalmente */
+  align-items: center;        /* Centra verticalmente */
   padding: 0px;
 }
 
+/*
+  La clase .logo controla el tamanio del logo.
+  width: 150px → ancho fijo.
+  height: auto → mantiene la proporcion original (aspect ratio).
+  NUNCA establezcas width Y height con valores fijos en imagenes,
+  porque distorsionarias la imagen.
+*/
 .logo{
   width: 150px;
   height: auto;
 }
 
+/*
+  ==========================================================================
+  NAV — Barra de navegacion
+  ==========================================================================
+  Tambien usa Flexbox para centrar la lista de enlaces.
+  flex-direction: column → apila la nav verticalmente en movil.
+  NOTA: "align-items: center" aparece DOS VECES. La segunda sobreescribe
+  a la primera (sin efecto practico, pero es codigo redundante).
+*/
 nav{
   display: flex;
   justify-content: center;
@@ -27,22 +109,38 @@ nav{
   width: 100%;
   padding: 0px;
   flex-direction: column;
-  align-items: center;
+  align-items: center;        /* Duplicado — redundante */
 }
 
+/*
+  La lista <ul> usa flex-wrap: wrap para que los items de navegacion
+  salten a la siguiente linea si no caben todos en una fila.
+*/
 ul{
   display: flex;
   flex-wrap: wrap;
-  list-style: none;
+  list-style: none;           /* Quita las bolitas de la lista */
   color: rgba(106, 102, 102, 0.906);
 
 }
 
+/*
+  BUG: flex: 1, 1, 25%
+  La propiedad flex shorthand se escribe CON ESPACIOS, no con comas:
+    flex: flex-grow flex-shrink flex-basis;
+    Correcto:   flex: 1 1 25%;
+    Incorrecto: flex: 1, 1, 25%;
+
+  Con comas, el navegador interpreta esto de forma incorrecta.
+  En la practica, puede que funcione parcialmente en algunos navegadores,
+  pero el comportamiento no es el esperado. El flex-basis de 25% no se
+  aplica correctamente.
+*/
 li{
   margin: 10px;
   padding: 5px 15px;
   border-radius: 10px;
-  flex: 1, 1, 25%;
+  flex: 1, 1, 25%;           /* BUG: deberia ser "flex: 1 1 25%;" */
   font-family: sans-serif;
   font-weight: 900;
 }
@@ -52,11 +150,25 @@ li:hover{
   background-color: #a9c0ed;
 }
 
+/*
+  ==========================================================================
+  .contenedor — Wrapper principal de las tarjetas de servicios
+  ==========================================================================
+  flex-direction: column → En movil, las tarjetas se apilan verticalmente
+  (una por fila). Las media queries cambiaran esto para tablet y desktop.
+*/
 .contenedor{
   display: flex;
   flex-direction: column;
 }
 
+/*
+  Estilos para TODAS las imagenes (<img>) de la pagina:
+  - width: 60% → Ocupa el 60% del ancho de su contenedor.
+  - display: block + margin: 0 auto → Centra la imagen horizontalmente.
+    (margin: auto solo funciona para centrar en elementos block; los
+    elementos inline ignoran margin auto.)
+*/
 img{
   width: 60%;
   height: auto;
@@ -64,6 +176,19 @@ img{
   margin: 0 auto ;
 }
 
+/*
+  ==========================================================================
+  .cajita — Estilos comunes a TODAS las tarjetas de servicios
+  ==========================================================================
+  flex: 1 1 100% → En movil, cada tarjeta ocupa el 100% del ancho.
+    - flex-grow: 1   → Puede crecer si hay espacio disponible.
+    - flex-shrink: 1 → Puede encogerse si falta espacio.
+    - flex-basis: 100% → Tamanio base = 100% del contenedor.
+
+  align-content: center → Centra el contenido verticalmente cuando hay
+  espacio extra (solo tiene efecto en contenedores flex/grid multilinea).
+  text-align: justify → Justifica el texto de los parrafos.
+*/
 .cajita{
   flex: 1 1 100%;
   border-radius: 20px;
@@ -71,17 +196,67 @@ img{
   padding: 10px;
   align-content: center;
   text-align: justify;
-  
+
 }
 
+/*
+  ==========================================================================
+  .titulo-cajita — Titulo de cada tarjeta de servicio
+  ==========================================================================
+
+  FONT SHORTHAND:
+  "font: 1.3em sans-serif;" es una forma abreviada de escribir:
+    font-size: 1.3em;
+    font-family: sans-serif;
+  El shorthand "font" puede incluir: font-style, font-variant, font-weight,
+  font-size/line-height, y font-family. Solo font-size y font-family son
+  obligatorios al usar el shorthand.
+
+  text-shadow: none;
+  Se ELIMINA explicitamente cualquier text-shadow heredado o definido
+  previamente. Esto es importante porque un text-shadow blanco sobre un
+  fondo con gradiente claro haria el texto ILEGIBLE. Al poner "none",
+  nos aseguramos de que el titulo sea legible contra el gradiente.
+
+  border-bottom: 5px solid → Linea inferior decorativa que separa
+  visualmente el titulo del contenido de la tarjeta.
+*/
 .titulo-cajita{
-  font: 1.3em sans-serif;;
-  color: white;
-  text-shadow: #244467 3px 2px;
-  border-bottom: 5px solid white;
+  font: 1.3em sans-serif;
+  color: #1a1a2e;
+  text-shadow: none;
+  border-bottom: 5px solid #1a1a2e;
+}
+
+/*
+  ==========================================================================
+  BODY — Estilos base del documento
+  ==========================================================================
+  margin: 0; padding: 0; → Elimina el margen y padding por defecto del
+  navegador. Esto es un "reset" basico para tener control total del espaciado.
+*/
+body {
+  color: #1a1a1a;
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
 
+/*
+  ==========================================================================
+  GRADIENTES — Fondo unico para cada tarjeta de servicio
+  ==========================================================================
+
+  linear-gradient(180deg, color1, color2):
+  - 180deg = gradiente de ARRIBA hacia ABAJO.
+    (0deg = abajo→arriba, 90deg = izq→der, 180deg = arriba→abajo, 270deg = der→izq)
+  - Va del color tematico (arriba) hacia blanco (abajo).
+  - Esto crea un efecto visual de "desvanecimiento" que hace que las tarjetas
+    se vean mas limpias y profesionales que un color solido.
+
+  Cada tarjeta tiene su propio gradiente con el color de var(--variable):
+*/
 .sistemas {
   background: linear-gradient(180deg, var(--azulclaro), #ffffff);
 
@@ -100,11 +275,37 @@ img{
 }
 
 
+/*
+  ==========================================================================
+  MEDIA QUERY — DESKTOP (pantallas >= 768px de ancho)
+  ==========================================================================
+
+  ATENCION: Esta query esta posicionada ANTES de la query de tablet.
+  Esto causa el bug de orden descrito al inicio del archivo.
+  A 768px exactos, ambas queries se cumplen, y la de tablet (que viene
+  DESPUES en el codigo) sobreescribe estos estilos.
+
+  Comportamiento esperado en desktop:
+  - flex-direction: row + flex-wrap: nowrap → Las 4 tarjetas en UNA fila.
+  - flex: 1 1 calc(100% / 4) → Cada tarjeta ocupa 1/4 del ancho.
+
+  SOBRE calc():
+  calc(100% / 4) es equivalente a escribir 25%, pero es mas LEGIBLE
+  y autoexplicativo. Cuando lees "calc(100% / 4)" sabes inmediatamente
+  que hay 4 elementos que dividen el espacio. Con "25%" tendrias que
+  hacer el calculo mental. En equipos de trabajo, la legibilidad es clave.
+
+  BUG: justify-content: left — NO ES UN VALOR VALIDO para Flexbox.
+  Deberia ser: justify-content: flex-start;
+  "left" es un valor de la especificacion CSS Box Alignment, pero no
+  todos los navegadores lo soportan en contextos flex. Puede funcionar
+  en Chrome pero fallar en otros navegadores. Usar flex-start es seguro.
+*/
 /* Computadoras (una fila) */
 @media screen and (min-width: 768px) {
   .contenedor {
     flex-direction: row;
-    flex-wrap: nowrap;
+    flex-wrap: nowrap;         /* Fuerza a que todo quede en UNA fila */
   }
 
   .cajita {
@@ -112,27 +313,51 @@ img{
   }
 
   header {
-    justify-content: left;
+    justify-content: left;    /* BUG: deberia ser "flex-start" */
   }
 }
 
 
+/*
+  ==========================================================================
+  MEDIA QUERY — TABLET (pantallas entre 560px y 768px de ancho)
+  ==========================================================================
+
+  RECORDATORIO DEL BUG DE ORDEN:
+  Esta query se declara DESPUES de la de desktop. A 768px exactos, AMBAS
+  queries se cumplen, y como esta es la ULTIMA en el codigo, sus estilos
+  GANAN por cascada CSS. Resultado: a 768px se aplican estilos de tablet
+  en lugar de desktop.
+
+  Comportamiento esperado en tablet:
+  - flex-direction: row + flex-wrap: wrap → Las tarjetas se organizan en
+    filas pero PUEDEN saltar a la siguiente linea.
+  - flex: 1 1 45% → Cada tarjeta ocupa ~45% del ancho (2 por fila).
+    Se usa 45% en vez de 50% para dejar espacio al margin de 8px.
+
+  box-sizing: border-box:
+  CRITICO en layouts responsivos con porcentajes. Sin border-box, un
+  elemento con flex-basis: 45% + padding: 10px + margin: 8px tendria
+  un ancho total de 45% + 20px + 16px, facilmente desbordando el contenedor.
+  Con border-box, el padding se INCLUYE en el 45%, evitando el desbordamiento.
+  (Nota: margin NO se incluye en border-box, por eso se usa 45% y no 50%.)
+*/
 /* Tablets (dos columnas) */
 @media screen and (min-width: 560px) and (max-width: 768px) {
   .contenedor {
-    display: flex;      
-    flex-direction: row;  
-    flex-wrap: wrap; 
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
     justify-content: center;
   }
 
   .cajita {
     flex: 1 1 45%;
-    margin: 8px;            
-    box-sizing: border-box; 
+    margin: 8px;
+    box-sizing: border-box;
   }
 
   li{
-    flex: 1 1 25%;
+    flex: 1 1 25%;           /* Cada item de nav ocupa 25% en tablet */
   }
 }

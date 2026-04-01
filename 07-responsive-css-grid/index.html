@@ -1,3 +1,41 @@
+<!--
+  ==========================================================================
+  EJERCICIO 07 — CSS Grid aplicado a formularios
+  ==========================================================================
+
+  CONTEXTO:
+  Esta pagina tiene EXACTAMENTE la misma estructura HTML que el ejercicio 06.
+  La diferencia esta en el CSS: el formulario ahora se maqueta con CSS GRID
+  en lugar de Flexbox.
+
+  ==========================================================================
+  CSS Grid vs Flexbox — Conceptos clave:
+  ==========================================================================
+
+  FLEXBOX es un sistema de maquetacion en UNA DIMENSION (1D):
+    - Trabaja sobre UN solo eje a la vez: horizontal (row) o vertical (column).
+    - Ideal para: barras de navegacion, alinear elementos en una fila,
+      distribuir espacio entre componentes.
+
+  CSS GRID es un sistema de maquetacion en DOS DIMENSIONES (2D):
+    - Trabaja sobre FILAS y COLUMNAS al mismo tiempo.
+    - Ideal para: layouts de pagina completa, formularios con campos
+      alineados en cuadricula, dashboards, galerias de imagenes.
+
+  CUANDO USAR CADA UNO:
+    - Grid  → Cuando necesitas controlar filas Y columnas simultaneamente.
+              Perfecto para formularios (campos alineados en cuadricula),
+              layouts de pagina, y cualquier disposicion bidimensional.
+    - Flex  → Cuando trabajas en un solo eje: una barra de nav horizontal,
+              centrar un grupo de botones, apilar elementos verticalmente.
+
+  En ESTE ejercicio usamos AMBOS:
+    - .contenedor usa Flexbox (layout de pagina: section + aside en fila).
+    - .grid (fieldset) usa CSS Grid (formulario: campos en cuadricula 2D).
+    Esta combinacion Grid + Flex es un patron MUY comun en proyectos reales.
+
+  ==========================================================================
+-->
 <!doctype html>
 <html lang="es">
 <head>
@@ -8,14 +46,15 @@
 <link rel="stylesheet" href="styles.css">
 
 <title>Natalia Edith Mejia Bautista</title>
+</head>
 <body>
-  <header>Encabezado Natalia Mejia :) </header>
-<nav>
+  <header role="banner">Encabezado Natalia Mejia</header>
+<nav aria-label="Navegación principal">
   <ul>
-    <li><a>Inicio</a></li>
-    <li><a>Nosotros</a></li>
-    <li><a>Servicios</a></li>
-    <li><a>Contacto</a></li>
+    <li><a href="#">Inicio</a></li>
+    <li><a href="#">Nosotros</a></li>
+    <li><a href="#">Servicios</a></li>
+    <li><a href="#">Contacto</a></li>
   </ul>
 </nav>
 <main>
@@ -28,20 +67,64 @@
     <article>
       <h3>Encabezado de articulo 1</h3>
 
+      <!--
+        ==========================================================================
+        FORMULARIO CON CSS GRID
+        ==========================================================================
+
+        El <fieldset> tiene la clase "grid", que en styles.css aplica:
+          display: grid;
+
+        Esto convierte al fieldset en un CONTENEDOR GRID. Todos sus hijos
+        directos se convierten automaticamente en ITEMS GRID.
+
+        IMPORTANTE — Por que cada label+input esta envuelto en un <div class="campo">:
+        Los items de grid deben ser HIJOS DIRECTOS del contenedor grid.
+        Si los <label> e <input> estuvieran sueltos, CADA UNO seria un item
+        de grid independiente, y no podriamos agrupar un label con su input
+        en la misma celda.
+
+        Al envolverlos en un <div class="campo">, cada div se convierte en
+        UN SOLO item de grid, y dentro de el podemos organizar el label y
+        el input como queramos (en este caso, con flex-direction: column).
+
+        Estructura de items grid:
+          fieldset.grid (contenedor grid)
+            ├── div.campo.nombre    → item grid 1 (columnas 1-3 en desktop)
+            ├── div.campo.correo    → item grid 2 (columnas 4-7 en desktop)
+            ├── div.campo.procede   → item grid 3 (columnas 1-3 en desktop)
+            └── div.campo.sabor     → item grid 4 (columnas 3-7 en desktop)
+      -->
       <form action="">
         <fieldset class="grid">
           <legend>Proporciona tus datos</legend>
 
+          <!--
+            div.campo.nombre — En desktop, ocupa columnas 1 a 3 (mitad izquierda).
+            La clase "nombre" se usa en CSS para posicionar este campo:
+              grid-column: 1 / 4;
+            Esto significa: "empieza en la LINEA 1 y termina en la LINEA 4".
+          -->
           <div class="campo nombre">
             <label for="nombre">Nombre:</label>
             <input type="text" id="nombre">
           </div>
 
+          <!--
+            div.campo.correo — En desktop, ocupa columnas 4 a 6 (mitad derecha).
+            grid-column: 4 / 7; → de la linea 4 a la linea 7.
+            Asi, nombre y correo quedan lado a lado en la misma fila.
+          -->
           <div class="campo correo">
             <label for="email">Correo electronico:</label>
             <input type="email" id="email">
           </div>
 
+          <!--
+            div.campo.procede — En desktop, ocupa columnas 1 a 2 (un tercio).
+            grid-column: 1 / 3; → de la linea 1 a la linea 3.
+            Contiene radio buttons para seleccionar procedencia.
+          -->
           <div class="campo procede">
             <span>Procedencia:</span>
             <input type="radio" id="mex" name="procedencia" value="mex" />
@@ -50,6 +133,11 @@
             <label for="ext">Extranjero</label>
           </div>
 
+          <!--
+            div.campo.sabor — En desktop, ocupa columnas 3 a 6 (dos tercios).
+            grid-column: 3 / 7; → de la linea 3 a la linea 7.
+            Complementa a .procede en la misma fila del grid.
+          -->
           <div class="campo sabor">
             <label for="sabor">Sabor favorito:</label>
             <select id="sabor">
@@ -84,9 +172,9 @@
   </aside>
   </div>
 </main>
-<footer>Footer Natalia Mejia</footer>
+<footer role="contentinfo">Footer Natalia Mejia</footer>
 
 
-  
+
 </body>
 </html>

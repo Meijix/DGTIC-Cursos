@@ -5,6 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portafolio de Natalia Edith Mejia Bautista</title>
     <style>
+        /* ================================================================
+           CSS VARIABLES (Custom Properties) — SISTEMA DE DISENO
+           ================================================================
+           :root apunta al elemento <html> y es el lugar idoneo para definir
+           variables globales.  La ventaja principal de las CSS Variables
+           frente a constantes de preprocesadores (Sass $var) es que son
+           reactivas: si las cambias con JS o con una media query, todo el
+           diseno se actualiza en cascada.
+
+           Aqui se crea un mini "design system":
+             - color-navy / navy-light / navy-dark  -> paleta principal
+             - color-green                          -> acento / llamada a la accion
+
+           Usar nombres semanticos (--color-navy) en vez de literales
+           (--azuloscuro) facilita el mantenimiento: si manana el azul se
+           vuelve gris, solo cambias el valor, no el nombre.
+           ================================================================ */
         :root {
             --color-navy: #001f3f;
             --color-navy-light: #003366;
@@ -12,6 +29,49 @@
             --color-green: #2ecc40;
         }
 
+        /* ================================================================
+           SKIP LINK — Patron de accesibilidad para navegacion por teclado
+           ================================================================
+           Los usuarios de lectores de pantalla y de teclado necesitan
+           saltar la navegacion repetitiva e ir directo al contenido.
+           El enlace esta oculto visualmente (top: -100%) pero existe
+           en el arbol de accesibilidad (NO usamos display:none, que lo
+           oculta tambien para lectores de pantalla).
+
+           Cuando el usuario presiona Tab, el enlace recibe :focus y
+           aparece en pantalla (top: 0).
+
+           z-index: 1001 — un punto por encima del header fijo (1000),
+           para que el skip-link se muestre ENCIMA de la barra de
+           navegacion cuando esta activo.
+           ================================================================ */
+        .skip-link {
+            position: absolute;
+            top: -100%;
+            left: 0;
+            background: var(--color-green);
+            color: var(--color-navy);
+            padding: 0.5rem 1rem;
+            z-index: 1001;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .skip-link:focus {
+            top: 0;
+        }
+
+        /* ================================================================
+           RESET UNIVERSAL
+           ================================================================
+           El selector * aplica a TODOS los elementos.
+           - margin: 0 / padding: 0 -> elimina los margenes por defecto
+             que cada navegador aplica de forma distinta.
+           - box-sizing: border-box -> hace que width/height INCLUYAN
+             padding y border.  Sin esto, un div con width:100% y
+             padding:1rem desbordaría su contenedor (el modelo de caja
+             por defecto "content-box" suma padding por fuera del width).
+             border-box es la convencion moderna universal.
+           ================================================================ */
         * {
             margin: 0;
             padding: 0;
@@ -31,6 +91,30 @@
             overflow: hidden;
         }
 
+        /* ================================================================
+           HEADER FIJO — position: fixed
+           ================================================================
+           position: fixed saca al elemento del flujo normal del documento
+           y lo posiciona RELATIVO AL VIEWPORT (la ventana del navegador).
+           Esto significa que NO se mueve al hacer scroll.
+
+           top:0; left:0; right:0; -> lo estira de extremo a extremo
+           en la parte superior.
+
+           z-index: 1000 — CONTEXTO DE APILAMIENTO (stacking context)
+           ¿Por que 1000 y no 1 o 999999?  Es una convencion de capas:
+             - Contenido normal:    z-index auto (equivale a 0)
+             - Tooltips/dropdowns:  100-500
+             - Header fijo:         1000
+             - Modales/overlays:    1050-1100
+             - Skip link:           1001 (justo encima del header)
+           Dejar huecos grandes (100, 1000) permite insertar nuevas
+           capas sin reordenar todas las existentes.
+
+           box-shadow: 0 2px 5px rgba(0,0,0,0.2) crea una sombra sutil
+           que da la ilusion de profundidad, separando visualmente el
+           header del contenido que pasa por debajo.
+           ================================================================ */
         header {
             background-color: var(--color-navy);
             position: fixed;
@@ -52,6 +136,22 @@
             margin: 0 1rem;
         }
 
+        /* ================================================================
+           TRANSITION — El shorthand de transiciones CSS
+           ================================================================
+           transition: color 0.3s ease;
+           Esto es la forma abreviada de:
+             transition-property: color;    -> que propiedad animar
+             transition-duration: 0.3s;     -> cuanto dura la animacion
+             transition-timing-function: ease; -> curva de aceleracion
+                                              (ease = inicio lento, rapido, final lento)
+
+           Se pueden animar multiples propiedades separando con coma:
+             transition: color 0.3s ease, background 0.3s ease;
+
+           IMPORTANTE: no todas las propiedades se animan con el mismo costo.
+           Ver la nota sobre opacity/transform mas abajo.
+           ================================================================ */
         nav ul li a {
             color: white;
             text-decoration: none;
@@ -64,6 +164,17 @@
             color: var(--color-green);
         }
 
+        /* ================================================================
+           SECCIONES A PANTALLA COMPLETA
+           ================================================================
+           min-height: 100vh -> cada seccion ocupa AL MENOS toda la
+           altura del viewport.  vh = viewport height (1vh = 1% de la
+           ventana).
+
+           display:flex + align-items:center + justify-content:center
+           centra vertical y horizontalmente el contenido dentro de la
+           seccion.  Es la forma mas limpia de centrado en CSS moderno.
+           ================================================================ */
         section {
             padding: 4rem 0;
             min-height: 100vh;
@@ -86,6 +197,33 @@
             display: block;
         }
 
+        /* ================================================================
+           ANIMACION CON OPACITY + TRANSFORM
+           ================================================================
+           Estado inicial: opacity:0 (invisible) + translateY(20px)
+           (desplazado 20px hacia abajo).
+
+           ¿Por que opacity y transform y no, por ejemplo, margin-top o height?
+
+           El navegador renderiza en tres fases:
+             1. LAYOUT  — calcula tamanos y posiciones (width, height, margin, padding)
+             2. PAINT   — rellena pixeles (color, background, border, shadow)
+             3. COMPOSITE — combina capas y aplica transformaciones
+
+           opacity y transform SOLO afectan la fase 3 (composite).
+           Esto significa que el navegador puede delegar la animacion
+           a la GPU (capa compuesta / composite layer), sin recalcular
+           el layout ni repintar otros elementos.
+
+           Si animaras width o height, cada fotograma recalcula layout de
+           TODOS los elementos afectados -> 60fps se vuelve imposible.
+
+           Regla de oro: anima SOLO opacity y transform para lograr
+           animaciones fluidas a 60fps.
+
+           transition: opacity 0.5s ease, transform 0.5s ease;
+           -> se animan las DOS propiedades en paralelo, 500ms cada una.
+           ================================================================ */
         .about-content {
             text-align: center;
             max-width: 600px;
@@ -95,11 +233,39 @@
             transition: opacity 0.5s ease, transform 0.5s ease;
         }
 
+        /* ================================================================
+           CLASE .show — Estado visible controlado por JavaScript
+           ================================================================
+           ¿Por que usamos una clase .show con opacity:1 en vez de la
+           pseudo-clase CSS :visible?
+
+           1. CSS no tiene :visible — esa es una invencion de jQuery.
+           2. Necesitamos que JavaScript DECIDA cuando el elemento es
+              visible (basado en la posicion de scroll), y la forma mas
+              limpia de comunicar estado de JS a CSS es anadiendo/
+              quitando una clase.
+           3. Esto sigue el patron "clase como interruptor": CSS define
+              las transiciones, JS controla CUANDO se activan.
+
+           La transicion ya esta definida en .about-content; al anadir
+           .show, el navegador interpola suavemente de opacity:0 a
+           opacity:1 y de translateY(20px) a translateY(0).
+           ================================================================ */
         .about-content.show {
             opacity: 1;
             transform: translateY(0);
         }
 
+        /* ================================================================
+           TARJETAS ANIMADAS — translateX para efecto de deslizamiento
+           ================================================================
+           Mismo patron de animacion pero con movimiento HORIZONTAL
+           (translateX(-20px) -> translateX(0)).
+
+           Nota: todos estos selectores agrupados comparten las mismas
+           propiedades base.  Agrupar selectores con coma es mas
+           eficiente que repetir el bloque para cada clase.
+           ================================================================ */
         .experience-item, .education-item, .skill-item, .contact-item {
             background-color: var(--color-navy-light);
             padding: 1.5rem;
@@ -123,6 +289,25 @@
             gap: 1rem;
         }
 
+        /* ================================================================
+           FLEXBOX PARA TARJETAS — flex: 1 1 calc(25% - 1rem)
+           ================================================================
+           El shorthand "flex" se descompone en tres valores:
+             flex-grow:   1        -> puede crecer para llenar espacio
+             flex-shrink: 1        -> puede encogerse si falta espacio
+             flex-basis:  calc(25% - 1rem) -> tamano base ideal
+
+           calc(25% - 1rem) = 4 tarjetas por fila (100%/4 = 25%),
+           restando 1rem para compensar el gap entre tarjetas.
+
+           min-width: 150px -> fallback responsivo:  cuando el 25% del
+           contenedor es menor a 150px (pantallas muy pequenas), la
+           tarjeta se niega a encogerse mas y flex-wrap la empuja a una
+           nueva fila.  Esto crea un layout responsivo SIN media queries.
+
+           Es un patron muy poderoso: flex-basis + min-width + flex-wrap
+           = "cuantas quepan por fila" automaticamente.
+           ================================================================ */
         .skill-item {
             background-color: var(--color-navy-light);
             padding: 1rem;
@@ -169,6 +354,40 @@
             width: 100%;
         }
 
+        /* ================================================================
+           MEDIA QUERY — Enfoque DESKTOP-FIRST (max-width)
+           ================================================================
+           @media (max-width: 768px) significa:
+             "Aplica estas reglas cuando la ventana sea 768px o MENOS"
+
+           Esto es el enfoque DESKTOP-FIRST: el CSS base esta disenado
+           para escritorio, y las media queries RESTAN/SIMPLIFICAN para
+           movil.
+
+           Contraste con el enfoque MOBILE-FIRST (usado en el ejercicio
+           06 y en el ejercicio 10):
+             @media (min-width: 768px) { ... }
+             El CSS base es para movil, y las queries ANADEN complejidad
+             para escritorio.
+
+           Pros y contras de cada enfoque:
+
+           DESKTOP-FIRST (max-width) — este archivo:
+             + Facil si ya tienes un diseno de escritorio
+             + Intuitivo para principiantes
+             - El CSS base es el mas pesado (problema para conexiones lentas)
+             - Tiende a tener mas sobreescrituras
+
+           MOBILE-FIRST (min-width) — ejercicio 06/10:
+             + El CSS base es el mas liviano (mejor rendimiento en moviles)
+             + Fuerza a priorizar el contenido esencial
+             + Es la recomendacion de la industria y de Google
+             - Requiere pensar "de menos a mas", que no es intuitivo al inicio
+
+           Nota: 768px es un breakpoint clasico para tablets en orientacion
+           vertical. En proyectos reales, elige breakpoints basados en donde
+           tu DISENO se rompe, no en dispositivos especificos.
+           ================================================================ */
         @media (max-width: 768px) {
             .container {
                 width: 95%;
@@ -183,6 +402,7 @@
                 margin: 0.5rem 0;
             }
 
+            /* En movil: 2 tarjetas por fila en vez de 4 */
             .skill-item, .contact-item {
                 flex: 1 1 calc(50% - 1rem);
             }
@@ -190,8 +410,31 @@
     </style>
 </head>
 <body>
-    <header>
-        <nav>
+    <!-- ================================================================
+         SKIP LINK — Primer elemento del body
+         ================================================================
+         Debe ser el PRIMER elemento enfocable del documento para que
+         al presionar Tab sea lo primero que aparezca.
+         href="#about" lleva directamente al contenido principal,
+         saltando toda la barra de navegacion.
+         ================================================================ -->
+    <a class="skip-link" href="#about">Saltar al contenido</a>
+
+    <!-- ================================================================
+         HEADER con role="banner"
+         ================================================================
+         role="banner" es un ARIA landmark que indica a los lectores de
+         pantalla que este es el encabezado principal del sitio.
+         En HTML5, <header> ya tiene role="banner" implicito cuando es
+         hijo directo de <body>, pero ser explicito no dana y mejora
+         la compatibilidad con lectores de pantalla antiguos.
+
+         aria-label="Navegacion principal" en <nav> da un nombre
+         accesible al bloque de navegacion (util si hay multiples <nav>
+         en la pagina, como una nav de pie de pagina).
+         ================================================================ -->
+    <header role="banner">
+        <nav aria-label="Navegación principal">
             <ul>
                 <li><a href="#about" class="nav-link">Sobre mí</a></li>
                 <li><a href="#experience" class="nav-link">Experiencia</a></li>
@@ -214,9 +457,18 @@
             </div>
         </section>
 
-        <section id="experience">
+        <!-- ================================================================
+             aria-labelledby="experience-heading"
+             ================================================================
+             aria-labelledby referencia el id de un elemento existente que
+             sirve como titulo de la seccion.  El lector de pantalla
+             anuncia: "region, Experiencia" al entrar en la seccion.
+             Compara con aria-label (usado arriba en <nav>) que recibe
+             texto directo en vez de un id.
+             ================================================================ -->
+        <section id="experience" aria-labelledby="experience-heading">
             <div class="container">
-                <h2>Experiencia</h2>
+                <h2 id="experience-heading">Experiencia</h2>
                 <div class="experience-item">
                     <h3>Propulsión UNAM</h3>
                     <p><strong>Miembro fundador</strong> | 3 años 5 meses</p>
@@ -235,9 +487,9 @@
             </div>
         </section>
 
-        <section id="skills">
+        <section id="skills" aria-labelledby="skills-heading">
             <div class="container">
-                <h2>Habilidades</h2>
+                <h2 id="skills-heading">Habilidades</h2>
                 <div class="skills-container">
                     <div class="skill-item">Microsoft Office</div>
                     <div class="skill-item">Matlab</div>
@@ -252,9 +504,9 @@
             </div>
         </section>
 
-        <section id="education">
+        <section id="education" aria-labelledby="education-heading">
             <div class="container">
-                <h2>Educación</h2>
+                <h2 id="education-heading">Educación</h2>
                 <div class="education-item">
                     <h3>Licenciatura en Matemáticas</h3>
                     <p>Facultad de Ciencias, UNAM</p>
@@ -263,9 +515,9 @@
             </div>
         </section>
 
-        <section id="contact">
+        <section id="contact" aria-labelledby="contact-heading">
             <div class="container">
-                <h2>Contacto</h2>
+                <h2 id="contact-heading">Contacto</h2>
                 <div class="contact-container">
                     <div class="contact-item">
                         <h3>Email</h3>
@@ -278,7 +530,23 @@
                     </div>
                     <div class="contact-item">
                         <h3>LinkedIn</h3>
-                        <a href="https://www.linkedin.com/in/natalia-edith-mejia-bautista-b6648b226/" target="_blank">Ver perfil</a>
+                        <!-- ========================================================
+                             rel="noopener noreferrer" en enlaces target="_blank"
+                             ========================================================
+                             Sin rel="noopener", la pagina destino puede acceder al
+                             objeto window.opener de TU pagina y redirigirla a una
+                             pagina de phishing (ataque llamado "tabnabbing").
+
+                             noopener: impide que la nueva ventana acceda a
+                                       window.opener.
+                             noreferrer: ademas, no envia la cabecera Referer,
+                                         protegiendo la privacidad del usuario.
+
+                             Los navegadores modernos ya aplican noopener por
+                             defecto en target="_blank", pero ser explicito es
+                             buena practica para compatibilidad.
+                             ======================================================== -->
+                        <a href="https://www.linkedin.com/in/natalia-edith-mejia-bautista-b6648b226/" target="_blank" rel="noopener noreferrer">Ver perfil</a>
                     </div>
                 </div>
             </div>
@@ -290,35 +558,149 @@
     </footer>
 
     <script>
-        // Función para manejar la animación de aparición
+        /* ================================================================
+           ANIMACION DE SCROLL — Enfoque manual con getBoundingClientRect()
+           ================================================================
+           Este archivo usa un PATRON CLASICO para animar elementos al
+           hacer scroll: escuchar el evento 'scroll' y, en cada disparo,
+           revisar la posicion de cada elemento respecto al viewport.
+
+           Ventajas:
+             - Funciona en TODOS los navegadores, incluso IE11
+             - Facil de entender paso a paso
+
+           Desventajas (comparado con IntersectionObserver del ejercicio 10):
+             - El evento 'scroll' se dispara CIENTOS de veces por segundo
+               mientras el usuario hace scroll -> puede causar jank si el
+               callback es pesado.
+             - Llamar a getBoundingClientRect() fuerza un "reflow" (el
+               navegador recalcula posiciones) en cada iteracion.
+             - No hay throttle/debounce aqui, asi que es ineficiente.
+
+           El ejercicio 10 resuelve estos problemas usando
+           IntersectionObserver, que es la API MODERNA y declarativa:
+           el navegador notifica cuando un elemento entra/sale del
+           viewport, sin necesidad de escuchar 'scroll'.
+           ================================================================ */
+
+        // Funcion para manejar la animacion de aparicion
         function handleScrollAnimation() {
             const elements = document.querySelectorAll('.about-content, .experience-item, .education-item, .skill-item, .contact-item');
             elements.forEach(el => {
+                /* ========================================================
+                   getBoundingClientRect()
+                   ========================================================
+                   Retorna un objeto DOMRect con la posicion del elemento
+                   RELATIVA AL VIEWPORT (la ventana visible):
+                   {
+                     top:    distancia del borde superior del elemento al
+                             borde superior del viewport,
+                     bottom: distancia del borde inferior al borde superior,
+                     left, right, width, height...
+                   }
+
+                   Si el usuario ha hecho scroll, los valores cambian porque
+                   el viewport se mueve.  Un elemento arriba del viewport
+                   tiene top negativo; uno abajo tiene top > windowHeight.
+                   ======================================================== */
                 const rect = el.getBoundingClientRect();
                 const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+
+                /* ========================================================
+                   Umbral del 75%: rect.top <= windowHeight * 0.75
+                   ========================================================
+                   El elemento se hace visible cuando su borde SUPERIOR esta
+                   al 75% de la ventana o mas arriba.  Esto significa que el
+                   elemento ya entro un 25% en la pantalla antes de animarse,
+                   dando una sensacion natural de "aparicion progresiva".
+
+                   Si usaramos windowHeight * 1.0, la animacion empezaria
+                   justo cuando el borde superior toca el borde inferior del
+                   viewport (demasiado tarde / el usuario ya lo ve).
+                   ======================================================== */
                 if (rect.top <= windowHeight * 0.75) {
                     el.classList.add('show');
                 }
             });
         }
 
-        // Manejar la navegación suave
+        /* ================================================================
+           NAVEGACION SUAVE — scrollIntoView({ behavior: 'smooth' })
+           ================================================================
+           Selecciona TODOS los enlaces internos (href que empieza con #)
+           y anade un listener de click a CADA UNO individualmente.
+
+           NOTA SOBRE EVENT DELEGATION vs LISTENERS INDIVIDUALES:
+           Aqui se usa el enfoque de listeners individuales:
+             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                 anchor.addEventListener('click', ...);
+             });
+
+           Alternativa — Event Delegation (un solo listener en el padre):
+             document.querySelector('nav').addEventListener('click', (e) => {
+                 const link = e.target.closest('a[href^="#"]');
+                 if (link) { ... }
+             });
+
+           Tradeoffs:
+             - Listeners individuales: codigo mas claro y directo.
+               Funciona bien con pocos elementos (5 enlaces aqui).
+             - Event Delegation: un solo listener sin importar cuantos
+               hijos haya.  Escala mejor si los elementos se crean/
+               destruyen dinamicamente (ej: listas infinitas).
+               Obligatorio para elementos creados despues del DOMContentLoaded.
+
+           Para 5 enlaces estaticos, la diferencia de rendimiento es
+           insignificante. Event Delegation brilla con cientos de elementos.
+           ================================================================ */
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
+
+                /* ========================================================
+                   scrollIntoView({ behavior: 'smooth' })
+                   ========================================================
+                   API nativa del DOM que desplaza el viewport hasta que el
+                   elemento sea visible.
+
+                   behavior: 'smooth' -> scroll suave animado
+                   behavior: 'auto'   -> salto instantaneo (por defecto)
+
+                   Nota: el ejercicio 10 logra lo mismo solo con CSS:
+                     html { scroll-behavior: smooth; }
+                   Esa solucion CSS es mas sencilla pero no permite tanto
+                   control (no puedes elegir 'block' o 'inline' alignment).
+                   ======================================================== */
                 document.querySelector(this.getAttribute('href')).scrollIntoView({
                     behavior: 'smooth'
                 });
             });
         });
 
-        // Resaltar el enlace de navegación activo
+        /* ================================================================
+           LINK DE NAVEGACION ACTIVO — Tracking de seccion actual
+           ================================================================
+           Mientras el usuario hace scroll, esta funcion determina cual
+           seccion ocupa actualmente el viewport y resalta su enlace
+           correspondiente en la navegacion.
+
+           Estrategia: para cada seccion, si su borde superior esta
+           por encima del umbral (100px) Y su borde inferior por debajo,
+           esa seccion es la "activa".
+
+           El umbral de 100px compensa la altura del header fijo.
+           Si el header mide 60px, rect.top=0 en realidad esta detras
+           del header.  100px da un margen de seguridad.
+           ================================================================ */
         function setActiveNavLink() {
             const sections = document.querySelectorAll('section');
             const navLinks = document.querySelectorAll('.nav-link');
 
             sections.forEach(section => {
                 const rect = section.getBoundingClientRect();
+                /* La condicion: la seccion "contiene" el punto Y=100px
+                   del viewport.  Es decir, su top esta arriba del punto
+                   (<=100) y su bottom esta abajo del punto (>=100). */
                 if (rect.top <= 100 && rect.bottom >= 100) {
                     const id = section.getAttribute('id');
                     navLinks.forEach(link => {
@@ -331,13 +713,56 @@
             });
         }
 
-        // Eventos de scroll
+        /* ================================================================
+           EVENTOS DE SCROLL
+           ================================================================
+           Cada vez que el usuario hace scroll, se ejecutan AMBAS funciones.
+           Como se menciono arriba, el evento 'scroll' se dispara con
+           altisima frecuencia (puede ser 60+ veces por segundo).
+
+           En un proyecto de produccion, seria recomendable usar
+           requestAnimationFrame o un throttle para limitar las ejecuciones
+           a una por frame (~16ms).  Ejemplo:
+
+             let ticking = false;
+             window.addEventListener('scroll', () => {
+               if (!ticking) {
+                 requestAnimationFrame(() => {
+                   handleScrollAnimation();
+                   setActiveNavLink();
+                   ticking = false;
+                 });
+                 ticking = true;
+               }
+             });
+
+           O mejor aun: usar IntersectionObserver (ver ejercicio 10).
+           ================================================================ */
         window.addEventListener('scroll', () => {
             handleScrollAnimation();
             setActiveNavLink();
         });
 
-        // Iniciar animaciones al cargar la página
+        /* ================================================================
+           EVENTO 'load' — Animar elementos visibles al cargar la pagina
+           ================================================================
+           ¿Por que se necesita esto?
+
+           Los elementos que ya estan visibles al cargar la pagina
+           (los que estan "above the fold", es decir, en la parte superior
+           sin necesidad de scroll) NUNCA disparan el evento 'scroll'.
+           Si solo escucharamos 'scroll', esos elementos permanecerian
+           invisibles (opacity:0) hasta que el usuario hiciera scroll.
+
+           El evento 'load' se dispara cuando la pagina y todos sus
+           recursos (imagenes, CSS, fonts) terminan de cargar.
+           Al llamar handleScrollAnimation() en ese momento, los elementos
+           above-the-fold reciben la clase .show inmediatamente.
+
+           Nota: 'load' espera a que las imagenes carguen.  Si quieres
+           actuar mas rapido, usa 'DOMContentLoaded' (solo espera el HTML
+           parseado, no recursos externos).
+           ================================================================ */
         window.addEventListener('load', handleScrollAnimation);
     </script>
 </body>

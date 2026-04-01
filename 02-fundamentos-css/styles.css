@@ -1,3 +1,74 @@
+/*
+  ==========================================================================
+  EJERCICIO 02 — FUNDAMENTOS DE CSS
+  ==========================================================================
+
+  Esta es tu primera hoja de estilos. Aqui aprenderas los conceptos
+  fundamentales que forman la base de TODO el CSS que escribiras en
+  tu carrera como desarrollador web.
+
+  CONCEPTOS QUE CUBRE ESTE ARCHIVO:
+  1. Variables CSS (Custom Properties) con :root
+  2. Selectores y la cascada
+  3. Especificidad
+  4. Unidades (px, rem, em, %)
+  5. Colores (hex, rgb, nombres)
+  6. Tipografia y font stacks
+  7. Box Model
+  8. Media queries y responsive design (mobile-first)
+  9. Introduccion a Flexbox
+
+  ==========================================================================
+*/
+
+
+/*
+  ==========================================================================
+  :ROOT Y VARIABLES CSS (Custom Properties)
+  ==========================================================================
+
+  QUE ES :root:
+  :root es un pseudo-selector que apunta al elemento raiz del documento.
+  En HTML, el elemento raiz es <html>. Entonces :root y html son casi
+  lo mismo, PERO :root tiene mayor especificidad:
+    - html  --> especificidad: 0,0,1 (un elemento)
+    - :root --> especificidad: 0,1,0 (una pseudo-clase)
+
+  POR QUE las variables van en :root:
+  Porque :root es el ANCESTRO de todos los elementos del documento.
+  Las variables CSS se HEREDAN hacia abajo (como font-family o color).
+  Al declararlas en :root, estan disponibles en CUALQUIER parte del
+  documento.
+
+  COMO FUNCIONAN LAS VARIABLES CSS:
+  - Se declaran con doble guion: --nombre-variable: valor;
+  - Se usan con la funcion var(): var(--nombre-variable)
+  - Son sensibles a mayusculas: --Color y --color son DIFERENTES
+  - Se heredan: un hijo puede usar variables del padre
+  - Se pueden redefinir en scopes mas especificos:
+
+    :root { --color: blue; }         (global: azul)
+    .alerta { --color: red; }        (dentro de .alerta: rojo)
+
+  VALOR DE RESPALDO (fallback):
+  var(--variable, valor-respaldo) usa el respaldo si la variable
+  no existe:
+    color: var(--color-texto, black);
+  Si --color-texto no esta definida, usa black.
+
+  POR QUE SON MEJORES QUE VARIABLES DE PREPROCESADORES (Sass/Less):
+  - Variables de Sass ($color: blue) se resuelven en COMPILACION.
+    Una vez compilado el CSS, el valor esta "quemado" y no cambia.
+  - Variables CSS (--color: blue) son DINAMICAS. Puedes:
+    1. Cambiarlas con JavaScript en tiempo real
+    2. Redefinirlas en media queries para temas oscuros/claros
+    3. Heredarlas y sobreescribirlas por componente
+  - Las de Sass no existen en el CSS final — las CSS Custom Properties si.
+
+  CONVENCION DE NOMBRES:
+  Usa nombres descriptivos en espaniol o ingles, con guiones:
+    --azulclaro, --color-primario, --spacing-large, etc.
+*/
 :root{
   --azulclaro: #7ee8fd;
   --azulmarino: #001f3f;
@@ -6,6 +77,101 @@
 }
 
 
+/*
+  ==========================================================================
+  SELECTOR DE MULTIPLES ELEMENTOS (Selector de grupo)
+  ==========================================================================
+
+  COMO FUNCIONA:
+  Puedes aplicar los MISMOS estilos a varios selectores separandolos
+  con comas. Esto:
+    div, header, nav { border: 1px solid red; }
+  Es equivalente a escribir:
+    div { border: 1px solid red; }
+    header { border: 1px solid red; }
+    nav { border: 1px solid red; }
+
+  La coma significa "O" — selecciona div O header O nav O main O...
+
+  POR QUE SE USA AQUI:
+  Para depuracion visual — poner borde a todos los contenedores te
+  permite VER la estructura del layout. Es como poner radiografia a
+  tu pagina. En produccion normalmente removes estos bordes.
+
+  ESPECIFICIDAD DE SELECTORES DE ELEMENTO:
+  Cada selector aqui (div, header, nav, etc.) es un selector de
+  ELEMENTO (tambien llamado "de tipo"). Tiene la especificidad mas
+  baja: 0,0,1.
+
+  TABLA DE ESPECIFICIDAD (de menor a mayor):
+  ============================================
+  Selector                | Especificidad | Ejemplo
+  ----------------------- | ------------- | -------
+  Elemento/tipo           | 0,0,1         | div, p, header
+  Clase/pseudo-clase      | 0,1,0         | .menu, :hover, :root
+  ID                      | 1,0,0         | #header
+  Inline (en el HTML)     | 1,0,0,0       | style="color:red"
+  !important              | Gana a todo   | color: red !important
+
+  COMO SE CALCULAN COMBINACIONES:
+  - div.menu       = 0,0,1 + 0,1,0 = 0,1,1
+  - #header .menu  = 1,0,0 + 0,1,0 = 1,1,0
+  - div p span     = 0,0,1 + 0,0,1 + 0,0,1 = 0,0,3
+
+  Si dos reglas tienen la MISMA especificidad, gana la que aparece
+  DESPUES en el CSS (orden de fuente / source order).
+
+  LA CASCADA — QUE ES REALMENTE:
+  ================================
+  "Cascada" significa que multiples reglas pueden apuntar al mismo
+  elemento. El navegador decide cual gana usando este orden:
+  1. Origen e importancia (user-agent < user < author < !important)
+  2. Especificidad (la tabla de arriba)
+  3. Orden de aparicion (la ultima gana si empatan en lo demas)
+
+  Ejemplo practico: si tienes:
+    body { color: blue; }    (especificidad 0,0,1)
+    .texto { color: red; }   (especificidad 0,1,0)
+  Un <p class="texto"> sera ROJO porque 0,1,0 > 0,0,1.
+
+  BOX MODEL — LO QUE CADA ELEMENTO TIENE:
+  ==========================================
+  Todo elemento HTML es una "caja" con 4 capas (de dentro hacia fuera):
+
+  +--------------------------------------------------+
+  |                   MARGIN                          |
+  |  +--------------------------------------------+  |
+  |  |               BORDER                        |  |
+  |  |  +--------------------------------------+  |  |
+  |  |  |            PADDING                    |  |  |
+  |  |  |  +--------------------------------+  |  |  |
+  |  |  |  |          CONTENT               |  |  |  |
+  |  |  |  |   (texto, imagenes, etc.)      |  |  |  |
+  |  |  |  +--------------------------------+  |  |  |
+  |  |  +--------------------------------------+  |  |
+  |  +--------------------------------------------+  |
+  +--------------------------------------------------+
+
+  - CONTENT: El contenido real (texto, imagen)
+  - PADDING: Espacio ENTRE el contenido y el borde (relleno interno)
+  - BORDER: El borde visible alrededor del padding
+  - MARGIN: Espacio FUERA del borde (separacion con otros elementos)
+
+  IMPORTANTE — box-sizing:
+  Por defecto (box-sizing: content-box), width/height solo incluyen
+  el CONTENT. Padding y border se SUMAN al tamano total:
+    width: 200px + padding: 20px + border: 2px = 244px total
+
+  Con box-sizing: border-box, padding y border se INCLUYEN en el
+  width/height:
+    width: 200px (ya incluye padding y border) = 200px total
+
+  Muchos frameworks usan: * { box-sizing: border-box; } para evitar
+  sorpresas con el tamano de los elementos.
+
+  En este archivo NO se declara box-sizing, asi que se usa el default
+  content-box. Algo a tener en cuenta cuando calcules tamanos.
+*/
 div,
 header,
 nav,
@@ -18,6 +184,99 @@ ul{
   padding: 0 .5rem; border: 1px solid rgb(245, 241, 241);
 }
 
+/*
+  ==========================================================================
+  ESTILOS DEL BODY — TIPOGRAFIA, COLORES, VARIABLES EN ACCION
+  ==========================================================================
+
+  FONT-FAMILY Y FONT STACKS (pilas de fuentes):
+  ================================================
+  'Arial', sans-serif es un "font stack" — una lista de respaldos:
+  1. El navegador intenta usar 'Arial'
+  2. Si Arial no esta instalada, usa cualquier fuente sans-serif del
+     sistema (Helvetica en Mac, Liberation Sans en Linux, etc.)
+
+  POR QUE se necesitan respaldos:
+  No todos los sistemas operativos tienen las mismas fuentes. Arial
+  existe en Windows y Mac pero podria faltar en algunas distros Linux.
+  La familia generica (sans-serif, serif, monospace) SIEMPRE funciona.
+
+  POR QUE las comillas en 'Arial':
+  Los nombres con espacios NECESITAN comillas: 'Times New Roman'.
+  Los nombres de una sola palabra como Arial no las necesitan
+  estrictamente, pero es buena practica usarlas para consistencia.
+  Las familias genericas (sans-serif, serif, monospace) NUNCA llevan
+  comillas — son palabras clave de CSS, no nombres de fuente.
+
+  UNIDADES — REM vs EM vs PX vs %:
+  ====================================
+  - px (pixeles): Unidad absoluta. 16px es 16px siempre.
+    PROBLEMA: Si el usuario cambia el tamano de fuente base en su
+    navegador (por accesibilidad), los px NO se ajustan.
+
+  - rem (root em): Relativa al font-size del elemento RAIZ (<html>).
+    Si <html> tiene font-size: 16px (el default del navegador):
+      1rem = 16px
+      0.8rem = 12.8px
+      2rem = 32px
+    VENTAJA: Si el usuario cambia el tamano base, todo se escala
+    proporcionalmente. Ideal para fuentes y espaciado.
+
+  - em: Relativa al font-size del elemento PADRE.
+    Si el padre tiene font-size: 20px:
+      1em = 20px, 0.5em = 10px
+    CUIDADO: Los em se ACUMULAN. Si abuelas, padre e hijo todos
+    usan em, los tamanos se multiplican de forma impredecible.
+    Ejemplo peligroso:
+      body { font-size: 1.2em; }     --> 19.2px (16 * 1.2)
+      section { font-size: 1.2em; }  --> 23.04px (19.2 * 1.2)
+      p { font-size: 1.2em; }        --> 27.65px (23.04 * 1.2)
+
+  - % (porcentaje): Relativa al valor del PADRE. Similar a em para
+    font-size (100% = 1em), pero para width se refiere al ancho del
+    contenedor padre.
+
+  CUANDO USAR CADA UNA:
+  - rem: Tamanos de fuente, espaciado general, padding, margin
+  - em: Padding/margin que deben escalar con el tamano de fuente
+    LOCAL del elemento (ej: un boton cuyo padding crece si crece su texto)
+  - px: Bordes finos (1px), sombras, elementos que NO deben escalar
+  - %: Anchos fluidos (columnas del layout)
+
+  VAR(--grande) — VARIABLES EN ACCION:
+  ======================================
+  Aqui usamos var(--grande) que equivale a 1rem (definido en :root).
+  Si manana decides que --grande deberia ser 1.1rem, cambias UNA linea
+  en :root y TODO el sitio se actualiza. Sin variables, tendrias que
+  buscar y reemplazar cada "1rem" en todo el CSS.
+
+  FORMATOS DE COLOR:
+  ====================
+  En este archivo se usan tres formatos. Todos son validos:
+
+  1. HEXADECIMAL: #001f3f
+     - 6 digitos: #RRGGBB (Rojo, Verde, Azul)
+     - Cada par va de 00 (nada) a FF (maximo)
+     - #001f3f = 00 rojo, 1F verde, 3F azul (azul marino oscuro)
+     - Abreviatura: #fff = #ffffff (cuando los pares se repiten)
+
+  2. RGB: rgb(245, 241, 241)
+     - Igual que hex pero en decimal (0-255 por canal)
+     - Mas legible: sabes que 245 de rojo es "casi maximo"
+     - Variante con alfa: rgba(245, 241, 241, 0.5) (50% transparente)
+
+  3. NOMBRES: #fff es equivalente a "white"
+     - CSS tiene 148 nombres de colores predefinidos
+     - Utiles para prototipar rapido, pero limitan tu paleta
+     - No todos los nombres son intuitivos: "navy" = #000080,
+       "teal" = #008080, "peru" = #CD853F (si, es un color)
+
+  CUANDO USAR CADA FORMATO:
+  - Variables/diseno systems: hex o hsl (hue-saturation-lightness)
+  - Transparencia: rgba() o hsla()
+  - Prototipado rapido: nombres
+  - Consistencia en equipo: el que tu equipo decida
+*/
 body{
   font-family: 'Arial', sans-serif;
   font-size: var(--grande);
@@ -26,13 +285,189 @@ body{
   color: var(--azulclaro);
 }
 
-section{ 
+/*
+  ==========================================================================
+  ESTILOS POR SECCION — LA CASCADA EN ACCION
+  ==========================================================================
+
+  Observa como los colores cambian por seccion:
+  - body: fondo azul marino, texto azul claro (el default)
+  - section: fondo lila, texto azul marino (sobreescribe el body)
+  - article: fondo morado, texto blanco (sobreescribe section)
+  - aside: fondo azul claro, texto azul marino
+
+  Esto funciona porque los selectores de tipo (section, article, etc.)
+  aplican SOLO a esos elementos. Los hijos HEREDAN el color de su padre
+  mas cercano que lo tenga definido.
+
+  La HERENCIA en CSS:
+  No TODAS las propiedades se heredan. Las que SI se heredan
+  tipicamente son las de texto:
+    - color, font-family, font-size, font-weight, line-height,
+      text-align, visibility, cursor, list-style
+
+  Las que NO se heredan son las de "caja":
+    - margin, padding, border, width, height, background,
+      display, position, overflow
+
+  Ejemplo: si <section> tiene color: var(--azulmarino), los <p>,
+  <h2>, <label> dentro de section HEREDAN ese color automaticamente
+  sin necesidad de repetir la regla para cada uno.
+*/
+section{
   font-size: var(--mediano);
   background: #d2a8fd;
   color:var(--azulmarino);
 }
-article{ background: #9005a57a}
-aside{ 
+article{ background: #9005a5; color: #fff}
+aside{
   background: var(--azulclaro);
-  color:var(--azulmarino)
+  color:var(--azulmarino);
+}
+
+/*
+  ==========================================================================
+  ESTILOS BASE Y RESPONSIVE — MOBILE-FIRST
+  ==========================================================================
+
+  CONCEPTO MOBILE-FIRST:
+  =========================
+  "Mobile-first" significa que los estilos BASE (fuera de media queries)
+  estan disenados para pantallas PEQUENAS (moviles). Luego, con media
+  queries, se AGREGAN estilos para pantallas mas grandes.
+
+  El flujo es:
+  1. Estilos base: layout simple, una columna (para movil)
+  2. @media (min-width: 768px): agrega layout de multiples columnas
+  3. @media (min-width: 1024px): ajustes para escritorio (si fuera
+     necesario)
+
+  POR QUE mobile-first y no desktop-first:
+  - Mas del 60% del trafico web es movil
+  - Es mas facil AGREGAR complejidad que QUITARLA
+  - Desktop-first usa max-width y terminas "deshaciendo" estilos
+  - Mobile-first es la practica recomendada por Google
+
+  ALTERNATIVA (desktop-first) — POR QUE NO:
+  @media (max-width: 768px) { ... }
+  Aqui empiezas con el layout complejo y QUITAS cosas para movil.
+  El problema es que escribes mas CSS (primero lo complejo, luego
+  lo quitas) y los estilos se vuelven mas dificiles de mantener.
+
+  NAV UL — RESET DE LISTA:
+  ============================
+  padding-left: 0 quita el indentado por defecto de las listas.
+  list-style: none quita las vinetas (bullets).
+  Esto es comun en navegaciones porque no quieres que se vean como
+  una lista con puntos — quieres enlaces horizontales o estilizados.
+*/
+body { padding: 0.5rem; }
+nav ul { padding-left: 0; list-style: none; }
+
+/*
+  ==========================================================================
+  MEDIA QUERY — @media (min-width: 768px)
+  ==========================================================================
+
+  COMO FUNCIONA:
+  @media es una "regla condicional". Los estilos dentro SOLO se aplican
+  cuando la condicion se cumple. En este caso: cuando el ancho del
+  viewport (ventana del navegador) es DE 768 pixeles EN ADELANTE.
+
+  min-width: 768px significa:
+    "Si el ancho es >= 768px, aplica estos estilos"
+
+  Esto es mobile-first: los estilos fuera del @media son para movil,
+  y los de adentro son ADICIONES para tablet/escritorio.
+
+  POR QUE 768px:
+  Es un breakpoint (punto de quiebre) historico porque 768px era el
+  ancho del iPad en orientacion vertical. No es una regla absoluta
+  — deberias elegir breakpoints basandote en DONDE TU CONTENIDO se
+  rompe, no en dispositivos especificos.
+
+  Breakpoints comunes (no son obligatorios):
+    480px  - moviles grandes
+    768px  - tablets verticales
+    1024px - tablets horizontales / laptops pequenias
+    1200px - escritorio
+    1440px - pantallas grandes
+
+  ==========================================================================
+  FLEXBOX — INTRODUCCION BASICA
+  ==========================================================================
+
+  COMO FUNCIONA:
+  Flexbox es un modelo de layout unidimensional (una fila O una columna
+  a la vez). Se activa con display: flex en el CONTENEDOR (padre).
+  Los hijos directos se convierten en "flex items".
+
+  PROPIEDADES DEL CONTENEDOR (padre):
+  - display: flex          --> Activa flexbox
+  - flex-wrap: wrap        --> Permite que los items salten a la
+                               siguiente linea si no caben
+
+  PROPIEDADES DE LOS ITEMS (hijos):
+  - flex: 1 1 100%         --> Atajo de 3 valores:
+    - flex-grow: 1         --> Puede CRECER para llenar espacio disponible
+    - flex-shrink: 1       --> Puede ENCOGERSE si no hay espacio
+    - flex-basis: 100%     --> Tamano BASE antes de crecer/encogerse
+
+  COMO SE LEE ESTE LAYOUT:
+  =============================
+  EN MOVIL (< 768px):
+  Todo es una sola columna (comportamiento normal de block elements).
+
+  EN TABLET/ESCRITORIO (>= 768px):
+  body es flex container con wrap:
+    header  --> flex: 1 1 100% (ocupa toda la fila)
+    nav     --> flex: 1 1 100% (ocupa toda la fila)
+    main    --> (es flex container tambien, con wrap)
+      section --> flex: 1 1 65% (ocupa ~65% del ancho de main)
+      aside   --> flex: 1 1 30% (ocupa ~30% del ancho de main)
+    footer  --> flex: 1 1 100% (ocupa toda la fila)
+
+  Resultado visual en escritorio:
+  +------------------------------------------+
+  |              HEADER (100%)               |
+  +------------------------------------------+
+  |              NAV (100%)                  |
+  +------------------------------------------+
+  |  SECTION (65%)        |  ASIDE (30%)     |
+  |                       |                  |
+  +------------------------------------------+
+  |              FOOTER (100%)               |
+  +------------------------------------------+
+
+  NOTA: 65% + 30% = 95%, no 100%. El 5% restante es espacio que
+  flex distribuye como gap. Si quisieras que sean exactos, podrias
+  usar gap: y ajustar los porcentajes, o usar CSS Grid (que veras
+  en ejercicios futuros).
+
+  POR QUE FLEXBOX y no FLOAT:
+  Antes de Flexbox (circa 2012), los layouts se hacian con floats:
+    section { float: left; width: 65%; }
+    aside { float: right; width: 30%; }
+  Los floats fueron un HACK — nunca fueron disenados para layouts.
+  Causaban problemas como el "clearfix hack" y elementos que se
+  salian de su contenedor. Flexbox fue disenado ESPECIFICAMENTE
+  para layouts y es infinitamente mas predecible.
+
+  POR QUE FLEXBOX y no CSS GRID (aqui):
+  CSS Grid es un sistema de layout BIDIMENSIONAL (filas Y columnas
+  simultaneamente). Es mas poderoso para layouts de pagina completa.
+  Flexbox es ideal para:
+  - Layouts de una dimension (una fila de botones, una columna de cards)
+  - Alinear items dentro de un contenedor
+  - Distribuir espacio entre items
+
+  En este ejercicio introductorio se usa Flexbox por su simplicidad.
+  CSS Grid lo veras mas adelante en el curso.
+*/
+@media (min-width: 768px) {
+  body { display: flex; flex-wrap: wrap; }
+  header, nav, footer { flex: 1 1 100%; }
+  main { display: flex; flex-wrap: wrap; }
+  section { flex: 1 1 65%; }
+  aside { flex: 1 1 30%; }
 }

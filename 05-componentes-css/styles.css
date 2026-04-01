@@ -1,19 +1,152 @@
+/*
+========================================================================
+EJERCICIO 05 - CSS DE COMPONENTES (TARJETAS / CARDS)
+========================================================================
+
+ESTRUCTURA DE ESTE ARCHIVO:
+  1. Estilos globales del body
+  2. Contenedor Flexbox (.cards-container)
+  3. Estilos base del componente (.card)
+  4. Clases modificadoras (.red-card, .blue-card, .green-card)
+  5. Elementos internos del componente (.card_title, etc.)
+  6. Media query para pantallas grandes
+*/
+
+/* =====================================================================
+   1. ESTILOS GLOBALES DEL BODY
+   =====================================================================
+
+   CONTRASTE DE COLOR Y ACCESIBILIDAD (WCAG)
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   Las pautas WCAG AA requieren un ratio de contraste MINIMO de 4.5:1
+   para texto de tamano normal (menos de 18px o 14px en negritas).
+
+   Originalmente se uso "aliceblue" (#F0F8FF) como fondo con color de texto
+   por defecto. Pero con fondo "beige" (#F5F5DC):
+     - aliceblue como color de texto sobre beige = ratio ~1.1:1 (FALLA)
+     - #1a1a1a (casi negro) sobre beige          = ratio ~16:1  (PASA)
+
+   Por eso el color de texto es #1a1a1a: garantiza legibilidad sobre el
+   fondo beige. Siempre verifica tus ratios de contraste con herramientas
+   como https://webaim.org/resources/contrastchecker/
+*/
 body{
     background-color: beige;
     font-family: sans-serif;
-    color: aliceblue;
+    color: #1a1a1a;
+    padding: 0.5rem;
 }
 
+/* =====================================================================
+   2. CONTENEDOR FLEXBOX PARA TARJETAS
+   =====================================================================
+
+   PATRON: CONTENEDOR FLEX PARA COMPONENTES REPETIDOS
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   .cards-container usa Flexbox para organizar las tarjetas:
+
+   - display: flex          -> activa el modelo Flexbox
+   - flex-direction: column -> en MOVIL, las tarjetas se apilan verticalmente
+   - align-items: center    -> centra las tarjetas horizontalmente
+   - gap: 2rem              -> espacio uniforme de 2rem entre tarjetas
+                               (gap es mas limpio que margenes individuales)
+   - padding: 1rem 0        -> espacio interno arriba/abajo del contenedor
+
+   En pantallas grandes (ver @media al final), cambia a flex-direction: row
+   para mostrar las tarjetas lado a lado.
+*/
+.cards-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    padding: 1rem 0;
+}
+
+/* =====================================================================
+   3. ESTILOS BASE DEL COMPONENTE .card
+   =====================================================================
+
+   Esta es la clase BASE del componente. Define TODO lo que es comun
+   a todas las tarjetas, sin importar su color. Las clases modificadoras
+   (.red-card, .blue-card, .green-card) solo agregan lo que VARIA.
+
+   PATRON RESPONSIVO: max-width + width: 100%
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   - width: 100%    -> la tarjeta ocupa todo el ancho disponible del padre
+   - max-width: 400px -> pero NUNCA mas de 400px
+
+   Este combo hace que las tarjetas sean FLUIDAS (responsive):
+   - En pantallas pequenas (< 400px): la tarjeta se adapta al 100% del ancho
+   - En pantallas grandes: la tarjeta se detiene en 400px y no crece mas
+
+   Este es uno de los patrones responsivos mas utiles y sencillos.
+
+   BOX-SHADOW: EFECTO DE RESPLANDOR
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   box-shadow: 0 0 25px 0 #000000;
+     - 0       -> desplazamiento horizontal (sin desplazamiento)
+     - 0       -> desplazamiento vertical (sin desplazamiento)
+     - 25px    -> radio de desenfoque (blur): cuanto se difumina la sombra
+     - 0       -> radio de expansion (spread): cuanto se expande antes del blur
+     - #000000 -> color de la sombra (negro)
+
+   Como AMBOS desplazamientos son 0, la sombra aparece IGUAL en todos los
+   lados, creando un efecto de "resplandor" (glow) alrededor de la tarjeta.
+   Si fueran, por ejemplo, "5px 5px", la sombra apareceria solo abajo-derecha,
+   simulando luz desde arriba-izquierda.
+
+   Este efecto de resplandor le da PROFUNDIDAD visual a la tarjeta,
+   haciendola parecer "elevada" sobre el fondo (material design).
+*/
 .card{
     text-align: center;
     border-radius: 10px;
-    width: 400px;
-    margin: auto;
-    margin-top: 50px;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
     padding: 20px 10px;
-    box-shadow: 0 0 25px 0 #000000; 
+    box-shadow: 0 0 25px 0 #000000;
+    color: #f0f0f0;
 }
 
+/* =====================================================================
+   4. CLASES MODIFICADORAS (VARIANTES DE COLOR)
+   =====================================================================
+
+   PATRON: CLASE BASE + CLASE MODIFICADORA
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   En el HTML, cada tarjeta tiene DOS clases: class="card red-card"
+     - .card      -> estilos compartidos (bordes, sombra, tamano, etc.)
+     - .red-card  -> estilos UNICOS de esta variante (solo el gradiente)
+
+   Esto evita DUPLICAR codigo. Sin este patron, tendriamos que repetir
+   TODOS los estilos de .card dentro de .red-card, .blue-card, etc.
+
+   LINEAR-GRADIENT: DEGRADADOS DE FONDO
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   linear-gradient() crea un fondo que transiciona entre colores.
+
+   Sintaxis: linear-gradient(direccion, color1 parada1, color2 parada2, ...)
+
+   En nuestro caso: linear-gradient(#000000, #d84242)
+     - Sin direccion especificada -> por defecto va de ARRIBA a ABAJO (180deg)
+     - #000000 -> comienza en negro (arriba)
+     - #d84242 -> termina en rojo (abajo)
+
+   Variantes de direccion que podrias usar:
+     - linear-gradient(to right, ...)        -> de izquierda a derecha (90deg)
+     - linear-gradient(45deg, ...)           -> en diagonal a 45 grados
+     - linear-gradient(to bottom right, ...) -> hacia esquina inferior derecha
+
+   Puedes agregar MAS colores y "paradas" (color stops):
+     - linear-gradient(#000 0%, #d84242 50%, #000 100%)
+       -> negro arriba, rojo en medio, negro abajo
+
+   Tambien puedes usar transparencia con rgba():
+     - linear-gradient(rgba(0,0,0,0.8), rgba(216,66,66,0.5))
+       -> el mismo gradiente pero semitransparente
+*/
 .red-card{
     background: linear-gradient(#000000, #d84242)
 }
@@ -26,25 +159,106 @@ body{
     background: linear-gradient(#000000, #287346);
 }
 
+/* =====================================================================
+   5. ELEMENTOS INTERNOS DEL COMPONENTE
+   =====================================================================
+
+   Estos son los "elementos" del componente en terminologia BEM.
+   Cada uno estiliza una parte especifica dentro de la tarjeta.
+
+   La nomenclatura .card_title, .card_subtitle, etc. deja claro
+   que estos elementos PERTENECEN al componente .card.
+   (En BEM estricto seria .card__title con doble guion bajo.)
+*/
+
+/* Titulo: nombre de la persona. margin: 0 elimina el margen por defecto de <h2> */
 .card_title{
     font-size: 22px;
     margin: 0;
 }
 
+/* Subtitulo: rol o profesion. Tamano mas pequeno que el titulo para jerarquia visual */
 .card_subtitle{
     font-size: 16px;
     margin: 0;
 }
 
+/* Contenido: texto descriptivo. El mas pequeno de todos (12px) = menor jerarquia */
 .card_content{
     font-size: 12px;
     margin-top: 20px;
 
 }
 
+/*
+   IMAGEN DE PERFIL CIRCULAR
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~
+   border-radius: 50% SOBRE UN ELEMENTO CUADRADO crea un CIRCULO perfecto.
+
+   Por que? border-radius: 50% significa que cada esquina se redondea con
+   un radio igual al 50% del ancho/alto del elemento. Si el elemento es
+   cuadrado (100x100px), el radio es 50px en cada esquina, y las cuatro
+   curvas se encuentran formando un circulo perfecto.
+
+   Si el elemento fuera RECTANGULAR (200x100px), border-radius: 50% crearia
+   una ELIPSE (ovalo), no un circulo. Por eso, si necesitas un circulo
+   perfecto, asegurate de que el elemento sea cuadrado, o usa un valor
+   fijo como border-radius: 50px.
+
+   Dato curioso: border-radius: 80% tambien crea un ovalo en elementos
+   cuadrados, porque el radio excede la mitad del lado y el navegador
+   ajusta las curvas, creando una forma asimetrica tipo "huevo".
+
+   max-width: 80% asegura que en pantallas muy pequenas la imagen no
+   se desborde de su contenedor (patron responsivo).
+*/
 .card_img{
     width: 100px;
-    border-radius: 80%;
+    max-width: 80%;
+    border-radius: 50%;
     margin-bottom: 10px;
-    
+}
+
+/* =====================================================================
+   6. MEDIA QUERY - DISPOSICION EN PANTALLAS GRANDES
+   =====================================================================
+
+   @media (min-width: 768px) significa:
+   "Aplica estos estilos cuando la pantalla tenga 768px o MAS de ancho."
+
+   768px es un punto de quiebre (breakpoint) clasico porque corresponde
+   al ancho del iPad en modo vertical (portrait).
+
+   CAMBIOS PARA PANTALLA GRANDE:
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   El contenedor cambia de columna a fila:
+   - flex-direction: row    -> tarjetas lado a lado (en vez de apiladas)
+   - justify-content: center -> centra el grupo de tarjetas horizontalmente
+   - flex-wrap: wrap         -> si no caben en una fila, bajan a la siguiente
+   - align-items: flex-start -> alinea tarjetas por el borde superior
+                                (en vez de estirarlas a la misma altura)
+
+   FLEX SHORTHAND: flex: 1 1 280px
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   Esta es la propiedad abreviada de Flexbox con tres valores:
+     - flex-grow: 1    -> la tarjeta PUEDE crecer para llenar espacio sobrante
+     - flex-shrink: 1  -> la tarjeta PUEDE encogerse si no hay espacio suficiente
+     - flex-basis: 280px -> el tamano IDEAL/INICIAL de la tarjeta es 280px
+
+   Esto significa: "empieza en 280px, pero crece o encoge segun el espacio".
+
+   Ejemplo practico con 3 tarjetas en un contenedor de 960px:
+     - Espacio ideal: 3 x 280px = 840px
+     - Espacio sobrante: 960px - 840px = 120px
+     - Como flex-grow es 1 para todas, el sobrante se reparte equitativamente:
+       cada tarjeta recibe 120px / 3 = 40px extra = 320px final cada una
+*/
+@media (min-width: 768px) {
+    .cards-container {
+        flex-direction: row;
+        justify-content: center;
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+    .card { flex: 1 1 280px; }
 }

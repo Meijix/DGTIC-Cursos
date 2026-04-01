@@ -1,35 +1,270 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi pagina</title>
+
+    <!--
+        ============================================================
+        NAVEGACION ENTRE PAGINAS — RUTAS RELATIVAS
+        ============================================================
+        Esta es la SEGUNDA pagina del sitio. Comparte la misma hoja de
+        estilos que index.html porque ambos archivos estan en la misma
+        carpeta:
+
+            03-pagina-web-basica/
+            |-- index.html        <- pagina principal
+            |-- pagina2.html      <- ESTAS AQUI
+            |-- styles.css        <- compartido por ambas paginas
+            \-- assets/
+
+        Al usar href="styles.css" (ruta relativa sin "/" al inicio),
+        el navegador busca el archivo en la misma carpeta que este HTML.
+
+        Esto permite que ambas paginas se vean consistentes: los mismos
+        colores, fuentes y espaciados. Un solo cambio en styles.css
+        se refleja automaticamente en TODAS las paginas que lo usen.
+    -->
     <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
-<body></body>
+<body>
+    <main>
     <h1>Segunda pagina</h1>
 
     <p>Esto es otro parrafo</p>
+
+    <!--
+        ============================================================
+        ENLACE DE REGRESO — NAVEGACION BIDIRECCIONAL
+        ============================================================
+        href="index.html" -> enlace relativo que regresa a la pagina principal.
+
+        Asi funciona la navegacion entre paginas en un sitio estatico:
+        - index.html tiene:   <a href="pagina2.html">  -> va a esta pagina
+        - pagina2.html tiene: <a href="index.html">    -> regresa
+
+        Es responsabilidad del desarrollador crear estos enlaces manualmente.
+        En frameworks modernos (React, Vue, etc.) esto se automatiza con
+        componentes de navegacion, pero el principio es el mismo.
+    -->
     <a href="index.html">Pagina principal</a>
+
+    <!--
+        ============================================================
+        LISTA ORDENADA <ol> vs LISTA DESORDENADA <ul>
+        ============================================================
+        Aqui usamos <ol> (ordered list) en lugar de <ul> (unordered list).
+
+        <ul> — Lista DESORDENADA:
+        - Muestra vinetas (bullets): *
+        - Para elementos donde el ORDEN NO IMPORTA.
+        - Ejemplo: lista de ingredientes, caracteristicas de un producto.
+
+        <ol> — Lista ORDENADA:
+        - Muestra NUMEROS: 1. 2. 3.
+        - Para elementos donde el ORDEN SI IMPORTA.
+        - Ejemplo: pasos de una receta, instrucciones, ranking.
+
+        Cuando usar cada una:
+        Preguntate: "Cambiaria el significado si reordeno los elementos?"
+        - SI cambiaria -> usa <ol>  (pasos, instrucciones, clasificaciones)
+        - NO cambiaria -> usa <ul>  (ingredientes, opciones de menu, etiquetas)
+
+        En la pagina index.html se uso <ul> para una lista generica.
+        Aqui se usa <ol> para practicar la diferencia, aunque el contenido
+        ("List item 1, 2, 3") sugiere un orden secuencial.
+    -->
     <ol>
         <li>List item 1</li>
         <li>List item 2</li>
         <li>List item 3</li>
     </ol>
-    
-    <img src="assets/fondo4.avif" alt="My Image">
 
+    <!--
+        ============================================================
+        FORMATO DE IMAGEN: AVIF
+        ============================================================
+        src="assets/fondo4.avif"
+
+        AVIF es un formato de imagen MODERNO (2020+) basado en el codec
+        de video AV1. Comparacion con JPG:
+
+        +--------------+----------------------+----------------------+
+        |              |       JPG            |       AVIF           |
+        +--------------+----------------------+----------------------+
+        | Compresion   | Buena                | Excelente (50% menor)|
+        | Calidad      | Buena                | Superior a igual peso|
+        | Soporte      | Universal (todos)    | Moderno (Chrome, FF) |
+        | Transparencia| NO soporta           | SI soporta (alfa)   |
+        | Animacion    | NO                   | SI (como GIF)       |
+        | Velocidad    | Decodificacion rapida| Mas lento al decod. |
+        +--------------+----------------------+----------------------+
+
+        ADVERTENCIA: AVIF no es soportado por TODOS los navegadores.
+        Safari lo soporto recien a partir de la version 16 (2022).
+        Navegadores muy antiguos no lo mostraran.
+
+        Solucion profesional: usar la etiqueta <picture> para ofrecer
+        multiples formatos y que el navegador elija:
+
+            <picture>
+                <source srcset="imagen.avif" type="image/avif">
+                <source srcset="imagen.webp" type="image/webp">
+                <img src="imagen.jpg" alt="Descripcion">
+            </picture>
+
+        El navegador usa el primer formato que soporte; si no soporta
+        ninguno, usa el <img> de respaldo (JPG).
+    -->
+    <img src="assets/fondo4.avif" alt="Imagen de fondo decorativa">
+
+    <!--
+        ============================================================
+        FORMULARIOS EN HTML — <form>
+        ============================================================
+        Un formulario recopila datos del usuario. Cuando se envia,
+        el navegador empaqueta los datos como pares CLAVE=VALOR y los
+        envia al servidor.
+
+        Sin atributos action ni method, el formulario se envia:
+        - A la misma pagina (action por defecto)
+        - Con metodo GET (los datos van en la URL)
+
+        En produccion, se agrega:
+            <form action="/procesar" method="POST">
+        - action -> URL del servidor que procesara los datos
+        - method -> GET (datos en URL) o POST (datos en el cuerpo, mas seguro)
+    -->
     <form>
+        <!--
+            ============================================================
+            LABEL + FOR: CONECTANDO ETIQUETA CON CAMPO
+            ============================================================
+            <label for="name">  <-  el atributo "for" debe coincidir con
+            <input id="name">   <-  el atributo "id" del campo.
+
+            Por que es importante esta conexion:
+            1. ACCESIBILIDAD: Los lectores de pantalla anuncian "Nombre,
+               campo de texto" cuando el usuario llega al input.
+            2. USABILIDAD: Al hacer clic en el texto "Nombre:", el cursor
+               salta automaticamente al campo de texto. Esto es especialmente
+               util en moviles donde los campos son pequenios.
+
+            Sin el for/id, el label es solo texto visual sin conexion
+            funcional al campo.
+        -->
+
+        <!--
+            ============================================================
+            ATRIBUTO name — LA CLAVE EN EL ENVIO DE DATOS
+            ============================================================
+            name="name" -> Cuando el formulario se envia, los datos viajan
+            como pares clave=valor. El atributo "name" define la CLAVE.
+
+            Ejemplo: si el usuario escribe "Maria" en este campo, se envia:
+                name=Maria
+
+            Si el campo de email tiene name="email" y escribes "maria@unam.mx":
+                email=maria%40unam.mx
+
+            El servidor recibe TODOS los pares juntos:
+                name=Maria&email=maria%40unam.mx&message=Hola&telephone=5551234567
+
+            SIN el atributo name, el campo NO SE ENVIA al servidor.
+            Es el error mas comun en formularios: olvidar el name.
+        -->
         <label for="name">Nombre:</label>
+        <!--
+            type="text" -> Campo de texto libre de una sola linea.
+            Es el tipo mas basico. Acepta cualquier caracter.
+        -->
         <input type="text" id="name" name="name">
 
         <label for="email">Correo:</label>
+        <!--
+            ============================================================
+            TIPO DE INPUT: email
+            ============================================================
+            type="email" -> No es solo visual; tiene comportamiento especial:
+
+            1. VALIDACION: El navegador verifica automaticamente que el texto
+               contenga un "@" y un dominio antes de permitir el envio.
+               Si escribes "hola" sin @, muestra un error nativo.
+            2. TECLADO MOVIL: En celulares, muestra un teclado con "@" y "."
+               prominentes, facilitando escribir correos.
+            3. AUTOCOMPLETADO: El navegador puede sugerir correos guardados.
+
+            Otros tipos comunes: text, password, number, date, url, search, color.
+            Cada uno cambia la validacion y el teclado en moviles.
+        -->
         <input type="email" id="email" name="email">
 
         <label for="message">Mensaje:</label>
+        <!--
+            ============================================================
+            TEXTAREA vs INPUT
+            ============================================================
+            <textarea> es para texto MULTILINEA (mensajes, comentarios, descripciones).
+            <input type="text"> es para texto de UNA SOLA LINEA (nombre, email).
+
+            Diferencias clave:
+            - <textarea> puede redimensionarse (el usuario arrastra la esquina).
+            - <textarea> tiene etiqueta de cierre: <textarea></textarea>
+            - <input> es auto-cerrado: <input> (no tiene </input>)
+            - <textarea> puede tener filas/columnas: rows="5" cols="30"
+            - El contenido por defecto de <textarea> va ENTRE las etiquetas,
+              no en un atributo value como en <input>.
+        -->
         <textarea id="message" name="message"></textarea>
 
-        <label for="number">Numero:</label>
-        <input type="tel" name="telephone number"></input>
+        <label for="telephone">Numero:</label>
+        <!--
+            ============================================================
+            TIPO DE INPUT: tel
+            ============================================================
+            type="tel" -> Campo para numeros telefonicos.
 
+            Importante: a diferencia de type="email", el navegador NO valida
+            automaticamente el formato, porque los formatos de telefono
+            varian enormemente entre paises (Mexico: 10 digitos,
+            EE.UU.: (xxx) xxx-xxxx, etc.).
+
+            Su ventaja principal es en MOVILES: muestra el teclado numerico
+            con simbolos de telefono (+, *, #), haciendo mas facil escribir
+            numeros.
+
+            Para validar el formato, necesitarias agregar el atributo pattern:
+                pattern="[0-9]{10}" -> exactamente 10 digitos
+        -->
+        <input type="tel" id="telephone" name="telephone">
+
+        <!--
+            ============================================================
+            BOTON DE ENVIO — type="submit"
+            ============================================================
+            <button type="submit"> envia el formulario al servidor.
+
+            Por que ser EXPLICITO con type="submit":
+
+            Dentro de un <form>, un <button> SIN type tiene comportamiento
+            implicito de type="submit" (por defecto). Sin embargo, ser
+            explicito es buena practica porque:
+
+            1. CLARIDAD: Otro desarrollador sabe de inmediato el proposito.
+            2. SEGURIDAD: Si luego agregas un boton "Cancelar" o "Limpiar"
+               dentro del mismo formulario, necesitaras type="button" o
+               type="reset" para que NO envie el formulario accidentalmente.
+            3. JAVASCRIPT: Al trabajar con JS, es comun tener multiples
+               botones. Ser explicito evita envios inesperados.
+
+            Tipos de <button>:
+            - type="submit"  -> Envia el formulario (por defecto dentro de <form>)
+            - type="reset"   -> Limpia todos los campos del formulario
+            - type="button"  -> No hace nada por si solo (se usa con JavaScript)
+        -->
         <button type="submit">Enviar</button>
     </form>
+    </main>
+</body>
 </html>

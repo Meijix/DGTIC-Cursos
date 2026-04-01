@@ -8,31 +8,130 @@
 <link rel="stylesheet" href="styles.css">
 
 <title>Natalia Edith Mejia Bautista</title>
+</head>
+
+<!--
+========================================================================
+EJERCICIO 06 - DISENO RESPONSIVO CON FLEXBOX (FUNDAMENTOS)
+========================================================================
+
+CONTEXTO EN LA SERIE DE EJERCICIOS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+En los ejercicios 01-05, el diseno responsivo se agrego como un "extra"
+al final (una media query de ultimo momento). A partir del ejercicio 06,
+el diseno responsivo es el OBJETIVO PRINCIPAL desde el inicio.
+
+Este ejercicio demuestra como usar Flexbox para crear un layout completo
+de pagina que se adapta entre movil y escritorio.
+
+FILOSOFIA MOBILE-FIRST
+~~~~~~~~~~~~~~~~~~~~~~~
+Cuando el CSS no tiene media queries aplicadas (pantalla pequena), el
+contenido se APILA naturalmente en una sola columna. HTML ya es
+responsivo por defecto: los bloques (<div>, <section>, <aside>) ocupan
+el 100% del ancho y se apilan uno debajo del otro.
+
+La estrategia mobile-first dice:
+  1. Los estilos BASE son para movil (sin media queries)
+  2. Las media queries AGREGAN complejidad para pantallas mas grandes
+
+Esto es mejor que el enfoque "desktop-first" porque:
+  - Escribes menos CSS (los estilos base son mas simples)
+  - No necesitas "deshacer" layouts complejos para movil
+  - Sigue el principio de mejora progresiva (progressive enhancement)
+-->
+
 <body>
-  <header>Encabezado Natalia Mejia :) </header>
-<nav>
+  <!--
+  HEADER con role="banner"
+  ~~~~~~~~~~~~~~~~~~~~~~~~
+  role="banner" es redundante en <header> cuando es hijo directo de <body>,
+  ya que <header> en ese contexto ya tiene el rol implicito de "banner".
+  Se incluye aqui con fines didacticos.
+  -->
+  <header role="banner">Encabezado Natalia Mejia</header>
+
+<!--
+NAVEGACION PRINCIPAL
+~~~~~~~~~~~~~~~~~~~~
+aria-label="Navegacion principal" identifica esta barra de navegacion
+para los lectores de pantalla. Es especialmente util cuando hay multiples
+<nav> en la pagina (ej. navegacion principal vs. navegacion del pie).
+-->
+<nav aria-label="Navegación principal">
   <ul>
-    <li><a>Inicio</a></li>
-    <li><a>Nosotros</a></li>
-    <li><a>Servicios</a></li>
-    <li><a>Contacto</a></li>
+    <li><a href="#">Inicio</a></li>
+    <li><a href="#">Nosotros</a></li>
+    <li><a href="#">Servicios</a></li>
+    <li><a href="#">Contacto</a></li>
   </ul>
 </nav>
+
 <main>
+  <!--
+  PATRON: DIV.CONTENEDOR PARA FLEXBOX
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  El <div class="contenedor"> es un "wrapper" (envoltorio) que agrupa
+  los elementos que queremos organizar con Flexbox.
+
+  Por que no aplicar Flexbox directamente a <main>?
+  Porque <main> contiene elementos que NO queremos que sean flex items
+  (como <h1> y el primer <p>). El .contenedor nos da un punto de control
+  mas preciso: solo <section> y <aside> dentro de el participan en el
+  layout Flexbox.
+
+  En movil (sin media query): section y aside ocupan flex: 1 1 100%,
+  es decir, se apilan verticalmente.
+  En escritorio (@media min-width: 798px): section ocupa ~60% y aside ~33%,
+  colocandose lado a lado.
+  -->
   <div class="contenedor">
   <h1>Encabezado principal en main</h1>
   <p>Parrafo en main Lorem ipsum dolor sit amet, consectetur adipisicing elit. Illum odit, deserunt rerum numquam sed itaque quasi doloremque architecto assumenda. Nostrum sed est cumque amet numquam mollitia earum optio animi obcaecati?</p>
+
+  <!--
+  SECTION: agrupacion tematica de contenido
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  <section> agrupa contenido que comparte un tema. Siempre deberia
+  tener un encabezado (<h2>, <h3>, etc.) que describa su contenido.
+  -->
   <section>
     <h2>Encabezado de seccion 1</h2>
     <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Perspiciatis totam debitis accusantium hic unde facilis doloribus ad sequi excepturi quidem dicta laboriosam numquam maiores minima quibusdam tenetur iusto, in deleniti.</p>
+
+    <!--
+    ARTICLE: contenido independiente y autocontenido
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    <article> indica contenido que tiene sentido por si solo.
+    Dentro de esta seccion, el articulo contiene un formulario
+    de ejemplo y texto adicional.
+    -->
     <article>
       <h3>Encabezado de articulo 1</h3>
 
+      <!--
+      FORMULARIO CON FIELDSET Y LEGEND
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      <fieldset> agrupa campos de formulario relacionados visualmente
+      (con un borde) y semanticamente. Esto es crucial para ACCESIBILIDAD:
+      los lectores de pantalla anuncian el <legend> antes de cada campo
+      dentro del fieldset, dando contexto al usuario.
+
+      Sin fieldset, un lector de pantalla diria:
+        "campo de texto, nombre"
+      Con fieldset, dice:
+        "Proporciona tus datos, campo de texto, nombre"
+
+      La clase "grid" en este fieldset podria usarse para organizar los
+      campos en una cuadricula CSS Grid (no implementada en este CSS,
+      pero la clase esta lista para futuras mejoras).
+      -->
       <form action="">
         <fieldset class="grid">
           <legend>Proporciona tus datos</legend>
           <p>Los campos marcados con * son obligatorios</p>
 
+          <!-- Cada campo se envuelve en un <div> para facilitar el estilizado -->
           <div class="campo nombre">
             <label for="nombre">Nombre:</label>
             <input type="text" id="nombre">
@@ -43,13 +142,32 @@
             <input type="email" id="email">
           </div>
 
-          <div class="campo procede">
-            <span>Procedencia:</span>
-            <input type="radio" name="procedencia" value="mex" />
-            <label for="huey">Mexicano</label><br>
-            <input type="radio" name="procedencia" value="ext" />
-            <label for="huey">Extranjero</label>
-          </div>
+          <!--
+          FIELDSET ANIDADO CON role="radiogroup"
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+          Los botones de radio (radio buttons) que comparten el mismo
+          atributo "name" forman un grupo logico. Envuélverlos en un
+          <fieldset> con role="radiogroup" hace EXPLICITO este agrupamiento
+          para tecnologias asistivas.
+
+          role="radiogroup" le dice al lector de pantalla:
+          "Estos elementos forman un grupo de opciones donde solo
+          puedes seleccionar una."
+
+          aria-label="Procedencia" proporciona una etiqueta accesible
+          para todo el grupo, complementando al <legend> visual.
+
+          Nota: cada <input type="radio"> tiene un "name" identico
+          ("procedencia"), lo que asegura que al seleccionar uno
+          se deselecciona el otro automaticamente.
+          -->
+          <fieldset class="campo procede" role="radiogroup" aria-label="Procedencia">
+            <legend>Procedencia:</legend>
+            <input type="radio" id="mex" name="procedencia" value="mex" />
+            <label for="mex">Mexicano</label>
+            <input type="radio" id="ext" name="procedencia" value="ext" />
+            <label for="ext">Extranjero</label>
+          </fieldset>
 
           <div class="campo sabor">
             <label for="sabor">Sabor favorito:</label>
@@ -66,6 +184,19 @@
       <p>Parrafo en articulo 1. Lorem ipsum dolor sit amet consectetur adipisicing elit. Repudiandae voluptate eius atque quibusdam architecto accusamus enim maiores nisi libero similique natus, velit sunt voluptatum reprehenderit earum sint asperiores minima vero?</p>
     </article>
   </section>
+
+  <!--
+  ASIDE: contenido complementario / barra lateral
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  <aside> contiene informacion que complementa al contenido principal
+  pero que podria existir independientemente (como una barra lateral).
+
+  En MOVIL: aside aparece debajo de section (flex-basis: 100%).
+  En ESCRITORIO: aside aparece AL LADO de section (flex-basis: 33.33%).
+
+  Dentro usamos una lista de definiciones (<dl>), que es semanticamente
+  correcta para pares de termino-descripcion (glosarios, FAQs, etc.).
+  -->
   <aside>
     <h3>Encabezado en lateral</h3>
     <dl>
@@ -85,9 +216,17 @@
   </aside>
   </div>
 </main>
-<footer>Footer Natalia Mejia</footer>
+
+<!--
+FOOTER con role="contentinfo"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+role="contentinfo" es redundante en <footer> cuando es hijo directo de
+<body>, ya que <footer> ya tiene ese rol implicito. Se incluye aqui
+con fines didacticos.
+-->
+<footer role="contentinfo">Footer Natalia Mejia</footer>
 
 
-  
+
 </body>
 </html>

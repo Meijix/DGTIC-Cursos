@@ -1,3 +1,43 @@
+<!--
+  ==========================================================================
+  EJERCICIO 02 — FUNDAMENTOS DE CSS (HTML + CSS externo)
+  ==========================================================================
+
+  PROGRESION DE APRENDIZAJE:
+  Este archivo es practicamente IDENTICO al del ejercicio 01. La unica
+  diferencia es la linea <link rel="stylesheet" href="styles.css">.
+  Esto es intencional: demuestra el principio de SEPARACION DE
+  RESPONSABILIDADES (Separation of Concerns):
+
+  - HTML = ESTRUCTURA y CONTENIDO (que dice la pagina)
+  - CSS  = PRESENTACION y DISENO (como se ve la pagina)
+  - JS   = COMPORTAMIENTO e INTERACTIVIDAD (que hace la pagina)
+
+  La estructura HTML NO cambia cuando le agregas estilos. Solo le
+  "pones ropa" al mismo esqueleto.
+
+  CONCEPTO CLAVE — POR QUE NO estilos inline o en <style>:
+  Podrias hacer:
+    <p style="color: red; font-size: 20px;">Texto</p>       (inline)
+  O dentro del <head>:
+    <style> p { color: red; font-size: 20px; } </style>     (interno)
+
+  Pero CSS EXTERNO tiene ventajas enormes:
+  1. CACHE: El navegador descarga styles.css UNA VEZ y lo reutiliza
+     en todas las paginas. Con estilos inline o internos, se repiten
+     en cada pagina y el navegador no puede cachearlos.
+  2. MANTENIMIENTO: Cambias UN archivo CSS y afectas TODAS las paginas.
+     Con inline tendrias que cambiar cada elemento uno por uno.
+  3. SEPARACION: El HTML queda limpio y legible. Un disenador puede
+     trabajar en CSS mientras un desarrollador trabaja en HTML.
+  4. ESPECIFICIDAD: Los estilos inline tienen la especificidad mas
+     alta (1000), lo que hace muy dificil sobreescribirlos con CSS.
+
+  PARA LOS CONCEPTOS DE HTML (DOCTYPE, semantica, formularios, etc.),
+  consulta los comentarios extensos del ejercicio 01.
+  ==========================================================================
+-->
+
 <!doctype html>
 <html lang="es">
 <head>
@@ -5,12 +45,57 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Ejercicios de HTML">
 
+<!--
+  ELEMENTO <link> — CONEXION CON HOJA DE ESTILOS EXTERNA
+  =========================================================
+  COMO FUNCIONA:
+  <link> crea una relacion entre este documento HTML y un recurso
+  externo. No es exclusivo para CSS — tambien se usa para favicons,
+  fuentes, preloading, etc.
+
+  ATRIBUTOS:
+  - rel="stylesheet": Indica que el recurso es una hoja de estilos.
+    Sin rel="stylesheet", el navegador descarga el archivo pero NO
+    lo aplica como CSS. Es un error comun olvidarlo.
+
+  - href="styles.css": La ruta al archivo CSS. Puede ser:
+    - Relativa: "styles.css" (mismo directorio)
+    - Relativa con ruta: "../css/styles.css" (directorio padre)
+    - Absoluta: "/css/styles.css" (desde la raiz del servidor)
+    - Externa: "https://cdn.example.com/styles.css"
+
+  COMO EL NAVEGADOR PROCESA ESTE <link>:
+  ==========================================
+  1. El navegador lee el HTML de arriba hacia abajo
+  2. Cuando encuentra <link rel="stylesheet">, DETIENE el renderizado
+     (CSS es "render-blocking" — bloquea el renderizado)
+  3. Envia una peticion HTTP al servidor para descargar styles.css
+  4. Mientras espera, sigue parseando el HTML pero NO pinta nada
+  5. Cuando recibe el CSS, construye el CSSOM (CSS Object Model)
+  6. Combina el DOM (del HTML) con el CSSOM para crear el "render tree"
+  7. AHORA si pinta la pagina en pantalla
+
+  POR QUE ES RENDER-BLOCKING:
+  Si el navegador pintara el HTML antes de tener el CSS, el usuario
+  veria un destello de contenido sin estilos (llamado FOUC — Flash
+  Of Unstyled Content) seguido de un repintado brusco cuando el CSS
+  llega. Esto es una mala experiencia de usuario.
+
+  POR QUE <link> va en <head> y no en <body>:
+  Porque el navegador necesita el CSS lo antes posible para evitar
+  FOUC. Si lo pones al final del <body>, todo el contenido se
+  renderiza sin estilos primero.
+
+  NOTA TECNICA: <link> es un "void element" — no tiene etiqueta de
+  cierre. No escribes </link>. Similar a <meta>, <br>, <img>, <input>.
+-->
 <link rel="stylesheet" href="styles.css">
 
 <title>Natalia Edith Mejia Bautista</title>
+</head>
 <body>
-  <header>HeaderNat</header>
-<nav>
+  <header role="banner">HeaderNat</header>
+<nav aria-label="Navegación principal">
   <ul>
     <li><a href="#">Inicio</a></li>
     <li><a href="#">Nosotros</a></li>
@@ -20,8 +105,8 @@
 </nav>
 <main>
   <h1>Encabezado principal en main</h1>
-  <section>
-    <h2>Encabezado de seccion 1</h2>
+  <section aria-labelledby="sec1-heading">
+    <h2 id="sec1-heading">Encabezado de seccion 1</h2>
     <article>
       <h3>Encabezado de articulo 1</h3>
 
@@ -34,18 +119,19 @@
           <label for="email">Correo electronico:</label>
           <input type="email" id="email"><br>
 
-          <span>Procedencia:</span>
-          <br>
-          <input type="radio" name="procedencia" value="mex" />
-          <label for="huey">Mexicano</label><br>
-          <input type="radio" name="procedencia" value="ext" />
-          <label for="huey">Extranjero</label><br>
+          <fieldset>
+            <legend>Procedencia:</legend>
+            <input type="radio" id="mex" name="procedencia" value="mex" />
+            <label for="mex">Mexicano</label><br>
+            <input type="radio" id="ext" name="procedencia" value="ext" />
+            <label for="ext">Extranjero</label>
+          </fieldset>
           <label for="sabor">Sabor favorito:</label><br>
           <select id="sabor">
             <option value="">-Elija una opcion-</option>
-            <option value="">Vainilla</option>
-            <option value="">Chocolate</option>
-            <option value="">Fresa</option>
+            <option value="vainilla">Vainilla</option>
+            <option value="chocolate">Chocolate</option>
+            <option value="fresa">Fresa</option>
           </select>
         </fieldset>
       </form>
@@ -72,9 +158,16 @@
   </aside>
 
 </main>
+
+<!--
+  NOTA: Este <footer> NO tiene role="contentinfo" a diferencia del
+  ejercicio 01. Esto es correcto — el rol implicito de <footer>
+  cuando es hijo directo de <body> ya es "contentinfo". Ambas formas
+  (con y sin role) funcionan igual para lectores de pantalla.
+-->
 <footer>footer</footer>
 
 
-  
+
 </body>
 </html>

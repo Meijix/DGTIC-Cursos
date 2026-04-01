@@ -1,3 +1,79 @@
+/*
+========================================================================
+EJERCICIO 06 - CSS RESPONSIVO MOBILE-FIRST CON FLEXBOX
+========================================================================
+
+FILOSOFIA MOBILE-FIRST
+~~~~~~~~~~~~~~~~~~~~~~~
+Este archivo sigue la estrategia "mobile-first":
+  - Los estilos BASE (sin media queries) estan disenados para MOVIL
+  - La unica @media query al final AGREGA estilos para ESCRITORIO
+
+Por que mobile-first es mejor que desktop-first?
+
+  Desktop-first (NO recomendado):
+    .sidebar { width: 300px; float: left; }      -- estilos complejos
+    @media (max-width: 768px) {
+      .sidebar { width: 100%; float: none; }      -- "deshaces" todo
+    }
+
+  Mobile-first (RECOMENDADO):
+    .sidebar { /* nada, ya ocupa 100% por defecto */ }  -- simple
+    @media (min-width: 768px) {
+      .sidebar { flex: 1 1 33%; }                       -- agregas complejidad
+    }
+
+  Ventajas del mobile-first:
+    1. Menos codigo CSS total (los bloques ya se apilan solos)
+    2. No necesitas "deshacer" layouts complejos para pantallas pequenas
+    3. Sigue el principio de MEJORA PROGRESIVA: la experiencia base
+       funciona en todos los dispositivos, y los mas capaces reciben mas
+    4. Las conexiones moviles suelen ser mas lentas, asi que reciben
+       menos CSS que procesar
+
+ESTRUCTURA DE ESTE ARCHIVO:
+  1. Variables CSS (:root)
+  2. Estilos de navegacion (ul, li)
+  3. Estilos globales del body
+  4. Estilos de secciones (section, article, aside)
+  5. Estilos de interaccion (hover)
+  6. Layout Flexbox (.contenedor, section, aside)
+  7. Media query para pantallas grandes
+*/
+
+/* =====================================================================
+   1. VARIABLES CSS (CUSTOM PROPERTIES)
+   =====================================================================
+
+   AMBITO (SCOPING) DE VARIABLES CSS
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   Las variables definidas en :root estan disponibles en TODO el documento.
+   :root es equivalente a <html> pero con mayor especificidad.
+
+   Podrias definir variables en un selector mas especifico:
+     .card { --color-card: blue; }
+   y solo estarian disponibles dentro de elementos con clase .card
+   y sus descendientes (las variables CSS se HEREDAN como color o font).
+
+   DISENO DE ESQUEMA DE COLORES
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   Usar variables para colores tiene ventajas enormes:
+     1. CONSISTENCIA: el mismo morado se usa en multiples lugares
+     2. MANTENIMIENTO: para cambiar el esquema de colores, solo
+        modificas los valores en :root (un solo lugar)
+     3. LEGIBILIDAD: var(--fondo) es mas descriptivo que #2e1955
+     4. TEMAS: puedes crear temas oscuro/claro redefiniendo las variables
+
+   En este ejercicio, el esquema usa tonos de morado y rosa:
+     --color-sec:     #e3a8da  (rosa claro - color secundario)
+     --color-sec-alt: #cb7ef2  (lila - variante del secundario)
+     --fondo:         #2e1955  (morado oscuro - fondo principal)
+     --moradooscuro:  #400a4c  (morado muy oscuro - fondo de articulos)
+     --letras:        rgb(248, 221, 253)  (rosa palido - texto sobre fondos oscuros)
+
+   Tambien se definen variables para tamanos de fuente, lo cual facilita
+   ajustar la tipografia de toda la pagina desde un solo lugar.
+*/
 :root{
   --color-sec: #e3a8da;
   --color-sec-alt: #cb7ef2;
@@ -8,6 +84,23 @@
   --mediano: 0.8rem;
 }
 
+/* =====================================================================
+   2. ESTILOS DE NAVEGACION
+   =====================================================================
+
+   La lista <ul> se convierte en una barra de navegacion horizontal
+   usando Flexbox:
+     - list-style: none    -> elimina las vinetas de la lista
+     - display: flex        -> los <li> se colocan en fila horizontal
+     - gap: 2rem            -> espacio uniforme entre cada elemento
+     - justify-content: center -> centra los elementos en el eje principal
+
+   Cada <li> tiene estilos que lo hacen parecer un "boton":
+     - padding para area clickeable mas grande
+     - background con el color secundario
+     - color del texto contrasta con el fondo del boton
+     - border-radius para esquinas redondeadas
+*/
 ul{
   list-style: none;
   display: flex;
@@ -22,6 +115,28 @@ li{
   border-radius: 0.5rem;
 }
 
+/* =====================================================================
+   3. ESTILOS GLOBALES DEL BODY
+   =====================================================================
+
+   font-family: 'Arial', sans-serif
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   Primero intenta cargar Arial; si no esta disponible, usa cualquier
+   fuente sans-serif del sistema. Las comillas en 'Arial' son opcionales
+   para nombres de una sola palabra, pero son buena practica.
+
+   font-size: var(--grande) = 1rem
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   1rem = el tamano de fuente del elemento raiz (<html>), que por defecto
+   es 16px en la mayoria de navegadores. Usar rem en vez de px respeta
+   las preferencias del usuario si ha cambiado el tamano base.
+
+   color: var(--color-sec)
+   ~~~~~~~~~~~~~~~~~~~~~~~~
+   El texto por defecto del body es rosa claro (#e3a8da) sobre fondo
+   morado oscuro (#2e1955). Este contraste (~8:1) supera ampliamente
+   el minimo WCAG AA de 4.5:1.
+*/
 body{
   font-family: 'Arial', sans-serif;
   font-size: var(--grande);
@@ -31,7 +146,22 @@ body{
   padding: 15px;
 }
 
-section{ 
+/* =====================================================================
+   4. ESTILOS DE SECCIONES
+   =====================================================================
+
+   Cada area de contenido tiene su propio esquema de colores para
+   diferenciarse visualmente. Observa como las variables CSS mantienen
+   la consistencia del esquema morado/rosa en todas las secciones:
+
+   - section: fondo lila (#cb7ef2), texto morado oscuro (#2e1955)
+   - article: fondo morado muy oscuro (#400a4c), texto rosa palido
+   - aside:   fondo rosa claro (#e3a8da), texto morado oscuro (#2e1955)
+
+   Este contraste visual ayuda al usuario a distinguir rapidamente
+   entre las diferentes areas de la pagina.
+*/
+section{
   font-size: var(--mediano);
   background: var(--color-sec-alt);
   color:var(--fondo);
@@ -40,12 +170,31 @@ article{ background:var(--moradooscuro);
   color:var(--letras);
   padding: 15px;
 }
-aside{ 
+aside{
   background: var(--color-sec);
   color:var(--fondo);
 }
 
 
+/* =====================================================================
+   5. ESTADOS HOVER: RETROALIMENTACION VISUAL
+   =====================================================================
+
+   Los estados :hover proporcionan RETROALIMENTACION VISUAL al usuario,
+   indicandole que un elemento es interactivo (clickeable).
+
+   a:hover  -> los enlaces cambian de color al pasar el cursor
+   li:hover -> los botones de navegacion cambian de fondo al pasar el cursor
+
+   Estos cambios visuales son una senal importante de usabilidad:
+   le dicen al usuario "puedes hacer click aqui". Sin estados hover,
+   los elementos interactivos parecerian estaticos y podrian confundir.
+
+   Nota: :hover no funciona en pantallas tactiles (moviles/tablets),
+   asi que no debe ser la UNICA forma de indicar interactividad.
+   Los estilos base (color del enlace, fondo del boton) ya deben
+   sugerir que son elementos interactivos.
+*/
 a:hover{
   color: var(--letras);
 }
@@ -54,6 +203,33 @@ li:hover{
   background-color: var(--color-sec-alt);
 }
 
+/* =====================================================================
+   6. LAYOUT FLEXBOX - CONTENEDOR PRINCIPAL
+   =====================================================================
+
+   .contenedor es el "wrapper" que organiza <section> y <aside> con Flexbox.
+
+   display: flex     -> activa Flexbox; los hijos directos se convierten
+                        en "flex items"
+   flex-wrap: wrap   -> permite que los items "salten" a la siguiente linea
+                        si no caben en una sola fila
+   padding: 10px     -> espacio interno alrededor del contenido
+
+   ESTILOS BASE (MOVIL) DE SECTION Y ASIDE
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   flex: 1 1 100%;  -> propiedad abreviada (shorthand) de Flexbox
+
+   Desglose de los tres valores:
+     - flex-grow: 1    -> el elemento PUEDE crecer para llenar espacio extra
+     - flex-shrink: 1  -> el elemento PUEDE encogerse si hay poco espacio
+     - flex-basis: 100% -> el tamano INICIAL/IDEAL es 100% del contenedor
+
+   Con flex-basis: 100%, cada elemento ocupa TODO el ancho del contenedor,
+   forzandolos a APILARSE verticalmente (uno debajo del otro).
+   Esto es exactamente lo que queremos en MOVIL: una sola columna.
+
+   padding: 15px agrega espacio interno para que el texto no toque los bordes.
+*/
 .contenedor {
   display: flex;
   flex-wrap: wrap;
@@ -65,11 +241,59 @@ section, aside {
   padding: 15px;
 }
 
+/* =====================================================================
+   7. MEDIA QUERY - LAYOUT PARA PANTALLAS GRANDES
+   =====================================================================
+
+   @media (min-width: 798px) {...}
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   "min-width" significa: "DESDE este ancho HACIA ARRIBA, aplica estos estilos."
+   Es el tipo de media query usado en mobile-first.
+
+   Contraste con desktop-first que usa "max-width":
+     @media (max-width: 768px) -> "HASTA este ancho, aplica estos estilos"
+
+   POR QUE 798px?
+   ~~~~~~~~~~~~~~~
+   Este valor es arbitrario pero cercano al clasico 768px (ancho del iPad
+   en modo vertical/portrait). Se eligio 798px probablemente para dar un
+   pequeno margen extra. No hay un breakpoint "correcto" universal:
+   debes elegirlo segun DONDE TU DISENO necesita cambiar, no segun
+   dispositivos especificos.
+
+   Breakpoints comunes de referencia:
+     - 480px:  smartphones pequenos
+     - 768px:  tablets (iPad portrait)
+     - 1024px: tablets landscape / laptops
+     - 1200px: escritorios
+
+   COMO FUNCIONA EL LAYOUT DE DOS COLUMNAS
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   section: flex: 1 1 60%
+     - flex-basis: 60% -> empieza ocupando el 60% del ancho del contenedor
+     - flex-grow: 1    -> puede crecer si hay espacio sobrante
+
+   aside: flex: 1 1 33.33%
+     - flex-basis: 33.33% -> empieza ocupando el ~33% del ancho
+
+   Nota: 60% + 33.33% = 93.33%, dejando ~6.67% de espacio libre.
+   Como ambos tienen flex-grow: 1, ese espacio sobrante se REPARTE
+   equitativamente entre los dos elementos. Resultado final aproximado:
+     - section: ~63%
+     - aside:   ~37%
+
+   Si el contenedor tiene padding o gap, los porcentajes se calculan
+   sobre el espacio disponible DESPUES de restar esos espacios.
+
+   flex-wrap: wrap (definido arriba) es ESENCIAL aqui: si la ventana
+   se encoge debajo de 798px, la media query deja de aplicarse y ambos
+   elementos vuelven a flex-basis: 100%, apilándose en una sola columna.
+*/
 @media (min-width: 798px) {
   section {
     flex: 1 1 60%;
   }
-  
+
   aside {
     flex: 1 1 33.33%;
   }

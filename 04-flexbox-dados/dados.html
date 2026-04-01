@@ -8,9 +8,32 @@
 <link rel="stylesheet" href="dados.css">
 
 <title>Natalia Edith Mejia Bautista</title>
+</head>
 <body>
-  <header>HeaderNat</header>
-<nav>
+  <!--
+      ============================================================
+      ESTRUCTURA DE PAGINA CON ETIQUETAS SEMANTICAS
+      ============================================================
+      <header>, <nav>, <main>, <footer> son etiquetas SEMANTICAS de HTML5.
+      No cambian la apariencia visual (eso lo hace CSS), pero comunican
+      la ESTRUCTURA del documento a navegadores, lectores de pantalla
+      y motores de busqueda.
+
+      role="banner" en el header es un atributo ARIA (Accessible Rich
+      Internet Applications) que refuerza el rol semantico. En la mayoria
+      de los casos, <header> ya tiene este rol implicito, pero ser
+      explicito no hace danio y mejora compatibilidad con lectores antiguos.
+  -->
+  <header role="banner">HeaderNat</header>
+
+<!--
+    aria-label="Navegacion principal" proporciona un nombre accesible
+    al <nav>. Si una pagina tiene MULTIPLES <nav> (ej: navegacion
+    principal y navegacion de pie de pagina), el aria-label permite
+    a los lectores de pantalla diferenciarlos:
+    "Navegacion principal" vs "Navegacion del pie de pagina".
+-->
+<nav aria-label="Navegación principal">
   <ul>
     <li><a href="#">Inicio</a></li>
     <li><a href="#">Nosotros</a></li>
@@ -19,53 +42,220 @@
   </ul>
 </nav>
 <main>
-    <p>Dado Flexbox</p>
-    <div class="contenedor">
-      <div class="cara1">
+    <h1>Dado Flexbox</h1>
+
+    <!--
+        ============================================================
+        FLEXBOX — EL CONCEPTO FUNDAMENTAL
+        ============================================================
+        Este ejercicio demuestra Flexbox: un modelo de layout CSS diseniado
+        para DISTRIBUIR ELEMENTOS EN UNA DIMENSION (fila o columna).
+
+        Por que Flexbox aqui:
+        Cada cara del dado necesita distribuir sus puntos de forma
+        diferente: centrado, en esquinas opuestas, en diagonal, en filas...
+        Flexbox resuelve cada caso con diferentes combinaciones de
+        propiedades, sin necesidad de posicionamiento manual.
+
+        ============================================================
+        CONTENEDOR FLEX vs ELEMENTOS FLEX (padre/hijo)
+        ============================================================
+        La relacion fundamental de Flexbox es PADRE <-> HIJO:
+
+        CONTENEDOR FLEX (padre):
+        - El elemento al que le pones "display: flex".
+        - Controla COMO se distribuyen sus hijos.
+        - Propiedades: justify-content, align-items, flex-direction,
+                       flex-wrap, gap.
+
+        ELEMENTOS FLEX (hijos directos):
+        - Los elementos DIRECTAMENTE dentro del contenedor flex.
+        - Pueden alinearse individualmente con align-self.
+        - Propiedades: flex-grow, flex-shrink, flex-basis, align-self, order.
+
+        IMPORTANTE: Solo los hijos DIRECTOS son elementos flex.
+        Los nietos no se ven afectados (a menos que su padre tambien
+        sea un contenedor flex).
+
+        En este ejercicio, hay DOS niveles de Flexbox:
+        1. .contenedor es flex -> las caras (.cara1, .cara2...) son sus hijos flex.
+        2. Cada .cara tambien es flex -> los puntos (.punto) son sus hijos flex.
+
+        ============================================================
+        ACCESIBILIDAD: role="img" + aria-label
+        ============================================================
+        role="img"
+        - Le dice al lector de pantalla: "Trata este <div> como si fuera
+          una imagen". Sin esto, el lector anunciaria un grupo de divs
+          y spans sin significado.
+
+        aria-label="Seis caras de un dado mostrando del 1 al 6"
+        - Proporciona la DESCRIPCION que el lector de pantalla dira
+          en voz alta, igual que el atributo alt en una etiqueta <img>.
+
+        Esto es necesario porque el contenido visual (los dados hechos con
+        CSS) no tiene texto que un lector de pantalla pueda leer. Sin
+        role="img" y aria-label, una persona con discapacidad visual
+        no sabria que se muestra en la pantalla.
+    -->
+    <div class="contenedor" role="img" aria-label="Seis caras de un dado mostrando del 1 al 6">
+
+      <!--
+          ============================================================
+          CARA 1 — UN SOLO PUNTO CENTRADO
+          ============================================================
+          Desafio Flexbox: colocar UN punto exactamente en el centro.
+          Solucion: justify-content: center + align-items: center (heredado).
+
+          La cara es un contenedor flex, y su unico hijo (.punto) se
+          centra automaticamente en ambos ejes.
+      -->
+      <div class="cara1" aria-label="Cara 1">
+          <!--
+              Por que <span> para los puntos:
+              <span> es un elemento INLINE (en linea): no crea saltos de
+              linea ni ocupa todo el ancho disponible. Es ideal para
+              elementos pequenios que se distribuyen dentro de un contenedor.
+
+              <div> es BLOCK (bloque): por defecto ocupa todo el ancho
+              y crea un salto de linea antes y despues.
+
+              En un contexto Flexbox, tanto <span> como <div> se comportan
+              como elementos flex (Flexbox anula el comportamiento
+              inline/block por defecto), pero semanticamente <span> es mas
+              apropiado para elementos decorativos pequenios sin significado
+              propio.
+          -->
           <span class="punto"></span>
       </div>
-      <div class="cara2">
+
+      <!--
+          ============================================================
+          CARA 2 — DOS PUNTOS EN ESQUINAS OPUESTAS (DIAGONAL)
+          ============================================================
+          Desafio: Colocar un punto arriba-izquierda y otro abajo-derecha.
+
+          Solucion Flexbox:
+          - flex-direction: column -> los puntos se apilan verticalmente.
+          - justify-content: space-between -> uno arriba, otro abajo.
+          - Primer punto: align-self: flex-start -> izquierda.
+          - Ultimo punto: align-self: flex-end -> derecha.
+
+          align-self es CLAVE aqui: permite que cada punto se posicione
+          de forma INDEPENDIENTE en el eje cruzado.
+      -->
+      <div class="cara2" aria-label="Cara 2">
           <span class="punto"></span>
           <span class="punto"></span>
-     
       </div>
-      <div class="cara3">
-        <span class="punto"></span>
-        <span class="punto"></span>
-        <span class="punto"></span>
 
-      </div>  
-      <div class="cara4">
-        <span class="punto"></span>
-        <span class="punto"></span>
-        <span class="punto"></span>
-        <span class="punto"></span>
+      <!--
+          ============================================================
+          CARA 3 — TRES PUNTOS EN DIAGONAL
+          ============================================================
+          Similar a cara 2, pero con un punto extra en el centro.
 
+          - flex-direction: column + justify-content: space-between
+            -> distribuye los 3 puntos verticalmente (arriba, medio, abajo).
+          - Primer punto: align-self: flex-start -> izquierda.
+          - Segundo punto: align-self: center -> centro.
+          - Tercer punto: align-self: flex-end -> derecha.
+
+          Esto crea la diagonal clasica del dado.
+      -->
+      <div class="cara3" aria-label="Cara 3">
+        <span class="punto"></span>
+        <span class="punto"></span>
+        <span class="punto"></span>
       </div>
-      <div class="cara5">
-        <span class="punto"></span>
-        <span class="punto"></span>
-        <span class="punto"></span>
-        <span class="punto"></span>
-        <span class="punto"></span>
 
-      </div>
-      <div class="cara6">
-        <span class="punto"></span>
-        <span class="punto"></span>
-        <span class="punto"></span>
-        <span class="punto"></span>
-        <span class="punto"></span>
-        <span class="punto"></span>
+      <!--
+          ============================================================
+          CARA 4 — CUATRO PUNTOS EN ESQUINAS (2x2)
+          ============================================================
+          Desafio: distribuir 4 puntos en una cuadricula 2x2.
 
+          Solucion Flexbox:
+          - justify-content: space-between -> empuja los puntos a los
+            extremos del eje principal.
+          - flex-wrap: wrap -> permite que los puntos salten a una
+            segunda fila cuando no caben en una.
+          - gap: 40px -> separa los puntos entre si.
+
+          Con el tamanio del dado (100px + padding) y gap de 40px,
+          los 4 puntos (20px cada uno) se distribuyen naturalmente
+          en 2 filas de 2.
+      -->
+      <div class="cara4" aria-label="Cara 4">
+        <span class="punto"></span>
+        <span class="punto"></span>
+        <span class="punto"></span>
+        <span class="punto"></span>
       </div>
-  
+
+      <!--
+          ============================================================
+          CARA 5 — CINCO PUNTOS (2-1-2 con punto central)
+          ============================================================
+          Este es el caso MAS COMPLEJO del ejercicio.
+
+          Desafio: 4 puntos en esquinas + 1 punto en el centro exacto.
+          Flexbox por si solo no puede hacer esto facilmente con 5
+          hijos en una distribucion asi.
+
+          Solucion HIBRIDA (Flexbox + position):
+          - Los 4 puntos de las esquinas se posicionan con flex-wrap
+            y space-between (igual que cara 4).
+          - El 5to punto (nth-child(3)) usa position: absolute para
+            sacarlo del flujo flex y colocarlo en el centro.
+
+          position: absolute dentro de un contenedor flex:
+          - El contenedor tiene position: relative (definido en los
+            estilos base de todas las caras).
+          - El punto absoluto se posiciona RELATIVO al contenedor,
+            ignorando el layout flex.
+          - Los demas puntos no "ven" al punto absoluto y se
+            distribuyen como si no existiera.
+      -->
+      <div class="cara5" aria-label="Cara 5">
+        <span class="punto"></span>
+        <span class="punto"></span>
+        <span class="punto"></span>
+        <span class="punto"></span>
+        <span class="punto"></span>
+      </div>
+
+      <!--
+          ============================================================
+          CARA 6 — SEIS PUNTOS (2 COLUMNAS DE 3)
+          ============================================================
+          Desafio: distribuir 6 puntos en 2 columnas de 3.
+
+          Solucion Flexbox:
+          - flex-direction: column -> los puntos fluyen verticalmente.
+          - flex-wrap: wrap -> al llenar una columna, saltan a la siguiente.
+          - justify-content: space-between -> distribuye los puntos
+            uniformemente en cada columna.
+          - gap: 20px -> separacion entre puntos.
+
+          Con la altura del dado y 6 puntos, flex-wrap crea automaticamente
+          2 columnas de 3 puntos cada una.
+      -->
+      <div class="cara6" aria-label="Cara 6">
+        <span class="punto"></span>
+        <span class="punto"></span>
+        <span class="punto"></span>
+        <span class="punto"></span>
+        <span class="punto"></span>
+        <span class="punto"></span>
+      </div>
     </div>
 
 </main>
 <footer>footer</footer>
 
 
-  
+
+
 </body>
 </html>

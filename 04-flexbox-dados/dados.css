@@ -1,17 +1,135 @@
+/*
+============================================================
+ESTILOS PARA EL EJERCICIO 04 — DADOS CON FLEXBOX
+============================================================
+Este es el ejercicio CENTRAL de Flexbox. Cada cara del dado
+presenta un desafio diferente de alineacion y distribucion.
+
+FLEXBOX EN RESUMEN:
+- Es un modelo de layout UNIDIMENSIONAL: organiza elementos
+  en UNA direccion (fila o columna) a la vez.
+- Resuelve problemas de DISTRIBUCION y ALINEACION que antes
+  requerian hacks con floats, tablas o posicionamiento.
+- Para layouts BIDIMENSIONALES (filas Y columnas a la vez),
+  se usa CSS Grid.
+============================================================
+*/
+
+/*
+============================================================
+.contenedor — EL CONTENEDOR FLEX PRINCIPAL
+============================================================
+Este es el "tablero" que contiene las 6 caras del dado.
+Es el PRIMER nivel de Flexbox en el ejercicio.
+*/
 .contenedor {
     background-color: darkgreen;
     margin: auto;
+
+    /*
+        ============================================================
+        display: flex — LA DECLARACION QUE ACTIVA FLEXBOX
+        ============================================================
+        Al poner display: flex en un elemento, ocurren DOS cosas:
+
+        1. El elemento se convierte en un CONTENEDOR FLEX:
+           - Puede usar propiedades como justify-content, align-items,
+             flex-direction, flex-wrap, gap.
+
+        2. Sus hijos DIRECTOS se convierten en ELEMENTOS FLEX:
+           - Se colocan en una fila (por defecto) o columna.
+           - Pueden usar align-self, flex-grow, flex-shrink, order.
+           - Se ANULAN los comportamientos inline/block de los hijos:
+             un <span> (inline) se comporta como un bloque flexible.
+           - Los margenes verticales NO colapsan (a diferencia del flujo normal).
+
+        Aqui, .contenedor es flex, y las .cara1 a .cara6 son sus elementos flex.
+    */
     display: flex;
+
+    /*
+        ============================================================
+        flex-wrap: wrap — PERMITIR SALTOS DE LINEA
+        ============================================================
+        Por defecto, flex-wrap es "nowrap": TODOS los elementos flex
+        se fuerzan en UNA SOLA LINEA, encogiendose si es necesario.
+
+        flex-wrap: wrap permite que los elementos "salten" a la
+        siguiente linea cuando no caben en el ancho disponible.
+
+        Es como el word-wrap del texto, pero para elementos flex.
+
+        En este caso, las 6 caras del dado se acomodan en multiples
+        filas segun el ancho disponible de la pantalla.
+    */
     flex-wrap: wrap;
-  
+
+    /*
+        ============================================================
+        justify-content — DISTRIBUCION EN EL EJE PRINCIPAL
+        ============================================================
+        justify-content controla como se distribuye el espacio SOBRANTE
+        a lo largo del EJE PRINCIPAL.
+
+        Que es el eje principal:
+        - Si flex-direction es row (defecto): el eje principal es HORIZONTAL ->
+        - Si flex-direction es column: el eje principal es VERTICAL |
+
+        Aqui no se define flex-direction, asi que es row (horizontal).
+        justify-content: center centra las caras horizontalmente.
+
+        Valores comunes:
+        - flex-start     -> Todo al inicio (izquierda en row)
+        - flex-end       -> Todo al final (derecha en row)
+        - center         -> Todo al centro
+        - space-between  -> Primer elemento al inicio, ultimo al final,
+                            espacio IGUAL entre ellos.
+        - space-around   -> Espacio igual ALREDEDOR de cada elemento
+                            (los bordes tienen la mitad de espacio).
+        - space-evenly   -> Espacio EXACTAMENTE igual entre todos, incluyendo bordes.
+    */
+    justify-content: center;
+
+    /*
+        ============================================================
+        gap vs margin — ESPACIADO MODERNO vs CLASICO
+        ============================================================
+        padding aqui crea espacio DENTRO del contenedor (entre el borde
+        verde y las caras del dado). Pero el espacio ENTRE las caras
+        se maneja con margin en cada cara (ver mas abajo).
+
+        Una alternativa moderna seria usar "gap" en el contenedor:
+            gap: 10px;
+        Esto pondria 10px entre cada cara, sin afectar los bordes externos.
+
+        Ventajas de gap sobre margin:
+        - No hay que preocuparse por margenes dobles entre elementos.
+        - No afecta los bordes del primer/ultimo elemento.
+        - Es mas predecible y facil de mantener.
+        - Funciona tanto en Flexbox como en Grid.
+
+        margin sigue siendo util para otros casos (centrar con auto,
+        espaciado en flujo normal), pero para espaciado entre hijos
+        flex, gap es la opcion moderna preferida.
+    */
+    padding: 10px;
+    max-width: 100%;
   }
 
+  /*
+      ============================================================
+      ESTILOS BASE PARA TODAS LAS CARAS DEL DADO
+      ============================================================
+      Este selector agrupa las 6 caras para definir estilos comunes.
+      Cada cara es un cuadrado blanco de 100x100px que TAMBIEN es
+      un contenedor flex (segundo nivel de Flexbox).
+  */
   .contenedor .cara1,
   .contenedor .cara2,
   .contenedor .cara3,
   .contenedor .cara4,
   .contenedor .cara5,
-  .contenedor .cara6 
+  .contenedor .cara6
   {
     background: white;
     width: 100px;
@@ -19,70 +137,341 @@
     padding: 10px;
     margin: 10px;
     box-shadow: 2px 2px 3px #000;
+
+    /*
+        SEGUNDO NIVEL DE FLEXBOX:
+        Cada cara TAMBIEN es un contenedor flex. Esto significa que
+        los puntos (.punto) dentro de cada cara son elementos flex.
+
+        Aqui se definen los valores BASE que todas las caras comparten.
+        Luego, cada cara (.cara1, .cara2, etc.) SOBREESCRIBE solo
+        las propiedades que necesita cambiar.
+    */
     display: flex;
+
+        /*
+            justify-content y align-items BASE:
+            - justify-content: center -> puntos centrados en eje principal.
+            - align-items: center -> puntos centrados en eje cruzado.
+            Juntos, centran los puntos tanto horizontal como verticalmente.
+        */
         justify-content: center;
+
+        /*
+            ============================================================
+            align-items — ALINEACION EN EL EJE CRUZADO
+            ============================================================
+            align-items controla la alineacion a lo largo del EJE CRUZADO
+            (perpendicular al eje principal).
+
+            - Si flex-direction es row (defecto):
+              Eje principal = horizontal -> Eje cruzado = VERTICAL
+              align-items controla la posicion VERTICAL de los hijos.
+
+            - Si flex-direction es column:
+              Eje principal = vertical -> Eje cruzado = HORIZONTAL
+              align-items controla la posicion HORIZONTAL de los hijos.
+
+            Valores comunes:
+            - stretch (defecto) -> Los hijos se estiran para llenar el eje cruzado.
+            - flex-start -> Alineados al inicio del eje cruzado (arriba en row).
+            - flex-end   -> Alineados al final (abajo en row).
+            - center     -> Centrados en el eje cruzado.
+            - baseline   -> Alineados por la linea base del texto.
+        */
         align-items: center;
         flex-wrap: wrap;
+
+        /*
+            position: relative es CRUCIAL aqui.
+            Establece cada cara como "contexto de posicionamiento" para
+            que sus hijos puedan usar position: absolute RELATIVO a la cara.
+            Esto se usa en la cara 5 para posicionar el punto central.
+
+            Sin position: relative en el padre, un hijo con position: absolute
+            se posicionaria relativo al <body> o al ancestro posicionado
+            mas cercano, no relativo a la cara del dado.
+        */
         position: relative;
   }
-      
+
+      /*
+          ============================================================
+          .punto — CADA PUNTO DEL DADO
+          ============================================================
+          Circulos negros de 20x20px que representan los puntos del dado.
+      */
       .punto{
           width: 20px;
           height: 20px;
           background: black;
+          /*
+              border-radius: 10px convierte el cuadrado en un CIRCULO.
+              10px = la mitad de 20px (width y height).
+              Cuando el radio es >= mitad del lado, se forma un circulo perfecto.
+              Tambien se podria escribir: border-radius: 50%;
+          */
           border-radius: 10px;
+          /*
+              display: flex aqui no tiene efecto visible porque .punto
+              no tiene hijos. Podria ser un residuo de experimentacion
+              o estar preparado para contenido futuro dentro del punto.
+          */
           display: flex;
-  
+
       }
+
+      /*
+          ============================================================
+          CARA 1 — UN PUNTO CENTRADO
+          ============================================================
+          Solo sobreescribe justify-content (aunque ya es center en la base).
+          Con un solo punto, justify-content: center + align-items: center
+          (heredado de la base) lo coloca en el centro exacto.
+
+              +---------+
+              |         |
+              |    *    |
+              |         |
+              +---------+
+      */
       .contenedor .cara1{
          justify-content: center;
-       
+
       }
-  
+
+      /*
+          ============================================================
+          CARA 2 — DOS PUNTOS EN DIAGONAL
+          ============================================================
+              +---------+
+              | *       |
+              |         |
+              |       * |
+              +---------+
+
+          justify-content: space-between -> los puntos se van a los
+          extremos del eje principal.
+
+          flex-direction: column -> cambia el eje principal a VERTICAL.
+          Ahora justify-content (space-between) actua VERTICALMENTE:
+          primer punto ARRIBA, segundo punto ABAJO.
+
+          Pero eso solo los separa arriba/abajo. Para la diagonal
+          (izquierda/derecha), se necesita align-self en cada punto
+          (ver regla siguiente).
+      */
       .contenedor .cara2{
   justify-content: space-between;
         flex-direction: column;
   }
-  
+
+  /*
+      ============================================================
+      align-self — SOBRESCRIBIR align-items PARA UN ELEMENTO
+      ============================================================
+      align-self permite que un elemento flex individual tenga una
+      alineacion DIFERENTE a la definida por align-items en su padre.
+
+      Es la clave para los patrones diagonales del dado.
+
+      Recuerda: con flex-direction: column, el eje cruzado es HORIZONTAL.
+      Entonces:
+      - align-self: flex-start -> lado IZQUIERDO
+      - align-self: flex-end   -> lado DERECHO
+      - align-self: center     -> CENTRO horizontal
+
+      ============================================================
+      PSEUDO-CLASES :first-child y :last-child
+      ============================================================
+      :first-child -> Selecciona el PRIMER hijo de su padre.
+      :last-child  -> Selecciona el ULTIMO hijo de su padre.
+
+      .cara2 .punto:first-child -> El primer punto de cara2.
+      .cara2 .punto:last-child  -> El ultimo punto de cara2.
+
+      Estas son pseudo-clases ESTRUCTURALES: seleccionan elementos
+      segun su POSICION en el DOM, no segun una clase o id.
+
+      En cara2 (2 puntos):
+      - Primer punto -> flex-start (izquierda) + space-between lo pone arriba.
+      - Ultimo punto -> flex-end (derecha) + space-between lo pone abajo.
+      Resultado: diagonal de arriba-izquierda a abajo-derecha.
+
+      En cara3 (3 puntos):
+      - Primer punto -> izquierda + arriba.
+      - Ultimo punto -> derecha + abajo.
+      - El segundo punto se maneja aparte (ver mas abajo).
+  */
    .cara2 .punto:first-child, .cara3 .punto:first-child {
         align-self: flex-start;
       }
       .cara2 .punto:last-child, .cara3 .punto:last-child {
         align-self: flex-end;
       }
-  
+
+      /*
+          ============================================================
+          CARA 3 — TRES PUNTOS EN DIAGONAL
+          ============================================================
+              +---------+
+              | *       |
+              |    *    |
+              |       * |
+              +---------+
+
+          Misma estrategia que cara2, pero con un punto extra en el medio.
+          - flex-direction: column + space-between -> 3 puntos distribuidos
+            verticalmente (arriba, medio, abajo).
+          - gap: 20px -> separacion entre puntos para que no se amontonen.
+          - Primer punto: flex-start (izquierda) — heredado de la regla anterior.
+          - Ultimo punto: flex-end (derecha) — heredado de la regla anterior.
+          - Segundo punto: center (ver regla siguiente).
+      */
       /* Cara 3 */
       .cara3 {
         justify-content: space-between;
         flex-direction: column;
         gap:20px;
       }
+
+      /*
+          ============================================================
+          :nth-child() — SELECCIONAR POR POSICION
+          ============================================================
+          :nth-child(2) selecciona el SEGUNDO hijo.
+
+          Es una pseudo-clase mas versatil que :first-child/:last-child:
+          - :nth-child(3)    -> tercer hijo
+          - :nth-child(2n)   -> hijos pares (2, 4, 6...)
+          - :nth-child(odd)  -> hijos impares (1, 3, 5...)
+          - :nth-child(3n+1) -> cada tercer elemento empezando del primero
+
+          Aqui, el segundo punto de cara3 se centra horizontalmente
+          con align-self: center, completando la diagonal.
+      */
       .cara3 .punto:nth-child(2) {
         align-self: center;
       }
-  
+
+      /*
+          ============================================================
+          CARA 4 — CUATRO PUNTOS EN ESQUINAS (2x2)
+          ============================================================
+              +---------+
+              | *     * |
+              |         |
+              | *     * |
+              +---------+
+
+          - flex-direction: row (defecto, no se especifica)
+          - justify-content: space-between -> empuja a los extremos horizontales.
+          - flex-wrap: wrap -> los puntos que no caben saltan a la siguiente fila.
+          - gap: 40px -> separacion grande entre puntos.
+
+          El espacio disponible (100px + padding) con gap de 40px hace que
+          solo quepan 2 puntos por fila, creando naturalmente la cuadricula 2x2.
+      */
       /* Cara 4 */
       .cara4 {
         justify-content: space-between;
         flex-wrap:wrap;
         gap:40px;
-        
-        
+
+
       }
-  
+
+      /*
+          ============================================================
+          CARA 5 — CINCO PUNTOS (SOLUCION HIBRIDA)
+          ============================================================
+              +---------+
+              | *     * |
+              |    *    |
+              | *     * |
+              +---------+
+
+          Este es el caso mas DIFICIL porque Flexbox no puede distribuir
+          5 elementos en un patron de "4 esquinas + 1 centro" de forma pura.
+
+          Se usa una solucion HIBRIDA: Flexbox para los 4 puntos exteriores
+          + position: absolute para el punto central.
+      */
       /* Cara 5 */
       .cara5 {
         justify-content: space-between;
         flex-wrap: wrap;
         gap: 40px;
       }
-  
+
+  /*
+      ============================================================
+      position: absolute EN UN CONTEXTO FLEX
+      ============================================================
+      .cara5 .punto:nth-child(3) -> el tercer punto (el del centro).
+
+      position: absolute SACA al elemento del flujo flex.
+      Esto significa:
+      1. Los otros 4 puntos no saben que existe -> se distribuyen
+         como si fueran 4 (igual que cara4, esquinas).
+      2. El punto absoluto se posiciona relativo al ANCESTRO
+         con position: relative (la cara5 tiene position: relative
+         definido en los estilos base).
+
+      Sin coordenadas top/left/right/bottom explicitas, el punto
+      queda en su posicion "natural" (donde estaria en el flujo),
+      que resulta ser aproximadamente el centro.
+
+      Para centrarlo EXACTAMENTE, se podria usar:
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+
+      Esta tecnica (Flexbox + posicionamiento absoluto) es un patron
+      comun cuando necesitas que la mayoria de los hijos sigan el
+      flujo flex, pero uno o dos se posicionen libremente.
+  */
   .cara5 .punto:nth-child(3){
     justify-content: center;
     position: absolute;
-    
+
   }
-  
+
+      /*
+          ============================================================
+          CARA 6 — SEIS PUNTOS (2 COLUMNAS DE 3)
+          ============================================================
+              +---------+
+              | *     * |
+              | *     * |
+              | *     * |
+              +---------+
+
+          - flex-direction: column -> los puntos fluyen hacia ABAJO.
+          - flex-wrap: wrap -> al llenar la altura, saltan a la siguiente columna.
+          - justify-content: space-between -> distribuye los puntos uniformemente
+            en cada columna (arriba, medio, abajo).
+          - gap: 20px -> separacion entre puntos.
+
+          Con 6 puntos y direccion columna, la cara tiene altura suficiente
+          para 3 puntos. Al activar wrap, los puntos 4-6 saltan a una
+          segunda columna, creando el patron 3x2 del dado.
+
+          ============================================================
+          RESUMEN: POR QUE CADA CARA NECESITA PROPIEDADES DIFERENTES
+          ============================================================
+          Cara 1: center + center                     -> 1 punto centrado
+          Cara 2: column + space-between + align-self  -> diagonal 2 puntos
+          Cara 3: column + space-between + align-self  -> diagonal 3 puntos
+          Cara 4: row + space-between + wrap + gap     -> cuadricula 2x2
+          Cara 5: row + wrap + absolute (hibrido)      -> 4 esquinas + centro
+          Cara 6: column + wrap + space-between        -> 2 columnas de 3
+
+          Cada cara demuestra una combinacion DIFERENTE de propiedades flex
+          para resolver un problema de distribucion distinto. Este ejercicio
+          cubre practicamente todos los conceptos fundamentales de Flexbox.
+      */
       /* Cara 6 */
       .cara6
   {
@@ -91,3 +480,23 @@
     flex-wrap:wrap;
     gap:20px;
       }
+
+/*
+============================================================
+ESTILOS RESPONSIVOS
+============================================================
+Ajustes para que el layout funcione bien en todas las pantallas.
+*/
+
+/* Padding en el body para evitar que el contenido toque los bordes */
+body { padding: 0.5rem; }
+
+/*
+    Navegacion horizontal con Flexbox.
+    list-style: none -> quita las vinetas.
+    display: flex + flex-wrap: wrap -> los enlaces se ponen en fila
+    y saltan de linea si la pantalla es angosta.
+    gap: 0.5rem -> separacion uniforme entre enlaces.
+*/
+nav ul { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
+h1 { text-align: center; }

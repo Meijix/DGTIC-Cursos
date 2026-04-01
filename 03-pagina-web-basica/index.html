@@ -1,21 +1,191 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi pagina</title>
+
+    <!--
+        ============================================================
+        ENLACE A HOJA DE ESTILOS EXTERNA
+        ============================================================
+        La etiqueta <link> conecta este documento HTML con un archivo CSS externo.
+
+        - rel="stylesheet"  → indica al navegador que el recurso es una hoja de estilos.
+        - type="text/css"   → especifica el tipo MIME. En HTML5 es opcional porque
+                              el navegador ya asume CSS, pero no causa error.
+        - href="styles.css" → es una RUTA RELATIVA. Como no empieza con "/" ni con
+                              "http", el navegador busca "styles.css" en la MISMA
+                              CARPETA donde se encuentra este archivo index.html.
+                              Si el CSS estuviera en una subcarpeta, seria:
+                              href="css/styles.css"
+    -->
     <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
+    <!--
+        ============================================================
+        LA ETIQUETA <main>
+        ============================================================
+        <main> envuelve el contenido PRINCIPAL de la pagina: aquello que es
+        unico de esta pagina y no se repite en otras (a diferencia de <header>,
+        <nav> o <footer> que suelen repetirse en todo el sitio).
+
+        Por que importa:
+        1. ACCESIBILIDAD: Los lectores de pantalla permiten al usuario "saltar"
+           directamente al <main>, evitando la navegacion repetitiva.
+        2. SEO: Los motores de busqueda entienden que contenido es relevante.
+        3. SEMANTICA: Comunica a otros desarrolladores la estructura del documento.
+
+        Regla: solo debe haber UN <main> por pagina.
+    -->
+    <main>
     <h1>Bienvenido a mi pagina de ejemplo</h1>
-    
+
+    <!--
+        ============================================================
+        CLASES EN HTML — class="box"
+        ============================================================
+        Una CLASE es un atributo que asigna un "nombre" a un elemento para
+        poder seleccionarlo desde CSS (o JavaScript).
+
+        Como funciona:
+        - En HTML:  class="box"
+        - En CSS:   .box { ... }   <- el punto "." indica que es una clase.
+
+        Diferencia con id:
+        - class puede repetirse en MULTIPLES elementos de la pagina.
+        - id debe ser UNICO en toda la pagina.
+
+        Convenciones de nombres:
+        - Usar minusculas y guiones: "mi-clase" (kebab-case) <- lo mas comun en CSS.
+        - Evitar nombres que describan apariencia: "caja-roja" es fragil;
+          si cambias el color, el nombre pierde sentido.
+        - Preferir nombres semanticos: "autor", "tarjeta-perfil", "alerta".
+
+        Nota: mas abajo veras class="Elemento-diferente" con mayuscula inicial.
+        Funciona, pero rompe la convencion. En proyectos reales es mejor ser
+        consistente: todo en minusculas con guiones.
+    -->
     <h2 class="box">Natalia Edith Mejia Bautista</h2>
-    <img src="https://w7.pngwing.com/pngs/976/442/png-transparent-unam-hd-logo-thumbnail.png">
-    
+
+    <!--
+        ============================================================
+        IMAGEN EXTERNA (cargada desde internet)
+        ============================================================
+        Esta imagen se carga desde un servidor externo (pngwing.com).
+
+        VENTAJAS de imagenes externas:
+        - No ocupan espacio en tu proyecto.
+        - Pueden actualizarse sin que tu hagas nada.
+
+        DESVENTAJAS de imagenes externas:
+        - FIABILIDAD: Si el servidor externo se cae o elimina la imagen,
+          tu pagina mostrara un icono roto. No tienes control.
+        - VELOCIDAD: El navegador debe hacer una conexion DNS adicional
+          a otro servidor, lo que puede ser mas lento.
+        - PRIVACIDAD: Cada vez que un usuario visita tu pagina, el servidor
+          externo recibe la IP del visitante (puede rastrearlo).
+        - DERECHOS: La imagen puede estar protegida por copyright.
+
+        En proyectos profesionales, se prefiere descargar la imagen y
+        servirla desde tu propio servidor (imagen LOCAL).
+
+        ============================================================
+        EL ATRIBUTO alt — TEXTO ALTERNATIVO
+        ============================================================
+        alt="Logo de la UNAM"
+
+        El texto alternativo NO es decorativo. Cumple funciones criticas:
+
+        1. LECTORES DE PANTALLA: Las personas con discapacidad visual usan
+           software que lee el contenido en voz alta. Cuando encuentra una
+           imagen, lee el texto del atributo alt. Sin el, el usuario no
+           sabe que hay ahi.
+
+        2. IMAGEN ROTA: Si la imagen no carga (servidor caido, URL incorrecta,
+           conexion lenta), el navegador muestra el texto del alt en su lugar.
+           Esto le da contexto al usuario sobre que deberia haber ahi.
+
+        3. SEO: Los motores de busqueda no "ven" imagenes; leen el alt para
+           indexar el contenido visual.
+
+        Como escribir un buen alt:
+        - Describir QUE MUESTRA la imagen, no como se ve tecnicamente.
+        - Bien:  alt="Logo de la UNAM"
+        - Mal:   alt="imagen" o alt="logo.png"
+        - Si la imagen es puramente decorativa (no aporta informacion),
+          se usa alt="" (vacio) para que el lector de pantalla la ignore.
+
+        ============================================================
+        DIFERENCIA ENTRE alt Y title
+        ============================================================
+        - alt  -> Se muestra cuando la imagen NO carga. Lo leen los lectores
+                  de pantalla. Es OBLIGATORIO en <img>.
+        - title -> Se muestra como un "tooltip" (cuadrito flotante) cuando
+                   el usuario pasa el cursor sobre la imagen. Es OPCIONAL
+                   y NO reemplaza al alt. Los lectores de pantalla pueden
+                   ignorarlo. Ver el ejemplo mas abajo con la imagen local.
+
+        Esta imagen NO tiene title, solo alt. Eso esta perfecto.
+    -->
+    <img src="https://w7.pngwing.com/pngs/976/442/png-transparent-unam-hd-logo-thumbnail.png" alt="Logo de la UNAM">
+
+    <!--
+        Los parrafos <p> contienen texto. El navegador ignora los saltos de
+        linea internos del codigo fuente: todo se muestra en una sola linea
+        continua. Para forzar saltos de linea, se usa <br>.
+    -->
     <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui soluta, earum tempore dolores veniam libero ipsam, necessitatibus obcaecati, cumque consectetur odio doloremque tenetur! Error soluta reprehenderit animi quas eligendi incidunt.Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia molestias numquam iusto repudiandae quaerat laboriosam voluptates consectetur nemo, officia natus. Vero modi odit repellat quibusdam aperiam deserunt minima similique rem?</p>
-    
+
+    <!--
+        ============================================================
+        ENLACES RELATIVOS — NAVEGACION ENTRE PAGINAS
+        ============================================================
+        href="pagina2.html"
+
+        Este es un ENLACE RELATIVO. Significa que el navegador buscara el
+        archivo "pagina2.html" RELATIVO a la ubicacion del documento actual.
+
+        Como index.html y pagina2.html estan en la MISMA CARPETA:
+            03-pagina-web-basica/
+            |-- index.html          <- estas aqui
+            |-- pagina2.html        <- enlace apunta aqui
+            |-- styles.css
+            \-- assets/
+
+        Si pagina2.html estuviera en una subcarpeta:
+            href="paginas/pagina2.html"
+
+        Si estuviera en la carpeta padre:
+            href="../pagina2.html"   <- "../" sube un nivel
+
+        Tipos de rutas:
+        - RELATIVA: "pagina2.html"                 -> relativa al archivo actual
+        - ABSOLUTA LOCAL: "/paginas/pagina2.html"  -> relativa a la raiz del sitio
+        - ABSOLUTA EXTERNA: "https://ejemplo.com"  -> URL completa a otro sitio
+
+        Para navegacion DENTRO del mismo sitio, las rutas relativas son la
+        mejor opcion: funcionan sin importar donde este alojado el sitio.
+    -->
     <a href="pagina2.html">Pagina secundaria</a>
     <p>Esto es un increible parrafo sobre como estoy aprendiendo a hacer paginas web</p>
     <p>Esto es otro parrafo sobre como seguir haciendo paginas web</p>
-    
+
+    <!--
+        ============================================================
+        LISTA DESORDENADA <ul> CON CLASES
+        ============================================================
+        <ul> genera una lista con vinetas (bullets). Cada <li> es un elemento.
+
+        Nota como algunos <li> tienen class="Elemento-diferente":
+        - En CSS, .Elemento-diferente { color: red; font-weight: bold; }
+          aplica estilos SOLO a esos elementos.
+        - Los <li> sin clase mantienen los estilos por defecto.
+
+        Esto demuestra el poder de las clases: puedes aplicar estilos
+        diferentes a elementos del mismo tipo (<li>) segun la clase.
+    -->
     <ul>
         <li class="Elemento-diferente">List item 1</li>
         <li>List item 2</li>
@@ -24,16 +194,61 @@
         <li>Ultimo elemento</li>
     </ul>
 
-    <p>Dos amigos van caminando por la calle y uno le pregunta al otro: 
+    <!--
+        Nota: Este parrafo contiene texto con saltos de linea en el codigo fuente,
+        pero el navegador los ignora y muestra todo en una sola linea.
+        Para preservar formato de texto (como un chiste o poema), se podria usar
+        la etiqueta <pre> (preformateado) o insertar <br> para saltos de linea.
+    -->
+    <p>Dos amigos van caminando por la calle y uno le pregunta al otro:
 
         — ¿Qué hora es?
         — Las doce.
         — ¡Uy, qué tarde!
         — Me hubieses preguntado antes.
     </p>
-    
+
+    <!--
+        ============================================================
+        IMAGEN LOCAL + ATRIBUTOS alt Y title
+        ============================================================
+        src="assets/fondo3.jpg" -> Imagen LOCAL almacenada en la subcarpeta "assets".
+
+        VENTAJAS de imagenes locales:
+        - FIABILIDAD: Siempre disponible mientras tu sitio este en linea.
+        - VELOCIDAD: Se sirve desde tu propio servidor, sin conexiones extra.
+        - PRIVACIDAD: No se filtran datos del visitante a terceros.
+        - CONTROL: Puedes optimizar el tamanio y formato de la imagen.
+
+        DESVENTAJA: Ocupa espacio en tu proyecto/servidor.
+
+        Esta imagen tiene AMBOS atributos:
+        - alt="Una imagen de anime"  -> Texto que aparece si la imagen no carga
+                                        y que los lectores de pantalla leen.
+        - title="Anime fondo"        -> Tooltip que aparece al pasar el cursor
+                                        sobre la imagen. Es informacion EXTRA,
+                                        no un sustituto del alt.
+
+        Comparacion directa:
+        +-----------+----------------------+----------------------+
+        |           |       alt            |       title          |
+        +-----------+----------------------+----------------------+
+        | Cuando    | Imagen no carga      | Cursor sobre imagen  |
+        | Lectores  | SI lo leen           | Puede ser ignorado   |
+        | Obligat.  | SI (en <img>)        | NO (es opcional)     |
+        | SEO       | SI influye           | Influencia minima    |
+        +-----------+----------------------+----------------------+
+    -->
     <img src="assets/fondo3.jpg" alt="Una imagen de anime" title="Anime fondo">
-    
+
+    <!--
+        Este es un enlace EXTERNO (URL completa con https://).
+        Lleva al usuario fuera de nuestro sitio, a YouTube.
+        Buena practica: en enlaces externos se suele agregar
+        target="_blank" para abrir en nueva pestania, y
+        rel="noopener noreferrer" por seguridad.
+    -->
     <a href="https://www.youtube.com/watch?v=H4ayPYcZEfI&list=TLPQMDkwOTIwMjRJbOhGvET6bA&index=14">Visit Bash Course</a>
+    </main>
 </body>
 </html>

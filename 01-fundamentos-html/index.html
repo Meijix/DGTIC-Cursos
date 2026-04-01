@@ -1,16 +1,366 @@
+<!--
+  ==========================================================================
+  EJERCICIO 01 — FUNDAMENTOS DE HTML (sin CSS)
+  ==========================================================================
+
+  OBJETIVO DE ESTE ARCHIVO:
+  Aprender la estructura fundamental de un documento HTML usando SOLO
+  etiquetas semanticas, sin ningun estilo visual. Todo lo que ves aqui
+  se renderiza con los estilos por defecto del navegador (llamados
+  "user-agent stylesheet"). Esto es intencional: primero dominas la
+  ESTRUCTURA, despues la PRESENTACION.
+
+  PROGRESION DE APRENDIZAJE:
+  Este es el ejercicio mas basico del curso. Aqui aprenderas:
+  1. La anatomia de un documento HTML (DOCTYPE, html, head, body)
+  2. Elementos semanticos vs elementos genericos
+  3. Formularios accesibles
+  4. Listas de definicion
+  5. Roles ARIA y accesibilidad
+
+  Al terminar este ejercicio, pasaras al ejercicio 02 donde el MISMO
+  HTML recibe estilos CSS externos. La idea es que notes como la
+  estructura NO cambia — solo se le agrega presentacion visual.
+  ==========================================================================
+-->
+
+<!--
+  DOCTYPE — LA PRIMERA LINEA OBLIGATORIA
+  ========================================
+  COMO FUNCIONA:
+  <!doctype html> le dice al navegador: "Este documento usa HTML5".
+  No es una etiqueta HTML (no tiene cierre </doctype>), es una
+  INSTRUCCION para el navegador.
+
+  POR QUE ES IMPORTANTE:
+  Sin DOCTYPE, el navegador entra en "quirks mode" (modo peculiar),
+  donde imita bugs antiguos de Internet Explorer 5 para no romper
+  paginas de los anios 90. En quirks mode:
+  - El box model se calcula diferente (border y padding se incluyen
+    dentro del width, no se suman — parecido a border-box pero por
+    accidente historico)
+  - Algunas propiedades CSS se comportan de forma impredecible
+  - Las tablas heredan font-size de forma distinta
+
+  Con DOCTYPE, el navegador usa "standards mode" (modo estandar),
+  donde todo se comporta segun las especificaciones W3C/WHATWG.
+
+  POR QUE NO usar doctypes antiguos:
+  En HTML4/XHTML se usaban doctypes largos como:
+    <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+    "http://www.w3.org/TR/html4/strict.dtd">
+  En HTML5 se simplifico a solo <!doctype html>. No hay razon para
+  usar los viejos — HTML5 es retrocompatible.
+
+  CONFUSION COMUN:
+  "<!doctype html>" y "<!DOCTYPE html>" son lo mismo. HTML no
+  distingue mayusculas/minusculas en el DOCTYPE. Ambas formas son
+  validas. Se prefiere minusculas por convencion moderna.
+-->
 <!doctype html>
+
+<!--
+  ELEMENTO <html> — LA RAIZ DEL DOCUMENTO
+  =========================================
+  Todo el contenido del documento va dentro de <html>...</html>.
+  Es el "elemento raiz" — el ancestro de todos los demas elementos.
+
+  ATRIBUTO lang="es"
+  ===================
+  COMO FUNCIONA:
+  Declara que el idioma principal del documento es espaniol.
+
+  POR QUE ES IMPORTANTE:
+  1. LECTORES DE PANTALLA: Software como NVDA, JAWS o VoiceOver usa
+     este atributo para elegir la voz y pronunciacion correcta. Sin
+     lang="es", un lector de pantalla podria leer el texto en espaniol
+     con pronunciacion inglesa, haciendolo incomprensible.
+
+  2. SEO: Google usa lang para entender en que idioma esta la pagina
+     y mostrarla en resultados de busqueda del idioma correcto.
+
+  3. TRADUCCION AUTOMATICA: Chrome y otros navegadores usan lang para
+     decidir si ofrecer traducir la pagina.
+
+  4. CSS: Puedes usar selectores como :lang(es) para aplicar estilos
+     especificos por idioma (util en sitios multilenguaje).
+
+  5. TIPOGRAFIA: Algunos caracteres se renderizan diferente segun el
+     idioma (por ejemplo, las comillas cambian de forma).
+
+  POR QUE NO omitirlo:
+  HTML5 lo marca como "should" (deberia), no "must" (debe), asi que
+  tu pagina funciona sin el. Pero omitirlo es como enviar una carta
+  sin remitente — funciona pero pierdes informacion importante.
+
+  CONFUSION COMUN:
+  lang="es" va en <html>, no en <head> ni en <body>. Si una seccion
+  de tu pagina esta en otro idioma, puedes poner lang="en" en esa
+  seccion especifica:
+    <blockquote lang="en">To be or not to be</blockquote>
+-->
 <html lang="es">
+
+<!--
+  ELEMENTO <head> — METADATOS (NO SE VEN EN PANTALLA)
+  =====================================================
+  El <head> contiene informacion SOBRE el documento, no contenido
+  visible. Piensa en el como la "ficha tecnica" de la pagina.
+
+  Aqui van: charset, viewport, titulo, descripcion, enlaces a CSS,
+  scripts, favicons, Open Graph tags para redes sociales, etc.
+
+  CONCEPTO CLAVE: Nada dentro de <head> se renderiza en el area
+  visible de la pagina (excepto <title> que aparece en la pestania
+  del navegador).
+-->
 <head>
+
+<!--
+  META CHARSET — CODIFICACION DE CARACTERES
+  ============================================
+  COMO FUNCIONA A NIVEL DE BYTES:
+  Las computadoras almacenan todo como numeros (bytes). charset="UTF-8"
+  le dice al navegador COMO interpretar esos bytes como letras.
+
+  - ASCII: Usa 1 byte por caracter, solo 128 caracteres (letras
+    inglesas, numeros, puntuacion basica). NO tiene ni, acentos, etc.
+  - Latin-1 (ISO-8859-1): Usa 1 byte, 256 caracteres. Tiene acentos
+    y ni pero no tiene caracteres chinos, arabes, emojis...
+  - UTF-8: Usa 1-4 bytes por caracter. Cubre TODOS los caracteres
+    de todos los idiomas del mundo, mas emojis. Es retrocompatible
+    con ASCII (los primeros 128 caracteres son identicos).
+
+  Ejemplo de como UTF-8 codifica la ni:
+    - "n" = 1 byte: 0x6E
+    - "ni" = 2 bytes: 0xC3 0xB1
+    - Un emoji como el corazon = 4 bytes: 0xF0 0x9F 0x92 0x96
+
+  POR QUE DEBE SER LO PRIMERO EN <head>:
+  El navegador necesita saber la codificacion ANTES de leer cualquier
+  otro texto. Si el charset va despues del <title>, el navegador ya
+  habra intentado decodificar el titulo sin saber la codificacion
+  correcta. La especificacion HTML5 exige que charset este dentro de
+  los primeros 1024 bytes del documento.
+
+  POR QUE UTF-8 y no otro:
+  - Es el estandar de facto en la web (97%+ de las paginas lo usan)
+  - Es retrocompatible con ASCII
+  - Soporta TODOS los idiomas sin cambiar de codificacion
+  - Es el default de HTML5
+
+  CONFUSION COMUN:
+  Si tu archivo esta guardado en UTF-8 pero declaras charset="latin-1"
+  (o viceversa), veras caracteres rotos como "Ã±" en lugar de "ni".
+  La declaracion charset DEBE coincidir con la codificacion real del
+  archivo. Tu editor de texto debe guardar en UTF-8.
+-->
 <meta charset="UTF-8">
+
+<!--
+  META VIEWPORT — CONTROL DE VISUALIZACION EN MOVILES
+  =====================================================
+  COMO FUNCIONA:
+  width=device-width: El ancho del viewport (area visible) se ajusta
+  al ancho fisico del dispositivo.
+  initial-scale=1.0: El nivel de zoom inicial es 100% (sin zoom).
+
+  POR QUE ES NECESARIO:
+  Sin esta etiqueta, los navegadores moviles asumen que tu pagina fue
+  disenada para escritorio y la muestran en un viewport virtual de
+  ~980px, luego la encojen para que quepa en la pantalla. El resultado:
+  texto diminuto e ilegible que el usuario debe ampliar con pellizco.
+
+  QUE PASA SIN VIEWPORT:
+  1. iPhone/Android renderizan la pagina como si la pantalla midiera
+     980px de ancho
+  2. Todo se ve enano — letras de 16px se ven como de 5px
+  3. El usuario tiene que hacer zoom y scroll horizontal
+  4. Google penaliza en rankings moviles (Mobile-First Indexing)
+
+  POR QUE NO agregar maximum-scale=1.0 o user-scalable=no:
+  Algunos tutoriales antiguos sugieren esas opciones para "evitar que
+  el usuario haga zoom". NUNCA lo hagas — es un problema grave de
+  accesibilidad. Personas con vision reducida NECESITAN poder ampliar
+  la pagina. WCAG 2.1 (pautas de accesibilidad) lo prohibe
+  explicitamente.
+-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!--
+  META DESCRIPTION — DESCRIPCION PARA BUSCADORES
+  =================================================
+  COMO FUNCIONA:
+  Google y otros buscadores usan esta descripcion como el "snippet"
+  (texto de vista previa) en los resultados de busqueda.
+
+  No afecta el ranking directamente, pero una buena descripcion
+  aumenta el CTR (Click-Through Rate) — mas personas hacen clic.
+
+  Longitud ideal: 150-160 caracteres. Si es mas larga, Google la
+  corta con "..."
+-->
 <meta name="description" content="Ejercicios de HTML">
+
+<!--
+  NOTA DEL EJERCICIO:
+  En este modulo 01 NO usamos CSS externo. Todo se ve con los estilos
+  por defecto del navegador. Esto es intencional para enfocarnos 100%
+  en la estructura semantica del HTML.
+
+  En el ejercicio 02, agregaremos un <link rel="stylesheet"> aqui
+  para conectar un archivo CSS externo.
+-->
 
 <!-- Este módulo es solo HTML, sin estilos externos -->
 
+<!--
+  ELEMENTO <title> — TITULO DE LA PAGINA
+  ========================================
+  COMO FUNCIONA:
+  Define el texto que aparece en:
+  1. La pestania del navegador
+  2. Los resultados de busqueda de Google (como titulo azul)
+  3. Los marcadores/favoritos cuando guardas la pagina
+  4. La barra de tareas del sistema operativo
+
+  POR QUE ES OBLIGATORIO:
+  Es uno de los pocos elementos REQUERIDOS por la especificacion HTML5.
+  Una pagina sin <title> es tecnicamente invalida.
+
+  CONFUSION COMUN:
+  <title> NO se muestra dentro de la pagina. Si quieres un titulo
+  visible, usa <h1> en el <body>.
+-->
 <title>Natalia Edith Mejia Bautista</title>
+</head>
+
+<!--
+  ELEMENTO <body> — CONTENIDO VISIBLE
+  ======================================
+  Todo lo que el usuario VE en la pagina va dentro de <body>.
+  Aqui van textos, imagenes, formularios, videos, etc.
+
+  CONCEPTO DE ELEMENTOS EN BLOQUE vs EN LINEA:
+  ================================================
+  Los elementos HTML tienen un comportamiento de visualizacion
+  por defecto que se divide en dos grandes categorias:
+
+  ELEMENTOS EN BLOQUE (block):
+  - Ocupan todo el ANCHO disponible de su contenedor
+  - Siempre empiezan en una NUEVA LINEA
+  - Pueden contener otros bloques y elementos en linea
+  - Ejemplos: <div>, <p>, <h1>-<h6>, <section>, <article>, <form>,
+    <header>, <footer>, <nav>, <main>, <aside>, <ul>, <ol>, <li>
+
+  ELEMENTOS EN LINEA (inline):
+  - Solo ocupan el ancho de su CONTENIDO
+  - NO empiezan en nueva linea (fluyen junto al texto)
+  - Solo pueden contener texto u otros elementos en linea
+  - Ejemplos: <span>, <a>, <strong>, <em>, <label>, <input>, <img>
+
+  Ejemplo visual:
+    <p>Esto es un <strong>parrafo</strong> con texto en negritas</p>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    El <p> es bloque: ocupa todo el ancho
+                       ^^^^^^^^^^
+                       <strong> es inline: solo ocupa "parrafo"
+
+  NOTA HISTORICA: HTML5 redefinio estas categorias como "flow content",
+  "phrasing content", etc., pero la mentalidad bloque/inline sigue
+  siendo util para entender el comportamiento visual por defecto.
+-->
 <body>
-  <header>HeaderNat</header>
-<nav>
+
+  <!--
+    ELEMENTO <header> — ENCABEZADO DE LA PAGINA/SECCION
+    =====================================================
+    COMO FUNCIONA:
+    <header> es un elemento SEMANTICO que representa contenido
+    introductorio. Tipicamente contiene el logo, titulo del sitio,
+    y navegacion principal.
+
+    SEMANTICO vs GENERICO — LA DIFERENCIA FUNDAMENTAL:
+    ====================================================
+    Podrias usar <div class="header"> y se VERIA igual. Pero:
+
+    1. ACCESIBILIDAD: Los lectores de pantalla anuncian <header> como
+       "banner" (punto de referencia). Un usuario ciego puede saltar
+       directamente al header, nav, main, o footer usando atajos.
+       Con <div>, el lector de pantalla solo ve "grupo generico" —
+       no sabe que es un encabezado.
+
+    2. SEO: Los motores de busqueda entienden la estructura de tu
+       pagina. Saben que el contenido en <main> es el importante,
+       que <nav> contiene enlaces de navegacion, que <aside> es
+       contenido complementario. Con <div> todo se ve como una
+       masa uniforme de contenido.
+
+    3. MANTENIMIENTO: Un desarrollador nuevo que lee tu codigo entiende
+       inmediatamente que <header> es el encabezado, <nav> la
+       navegacion, <footer> el pie. Con <div class="hdr"> tiene que
+       adivinar que significa "hdr".
+
+    ROLE="BANNER" — ARIA EXPLICITO vs IMPLICITO:
+    ================================================
+    Cada elemento semantico tiene un "rol implicito" que los lectores
+    de pantalla entienden automaticamente:
+
+      <header>  --> rol implicito: "banner" (cuando es hijo directo de <body>)
+      <nav>     --> rol implicito: "navigation"
+      <main>    --> rol implicito: "main"
+      <footer>  --> rol implicito: "contentinfo" (cuando es hijo directo de <body>)
+      <aside>   --> rol implicito: "complementary"
+      <section> --> rol implicito: "region" (solo si tiene aria-label o aria-labelledby)
+
+    Entonces, role="banner" en <header> es REDUNDANTE — el <header>
+    ya lo tiene implicitamente. Agregarlo no causa dano, pero tampoco
+    agrega valor.
+
+    CUANDO SI se necesita ARIA explicito:
+    - Cuando usas <div> en lugar de un elemento semantico (por alguna
+      razon tecnica): <div role="banner">
+    - Cuando tienes multiples <nav> y quieres distinguirlos:
+      <nav aria-label="Navegacion principal">
+      <nav aria-label="Navegacion del pie de pagina">
+
+    REGLA DE ORO DE ARIA:
+    "La primera regla de ARIA es: NO uses ARIA si puedes usar HTML
+    semantico nativo." — W3C WAI-ARIA Authoring Practices
+  -->
+  <header role="banner">HeaderNat</header>
+
+<!--
+  ELEMENTO <nav> — NAVEGACION
+  ==============================
+  COMO FUNCIONA:
+  <nav> indica que su contenido es un bloque de enlaces de navegacion.
+  No TODOS los enlaces van en <nav> — solo los bloques principales
+  de navegacion (menu principal, breadcrumbs, paginacion).
+
+  ARIA-LABEL="Navegacion principal":
+  Aqui el aria-label SI es util porque podrias tener multiples <nav>
+  en la pagina (uno arriba, otro en el footer). El aria-label permite
+  a los lectores de pantalla distinguirlos:
+    "Navegacion, Navegacion principal" vs "Navegacion, Pie de pagina"
+
+  Sin aria-label, ambos se anunciarian solo como "Navegacion" y el
+  usuario ciego no sabria cual es cual.
+
+  LA ESTRUCTURA <ul> + <li> + <a> PARA MENUS:
+  Es la convencion estandar para menus de navegacion porque:
+  1. <ul> (lista no ordenada) indica que son items relacionados
+  2. Los lectores de pantalla anuncian "lista, 4 elementos" — el
+     usuario sabe cuantas opciones hay antes de recorrerlas
+  3. Sin la lista, el lector de pantalla solo ve enlaces sueltos
+     y el usuario no sabe cuantos son ni donde terminan
+
+  POR QUE NO usar <div> con enlaces sueltos:
+    <div><a>Inicio</a> <a>Nosotros</a> <a>Servicios</a></div>
+  Se VE igual pero el lector de pantalla no anuncia cuantos items hay,
+  y no comunica que son un grupo relacionado de navegacion.
+-->
+<nav aria-label="Navegación principal">
   <ul>
     <li><a href="#">Inicio</a></li>
     <li><a href="#">Nosotros</a></li>
@@ -18,34 +368,268 @@
     <li><a href="#">Contacto</a></li>
   </ul>
 </nav>
+
+<!--
+  ELEMENTO <main> — CONTENIDO PRINCIPAL
+  ========================================
+  COMO FUNCIONA:
+  <main> indica el contenido principal y UNICO de la pagina.
+  Solo puede haber UN <main> visible por pagina.
+
+  POR QUE ES IMPORTANTE:
+  Los lectores de pantalla tienen un atajo para saltar directamente a
+  <main>, permitiendo a usuarios ciegos evitar el header y la
+  navegacion que se repiten en todas las paginas. Sin <main>, el
+  usuario debe recorrer TODO el header y nav en CADA pagina.
+
+  CONCEPTO: ALGORITMO DE ESQUEMA DEL DOCUMENTO (Document Outline)
+  ===================================================================
+  Los encabezados (h1-h6) crean una jerarquia/esquema del documento,
+  similar al indice de un libro:
+
+    h1: Titulo principal (solo UNO por pagina — el tema general)
+      h2: Subtema 1
+        h3: Detalle del subtema 1
+      h2: Subtema 2
+        h3: Detalle del subtema 2
+
+  POR QUE NO saltar niveles (ej: de h1 a h3 sin h2):
+  Los lectores de pantalla permiten navegar por encabezados.
+  Si saltas de h1 a h3, el usuario piensa que falta una seccion h2.
+  Es como un libro donde el indice va:
+    Capitulo 1
+      1.1.1 (Donde esta 1.1?)
+
+  En este documento la jerarquia es:
+    h1: "Encabezado principal en main"
+      h2: "Encabezado de seccion 1"
+        h3: "Encabezado de articulo 1"
+      h3: "Encabezado en lateral" <-- NOTA: este h3 en el aside
+          deberia ser h2 si el aside es hermano de section, para
+          mantener la jerarquia correcta. Es un detalle discutible
+          dependiendo de si el aside es un subtema de section o un
+          bloque independiente.
+-->
 <main>
   <h1>Encabezado principal en main</h1>
-  <section>
-    <h2>Encabezado de seccion 1</h2>
+
+  <!--
+    ELEMENTO <section> — SECCION TEMATICA
+    ========================================
+    COMO FUNCIONA:
+    <section> agrupa contenido que comparte un mismo tema. Siempre
+    deberia tener un encabezado (h2, h3, etc.) que lo identifique.
+
+    ARIA-LABELLEDBY="sec1-heading":
+    Conecta esta <section> con su encabezado. Esto hace que el lector
+    de pantalla anuncie: "region, Encabezado de seccion 1" cuando el
+    usuario llega a esta seccion.
+
+    Sin aria-labelledby, una <section> sin nombre accesible podria
+    no ser anunciada como punto de referencia (landmark) por algunos
+    lectores de pantalla.
+
+    COMO FUNCIONA aria-labelledby:
+    El valor "sec1-heading" es el ID del elemento que sirve como
+    etiqueta. El navegador busca id="sec1-heading" en el documento
+    y usa su texto como nombre accesible.
+
+    DIFERENCIA ENTRE <section> Y <div>:
+    - <section> = "esto es una seccion tematica con significado propio"
+    - <div> = "necesito un contenedor para agrupar cosas, sin
+      significado semantico"
+
+    Regla practica: Si no le puedes poner un encabezado a un grupo
+    de contenido, probablemente deberia ser <div>, no <section>.
+  -->
+  <section aria-labelledby="sec1-heading">
+    <h2 id="sec1-heading">Encabezado de seccion 1</h2>
+
+    <!--
+      ELEMENTO <article> — CONTENIDO INDEPENDIENTE
+      ================================================
+      COMO FUNCIONA:
+      <article> representa contenido que tiene sentido POR SI SOLO,
+      independiente del resto de la pagina. Ejemplo clasico: un post
+      de blog, un comentario, un tweet, un producto en una tienda.
+
+      Pregunta para decidir si algo es <article>:
+      "Si extraigo este contenido y lo pongo en otro sitio,
+       tiene sentido por si solo?"
+      Si la respuesta es si --> <article>
+      Si la respuesta es no --> <section> o <div>
+
+      DIFERENCIA ENTRE <section> Y <article>:
+      - <section>: Parte de algo mas grande (capitulo de un libro)
+      - <article>: Unidad completa e independiente (el libro entero)
+      - Pueden anidarse: un <article> puede tener <section>s internas,
+        y una <section> puede contener multiples <article>s
+    -->
     <article>
       <h3>Encabezado de articulo 1</h3>
 
+      <!--
+        ELEMENTO <form> — FORMULARIOS
+        ================================
+        COMO FUNCIONA:
+        <form> agrupa controles interactivos para enviar datos al
+        servidor. El atributo action="" indica la URL a donde se
+        envian los datos. Con action="" (vacio), se envia a la
+        misma pagina.
+
+        Otros atributos importantes (no usados aqui):
+        - method="GET" (default): Datos van en la URL (?nombre=Juan)
+        - method="POST": Datos van en el cuerpo de la peticion HTTP
+          (mas seguro, necesario para passwords y datos grandes)
+      -->
       <form action="">
+
+        <!--
+          ELEMENTO <fieldset> — AGRUPACION DE CAMPOS
+          ==============================================
+          COMO FUNCIONA:
+          <fieldset> agrupa campos de formulario que estan relacionados.
+          Visualmente dibuja un borde alrededor del grupo.
+          <legend> es el titulo/etiqueta de ese grupo.
+
+          POR QUE ES IMPORTANTE PARA ACCESIBILIDAD:
+          El lector de pantalla anuncia el <legend> ANTES de cada campo
+          dentro del <fieldset>. Ejemplo:
+            "Proporciona tus datos, Nombre, campo de texto"
+            "Proporciona tus datos, Correo electronico, campo de email"
+
+          Sin <fieldset>/<legend>, el lector solo dice:
+            "Nombre, campo de texto"
+          Y el usuario no sabe que seccion del formulario esta
+          completando si hay multiples grupos de campos.
+        -->
         <fieldset>
           <legend>Proporciona tus datos</legend>
+
+          <!--
+            LABEL + FOR + ID — LA CONEXION CRUCIAL
+            ==========================================
+            COMO FUNCIONA:
+            El atributo "for" del <label> se conecta con el "id" del
+            <input>. Deben ser EXACTAMENTE iguales:
+              <label for="nombre">  <-->  <input id="nombre">
+
+            POR QUE ES CRUCIAL (no es solo visual):
+            1. LECTORES DE PANTALLA: Sin label-for-id, cuando un
+               usuario ciego llega al input, el lector de pantalla
+               dice "campo de texto" — no sabe para QUE es. Con la
+               conexion, dice "Nombre, campo de texto".
+
+            2. AREA DE CLIC: Con la conexion, hacer clic en el TEXTO
+               "Nombre:" activa el input. Sin ella, solo el input
+               responde al clic. Esto importa especialmente en
+               moviles donde los inputs son pequenios.
+
+            3. VALIDACION: Herramientas de testing de accesibilidad
+               marcan inputs sin label como errores criticos.
+
+            POR QUE NO usar placeholder en vez de label:
+            Algunos desarrolladores hacen:
+              <input placeholder="Nombre">
+            ESTO ES INCORRECTO porque:
+            - El placeholder desaparece al escribir — el usuario
+              olvida que campo es
+            - Los lectores de pantalla no siempre leen placeholders
+            - El placeholder tiene color gris claro, dificil de leer
+            - No es un sustituto semantico del label
+
+            ALTERNATIVA: Label envolvente (sin for/id):
+              <label>Nombre: <input type="text"></label>
+            Esto tambien funciona pero es menos flexible para CSS.
+          -->
           <label for="nombre">Nombre:</label>
           <input type="text" id="nombre"><br>
 
+          <!--
+            INPUT TYPE="EMAIL" — VALIDACION NATIVA
+            =========================================
+            COMO FUNCIONA:
+            type="email" le dice al navegador que este campo espera
+            un correo electronico. El navegador:
+            1. Valida el formato automaticamente al enviar
+            2. En moviles, muestra teclado con @ y .com
+            3. Lectores de pantalla anuncian "campo de email"
+
+            POR QUE NO usar type="text" para todo:
+            Pierdes la validacion nativa, el teclado optimizado en
+            moviles, y la semantica para lectores de pantalla.
+
+            Otros tipos utiles: tel, url, number, date, password, search
+          -->
           <label for="email">Correo electronico:</label>
           <input type="email" id="email"><br>
 
-          <span>Procedencia:</span>
-          <br>
-          <input type="radio" name="procedencia" value="mex" />
-          <label for="huey">Mexicano</label><br>
-          <input type="radio" name="procedencia" value="ext" />
-          <label for="huey">Extranjero</label><br>
+          <!--
+            FIELDSET ANIDADO — GRUPO DENTRO DE GRUPO
+            ============================================
+            Este <fieldset> esta DENTRO del fieldset principal.
+            Agrupa los radio buttons de "Procedencia" como una
+            sub-seccion del formulario.
+
+            RADIO BUTTONS — COMO FUNCIONAN:
+            =================================
+            Los radio buttons permiten seleccionar UNA sola opcion
+            de un grupo. El mecanismo clave es el atributo NAME:
+
+            name="procedencia" en AMBOS radios los agrupa. El
+            navegador sabe que solo uno puede estar seleccionado
+            porque comparten el mismo name.
+
+            POR QUE name="procedencia" los agrupa:
+            - Si los dos tuvieran name diferente, serian independientes
+              y AMBOS podrian seleccionarse al mismo tiempo (como
+              checkboxes)
+            - El name tambien es la "clave" cuando se envian los datos:
+              procedencia=mex  o  procedencia=ext
+
+            POR QUE cada radio necesita un ID UNICO:
+            - El id conecta cada radio con SU label (for/id)
+            - id="mex" <--> <label for="mex">
+            - id="ext" <--> <label for="ext">
+            - Si ambos tuvieran el mismo id, solo funcionaria el
+              primero (id DEBE ser unico en todo el documento)
+
+            CONFUSION COMUN — name vs id:
+            - name: Agrupa los radios + se envia al servidor
+            - id: Identifica el elemento unico + conecta con label
+            - name puede repetirse (y DEBE repetirse en radios del
+              mismo grupo)
+            - id NUNCA puede repetirse en el documento
+          -->
+          <fieldset>
+            <legend>Procedencia:</legend>
+            <input type="radio" id="mex" name="procedencia" value="mex" />
+            <label for="mex">Mexicano</label><br>
+            <input type="radio" id="ext" name="procedencia" value="ext" />
+            <label for="ext">Extranjero</label>
+          </fieldset>
+
+          <!--
+            ELEMENTO <select> — MENU DESPLEGABLE
+            ========================================
+            COMO FUNCIONA:
+            <select> crea un dropdown. Cada <option> es una opcion.
+            El atributo value es lo que se ENVIA al servidor.
+            El texto entre <option>...</option> es lo que el usuario VE.
+
+            La primera option con value="" sirve como placeholder/
+            instruccion. Como no tiene valor real, puedes validar que
+            el usuario eligio algo real.
+
+            La conexion label for="sabor" <--> select id="sabor"
+            funciona igual que con inputs.
+          -->
           <label for="sabor">Sabor favorito:</label><br>
           <select id="sabor">
             <option value="">-Elija una opcion-</option>
-            <option value="">Vainilla</option>
-            <option value="">Chocolate</option>
-            <option value="">Fresa</option>
+            <option value="vainilla">Vainilla</option>
+            <option value="chocolate">Chocolate</option>
+            <option value="fresa">Fresa</option>
           </select>
         </fieldset>
       </form>
@@ -53,8 +637,60 @@
       <p>Parrafo en articulo 1</p>
     </article>
   </section>
+
+  <!--
+    ELEMENTO <aside> — CONTENIDO LATERAL/COMPLEMENTARIO
+    =====================================================
+    COMO FUNCIONA:
+    <aside> representa contenido tangencialmente relacionado con el
+    contenido que lo rodea. Ejemplos clasicos:
+    - Barra lateral con enlaces relacionados
+    - Citas destacadas (pull quotes)
+    - Publicidad
+    - Glosario
+
+    El contenido en <aside> deberia poder REMOVERSE sin que el
+    contenido principal pierda sentido.
+
+    ROL IMPLICITO: "complementary"
+    Los lectores de pantalla anuncian: "complementario" cuando el
+    usuario navega por landmarks (puntos de referencia).
+  -->
   <aside>
     <h3>Encabezado en lateral</h3>
+
+    <!--
+      LISTA DE DEFINICION — <dl>, <dt>, <dd>
+      ==========================================
+      COMO FUNCIONA:
+      - <dl> (definition list): Contenedor de la lista
+      - <dt> (definition term): El termino a definir
+      - <dd> (definition description): La definicion/descripcion
+
+      CUANDO USAR dl/dt/dd vs ul/ol:
+      - <ul> (unordered list): Lista de items sin orden especifico
+        Ejemplo: lista de compras, ingredientes
+      - <ol> (ordered list): Lista donde el ORDEN importa
+        Ejemplo: pasos de una receta, ranking
+      - <dl> (definition list): Pares de termino-definicion
+        Ejemplo: glosario, FAQ, metadatos (Autor: Juan, Fecha: 2024)
+
+      POR QUE NO usar <ul> para definiciones:
+      Podrias hacer:
+        <ul>
+          <li><strong>Termino 1:</strong> Descripcion 1</li>
+        </ul>
+      Pero pierdes la semantica — el navegador y los lectores de
+      pantalla no entienden que hay una relacion termino-definicion.
+      Con <dl>, el lector de pantalla puede anunciar:
+        "Lista de definiciones, 3 elementos"
+        "Termino: Termino 1"
+        "Definicion: La descripcion 1"
+
+      DATO: Un <dt> puede tener multiples <dd> (varias definiciones
+      para un mismo termino) y un <dd> puede tener multiples <dt>
+      (varios terminos que comparten una definicion).
+    -->
     <dl>
       <dt>Termino 1</dt>
       <dd>
@@ -72,9 +708,52 @@
   </aside>
 
 </main>
-<footer>footer</footer>
+
+<!--
+  ELEMENTO <footer> — PIE DE PAGINA
+  ====================================
+  COMO FUNCIONA:
+  <footer> representa el pie de pagina del documento o de una seccion.
+  Tipicamente contiene: copyright, enlaces legales, contacto, mapa
+  del sitio, redes sociales.
+
+  ROLE="CONTENTINFO":
+  Igual que con <header role="banner">, esto es REDUNDANTE cuando el
+  <footer> es hijo directo de <body>. El <footer> ya tiene el rol
+  implicito "contentinfo".
+
+  NOTA IMPORTANTE: Si un <footer> esta DENTRO de un <article> o
+  <section>, NO tiene rol "contentinfo" — se considera un pie de
+  pagina local de esa seccion, no del documento completo.
+
+  Lo mismo aplica a <header>: un <header> dentro de un <article>
+  NO tiene rol "banner" — es solo el encabezado de ese articulo.
+
+  MAPA COMPLETO DE ELEMENTOS SEMANTICOS DE ESTA PAGINA:
+  ========================================================
+  <header>  --> Banner/encabezado del sitio
+  <nav>     --> Bloque de navegacion
+  <main>    --> Contenido principal (unico por pagina)
+  <section> --> Agrupacion tematica dentro de main
+  <article> --> Contenido independiente dentro de section
+  <aside>   --> Contenido complementario/lateral
+  <footer>  --> Pie de pagina del sitio
+
+  Sin elementos semanticos, esto seria:
+  <div class="header">
+  <div class="nav">
+  <div class="main">
+  <div class="section">
+  <div class="article">
+  <div class="aside">
+  <div class="footer">
+
+  Se VE igual pero: no hay accesibilidad, no hay SEO semantico,
+  y el codigo es mas dificil de mantener.
+-->
+<footer role="contentinfo">footer</footer>
 
 
-  
+
 </body>
 </html>

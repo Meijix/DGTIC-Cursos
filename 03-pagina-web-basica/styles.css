@@ -1,42 +1,255 @@
+/*
+============================================================
+ESTILOS PARA EL EJERCICIO 03 — PAGINA WEB BASICA
+============================================================
+Este archivo CSS es compartido por index.html y pagina2.html.
+Cualquier cambio aqui afecta a AMBAS paginas.
+============================================================
+*/
+
+/*
+============================================================
+MODELO DE COLOR RGB — rgb(r, g, b)
+============================================================
+RGB significa Red (rojo), Green (verde), Blue (azul).
+Es un modelo de COLOR ADITIVO basado en la mezcla de LUZ:
+
+- Cada valor va de 0 (nada de ese color) a 255 (maximo de ese color).
+- rgb(0, 0, 0)       -> negro (sin luz)
+- rgb(255, 255, 255)  -> blanco (toda la luz)
+- rgb(255, 0, 0)      -> rojo puro
+- rgb(0, 255, 0)      -> verde puro
+- rgb(0, 0, 255)      -> azul puro
+
+Aqui, rgb(185, 255, 248) es un turquesa/menta claro:
+- 185 de rojo (bastante, pero no al maximo)
+- 255 de verde (maximo)
+- 248 de azul (casi maximo)
+Los valores altos en los tres canales producen colores claros/pastel.
+
+Se llama "aditivo" porque funciona como la luz: mezclar
+TODOS los colores da BLANCO (a diferencia de la pintura,
+donde mezclar todo da un color oscuro — eso es sustractivo).
+
+Tambien puedes escribir colores en HEXADECIMAL:
+- rgb(185, 255, 248) equivale a #b9fff8
+- Cada par de digitos hex (b9, ff, f8) corresponde a un canal (R, G, B).
+*/
 body{
     background-color: rgb(185, 255, 248);
+    /*
+        font-family define una LISTA de fuentes en orden de preferencia.
+        El navegador usa la primera que este disponible en el sistema del usuario.
+        - 'Gill Sans' -> primera opcion (comillas porque tiene espacio en el nombre)
+        - 'Gill Sans MT' -> alternativa similar en Windows
+        - Calibri, 'Trebuchet MS' -> mas alternativas
+        - sans-serif -> ULTIMA opcion: fuente generica del sistema.
+          SIEMPRE terminar con una familia generica como respaldo:
+          serif, sans-serif, monospace, cursive, fantasy.
+
+        Nota: "sans-serif" aparece DOS VECES aqui — es redundante pero no causa error.
+    */
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif, sans-serif;
     margin: 0;
     padding: 0;
-    
-    
+
+
 }
 
+/*
+============================================================
+LA CLASE .box — CONTENEDOR CON SOMBRA Y DEGRADADO
+============================================================
+*/
 .box{
-    width: 400PX;
-    height: 50px;
+    /*
+        ============================================================
+        PATRON RESPONSIVO: width: 100% + max-width
+        ============================================================
+        width: 100%    -> El elemento ocupa todo el ancho disponible.
+        max-width: 400px -> PERO nunca sera mas ancho que 400px.
+
+        Juntos crean un patron "fluido con techo":
+        - En pantallas PEQUENIAS (< 400px): ocupa el 100% del espacio.
+        - En pantallas GRANDES (> 400px): se detiene en 400px.
+
+        Esto es FUNDAMENTAL para disenio responsivo. Sin max-width,
+        el contenido se estiraria demasiado en pantallas grandes
+        y seria dificil de leer. Sin width: 100%, no se adaptaria
+        a pantallas pequenias.
+    */
+    width: 100%;
+    max-width: 400px;
+    /*
+        height: auto -> La altura se ajusta automaticamente al contenido.
+        min-height: 50px -> Pero NUNCA sera menor a 50px, incluso si
+        el contenido es poco o esta vacio.
+    */
+    height: auto;
+    min-height: 50px;
+    /*
+        margin: auto -> Centra el elemento horizontalmente.
+        Funciona porque el elemento tiene un ancho definido (max-width: 400px).
+        El navegador calcula margenes izquierdo y derecho iguales.
+    */
     margin: auto;
     margin-top: 10px;
+
+    /*
+        ============================================================
+        BOX-SHADOW — SOMBRA DE CAJA
+        ============================================================
+        Sintaxis: box-shadow: offset-x  offset-y  blur  spread  color;
+
+        Desglose de: 0 0 35px 0 #5d3469
+
+        - offset-x: 0     -> Desplazamiento horizontal de la sombra.
+                              0 = centrada. Positivo = derecha. Negativo = izquierda.
+        - offset-y: 0     -> Desplazamiento vertical.
+                              0 = centrada. Positivo = abajo. Negativo = arriba.
+        - blur: 35px      -> Radio de desenfoque. Mayor numero = sombra mas difusa
+                              y extendida. 0 = borde duro.
+        - spread: 0       -> Expansion de la sombra. Positivo = mas grande que la caja.
+                              Negativo = mas pequenia. 0 = mismo tamanio.
+        - color: #5d3469  -> Color purpura oscuro.
+
+        Con ambos offsets en 0 y blur en 35px, se crea un RESPLANDOR
+        (glow) uniforme alrededor de toda la caja.
+    */
     box-shadow: 0 0 35px 0 #5d3469;
+
+    /*
+        ============================================================
+        BOX-SIZING: BORDER-BOX
+        ============================================================
+        Por defecto, CSS usa "content-box":
+        - width: 400px solo cuenta el CONTENIDO.
+        - El padding y border se SUMAN al ancho total.
+        - Si agregas padding: 10px, el ancho real es 420px.
+
+        Con "border-box":
+        - width: 400px incluye contenido + padding + border.
+        - El ancho total SIEMPRE es 400px, sin sorpresas.
+
+        Es tan util que muchos proyectos usan:
+            * { box-sizing: border-box; }
+        para aplicarlo a TODOS los elementos.
+    */
     box-sizing: border-box;
     font-family: sans-serif;
     text-align: justify;
+
+    /*
+        ============================================================
+        LINEAR-GRADIENT — DEGRADADO LINEAL
+        ============================================================
+        Sintaxis: linear-gradient(direccion, color1, color2, ...);
+
+        Desglose de: linear-gradient(to right, rgb(120, 120, 225), #b4daf9)
+
+        - "to right" -> DIRECCION del degradado. De izquierda a derecha.
+          Otras opciones: to left, to bottom (default), to top,
+          to bottom right, 45deg, 135deg, etc.
+
+        - rgb(120, 120, 225) -> Color INICIAL (azul medio, lado izquierdo).
+        - #b4daf9             -> Color FINAL (azul claro, lado derecho).
+
+        El navegador INTERPOLA (calcula los colores intermedios) automaticamente
+        entre los dos colores, creando una transicion suave.
+
+        Puedes agregar mas "color stops" (paradas):
+            linear-gradient(to right, red, yellow 30%, green)
+        Aqui el amarillo aparece en el 30% del recorrido.
+
+        Nota: Se usa "background" (shorthand) en lugar de "background-color"
+        porque los gradientes son tecnicamente IMAGENES de fondo, no colores solidos.
+    */
     background: linear-gradient(to right, rgb(120, 120, 225),#b4daf9) ;
 }
 
+/*
+============================================================
+ESTILOS DE IMAGENES
+============================================================
+*/
 img{
-    width: auto;
-    height: 200px;
+    /*
+        max-width: 100% + height: auto es OTRO patron responsivo.
+        La imagen nunca sera mas ancha que su contenedor,
+        y mantiene sus proporciones (no se deforma).
+    */
+    max-width: 100%;
+    height: auto;
+    max-height: 200px;
+
+    /*
+        ============================================================
+        OBJECT-FIT — COMO LA IMAGEN LLENA SU CAJA
+        ============================================================
+        Cuando defines un ancho Y alto para una imagen, y la imagen
+        tiene proporciones diferentes, hay un conflicto. object-fit
+        resuelve como la imagen se ajusta dentro de ese espacio.
+
+        object-fit: cover -> La imagen CUBRE todo el espacio definido,
+        recortando lo que sobra (sin deformarla). Es como "zoom + recorte".
+
+        Otros valores:
+        - contain -> La imagen se muestra COMPLETA dentro del espacio,
+                     dejando barras vacias si las proporciones no coinciden.
+        - fill    -> Estira/deforma la imagen para llenar exactamente el espacio.
+        - none    -> Muestra la imagen a su tamanio original, sin ajustar.
+
+        Es analogo a background-size para imagenes de fondo, pero
+        object-fit funciona con la etiqueta <img> directamente.
+    */
     object-fit: cover;
+
+    /*
+        ============================================================
+        BORDER-RADIUS — ESQUINAS REDONDEADAS
+        ============================================================
+        border-radius: 80%
+
+        Cuando usas PORCENTAJE:
+        - 50% -> Crea un CIRCULO perfecto (si el elemento es cuadrado)
+                  o una ELIPSE (si es rectangular).
+        - 80% -> Crea una forma OVALADA mas extrema. Al pasar del 50%,
+                  los bordes se curvan mas alla del semicirculo.
+        - 100% da el mismo resultado visual que 50% en la mayoria
+                  de los casos (el navegador limita la curva).
+
+        Cuando usas PIXELES:
+        - border-radius: 10px -> Esquinas suavemente redondeadas.
+        - border-radius: 9999px -> Circulo (truco para asegurar redondez
+                                    sin importar el tamanio del elemento).
+
+        En este caso, con 80% las imagenes se muestran en forma ovalada.
+        Si quisieras circulos perfectos, usa 50% y asegurate de que
+        el elemento sea cuadrado (mismo width y height).
+    */
     border-radius: 80%;
     margin: auto;
+
+    /*
+        Nota: La sintaxis de drop-shadow aqui tiene un error.
+        La sintaxis correcta seria:
+            filter: drop-shadow(0px 0px 3px #000);
+        Los valores se separan con ESPACIOS, no con comas.
+        Y son 3 valores (offset-x, offset-y, blur) + color.
+        A diferencia de box-shadow, drop-shadow NO tiene parametro "spread".
+    */
     filter: drop-shadow(0px,0px,3px, #000)
 }
 
 h2{
-    color: rgb(243, 243, 243);
+    color: rgb(30, 30, 100);
     font-size: 20px;
     border: 5px solid rgb(108, 73, 150);
     border-radius: 5px;
     padding: 10px;
     margin: 10px;
     text-align: center;
-    
+
 }
 
 p{
@@ -50,6 +263,15 @@ p{
 }
 
 
+/*
+    CLASE .Elemento-diferente
+    Nota sobre convencion de nombres: esta clase usa "PascalCase" (mayuscula inicial).
+    La convencion mas extendida en CSS es "kebab-case" (minusculas con guiones):
+        .elemento-diferente
+
+    Funciona correctamente, pero en proyectos con multiples desarrolladores
+    es mejor ser consistente con una sola convencion de nombres.
+*/
 .Elemento-diferente{
     color: rgb(209, 25, 56);
     font-size: 18px;
@@ -65,7 +287,102 @@ input{
 }
 
 label{
+    /*
+        ============================================================
+        ERROR EN FONT SHORTHAND — "font: tahoma"
+        ============================================================
+        La propiedad "font" es un SHORTHAND (abreviacion) que espera
+        MULTIPLES valores en un orden especifico:
+
+            font: [style] [variant] [weight] [size]/[line-height] family;
+
+        Como MINIMO requiere font-size y font-family:
+            font: 16px tahoma;        <- esto SI seria valido.
+            font: italic bold 16px tahoma; <- esto tambien.
+
+        "font: tahoma" es INVALIDO porque falta el tamanio (font-size).
+        El navegador IGNORA toda la declaracion al ser invalida.
+
+        Para solo cambiar la fuente, usa la propiedad especifica:
+            font-family: tahoma;
+
+        Esta es una trampa comun del shorthand "font": parece sencilla
+        pero tiene reglas estrictas de sintaxis.
+    */
     font: tahoma;
-    color:darkcyan;
+    color: #006060;
     font-style: italic;
+}
+
+/*
+============================================================
+ESTILOS RESPONSIVOS
+============================================================
+Responsive design = el sitio se adapta a diferentes tamanios de pantalla
+(celular, tablet, escritorio).
+*/
+
+/* Padding base para el contenido principal */
+main { padding: 0.5rem; }
+
+/*
+    Estos estilos aseguran que los elementos de formulario no se
+    desborden de su contenedor en pantallas pequenias.
+
+    max-width: 100%   -> Nunca mas ancho que su padre.
+    box-sizing: border-box -> El padding/borde se incluye en el ancho.
+
+    Sin box-sizing: border-box, un input con width: 100% y padding: 10px
+    tendria un ancho TOTAL de 100% + 20px, desbordando su contenedor.
+*/
+input, textarea, select, button {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/*
+    ============================================================
+    FLEXBOX PARA FORMULARIOS
+    ============================================================
+    display: flex -> Convierte el <form> en un contenedor flex.
+    flex-direction: column -> Los hijos se apilan VERTICALMENTE
+                              (label, input, label, input, ...).
+    gap: 0.5rem -> Espacio UNIFORME entre cada hijo.
+
+    gap vs margin:
+    - gap es MODERNO (Flexbox/Grid): aplica espacio entre elementos
+      sin afectar los bordes externos. Mas predecible.
+    - margin es el enfoque CLASICO: requiere cuidado con colapso de
+      margenes y los bordes del primer/ultimo elemento.
+
+    Con flex-direction: column + gap, el formulario se adapta
+    automaticamente a cualquier pantalla sin necesidad de media queries
+    para el layout interno.
+*/
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/*
+    ============================================================
+    MEDIA QUERY — @media
+    ============================================================
+    @media (min-width: 768px) -> "Cuando el ancho de la ventana sea
+    768px O MAS, aplica estos estilos."
+
+    768px es un breakpoint comun para tablets en orientacion horizontal.
+
+    Aqui, en pantallas grandes:
+    - max-width: 900px -> El contenido no se expande mas alla de 900px
+                          (evita lineas de texto demasiado largas).
+    - margin: 0 auto   -> Centra el contenido horizontalmente.
+    - padding: 1rem    -> Mas espacio interno que en movil (0.5rem arriba).
+
+    Esto es el patron "contenedor centrado con ancho maximo",
+    fundamental en disenio web responsivo.
+*/
+@media (min-width: 768px) {
+    main { max-width: 900px; margin: 0 auto; padding: 1rem; }
 }

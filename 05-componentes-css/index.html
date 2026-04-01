@@ -1,29 +1,147 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Document</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Componentes CSS</title>
     <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
-    <div class="card red-card">
-        <img class="card_img" src="assets/FotoYo.jpg">
-        <h1 class="card_title">Natalia Edith Mejia Bautista</h1>
-        <h2 class="card_subtitle">Estudiante de Matematicas</h2>
-        <p class="card_content">Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit porro animi, necessitatibus amet laborum fuga maxime dolores illum ullam vitae! Ipsa saepe placeat explicabo aspernatur soluta doloribus eius libero culpa!Lorem Lorem ipsum dolor, sit amet consectetur adipisicing elit. Culpa consectetur omnis odit fuga eveniet excepturi ipsam aut blanditiis error officia tempora quam modi, sunt iusto accusantium molestiae animi. Minus, quae. ipsum dolor sit amet consectetur adipisicing elit. Qui soluta, earum tempore dolores veniam libero ipsam, necessitatibus obcaecati, cumque consectetur odio doloremque tenetur! Error soluta reprehenderit animi quas eligendi incidunt.Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia molestias numquam iusto repudiandae quaerat laboriosam voluptates consectetur nemo, officia natus. Vero modi odit repellat quibusdam aperiam deserunt minima similique rem?</p>
-    </div>
 
-    <div class="card blue-card">
-        <img class="card_img" src="assets/FotoYo.jpg">
-        <h1 class="card_title">Natalia Edith Mejia Bautista</h1>
-        <h2 class="card_subtitle">Estudiante de Matematicas</h2>
-        <p class="card_content">Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit porro animi, necessitatibus amet laborum fuga maxime dolores illum ullam vitae! Ipsa saepe placeat explicabo aspernatur soluta doloribus eius libero culpa!Lorem Lorem ipsum dolor, sit amet consectetur adipisicing elit. Culpa consectetur omnis odit fuga eveniet excepturi ipsam aut blanditiis error officia tempora quam modi, sunt iusto accusantium molestiae animi. Minus, quae. ipsum dolor sit amet consectetur adipisicing elit. Qui soluta, earum tempore dolores veniam libero ipsam, necessitatibus obcaecati, cumque consectetur odio doloremque tenetur! Error soluta reprehenderit animi quas eligendi incidunt.Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia molestias numquam iusto repudiandae quaerat laboriosam voluptates consectetur nemo, officia natus. Vero modi odit repellat quibusdam aperiam deserunt minima similique rem?</p>
-    </div>
+    <!--
+    ========================================================================
+    EJERCICIO 05 - COMPONENTES CSS (TARJETAS / CARDS)
+    ========================================================================
 
-    <div class="card green-card">
-        <img class="card_img" src="assets/FotoYo.jpg">
-        <h1 class="card_title">Natalia Edith Mejia Bautista</h1>
-        <h2 class="card_subtitle">Estudiante de Matematicas</h2>
+    QUE ES UN "COMPONENTE" EN CSS?
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Un componente es una pieza de interfaz de usuario (UI) que es:
+      - AUTOCONTENIDA: tiene todo lo que necesita (HTML + CSS) para verse bien
+      - REUTILIZABLE: puedes copiar y pegar la misma estructura varias veces
+      - INDEPENDIENTE: cambiar un componente no afecta a los demas
+
+    En este ejercicio, cada "card" (tarjeta) es un componente. Observa como
+    las tres tarjetas comparten exactamente la misma estructura HTML y las
+    mismas clases CSS base (.card, .card_img, .card_title, etc.).
+
+    PATRON: CONTENEDOR > COMPONENTES REPETIDOS
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Este es uno de los patrones mas comunes en desarrollo web:
+      1. Un elemento CONTENEDOR que organiza la disposicion (layout)
+      2. Multiples COMPONENTES hijos con estructura identica
+
+    En nuestro caso:
+      - Contenedor: <main class="cards-container">  (organiza con Flexbox)
+      - Componentes: <article class="card">          (se repite 3 veces)
+
+    Este patron aparece en todas partes: galerias de productos, listados
+    de articulos, equipos de trabajo, portafolios, etc.
+
+    NOMENCLATURA TIPO BEM (Block Element Modifier)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Las clases siguen una convencion inspirada en BEM:
+      - BLOQUE:     .card              (el componente principal)
+      - ELEMENTOS:  .card_img          (imagen dentro de la card)
+                    .card_title        (titulo dentro de la card)
+                    .card_subtitle     (subtitulo dentro de la card)
+                    .card_content      (contenido dentro de la card)
+      - MODIFICADORES: .red-card       (variante roja del bloque .card)
+                       .blue-card      (variante azul)
+                       .green-card     (variante verde)
+
+    Nota: en BEM estricto se usa doble guion bajo para elementos (.card__title)
+    y doble guion medio para modificadores (.card--red). Aqui usamos una
+    version simplificada con guion bajo simple y clases separadas.
+    -->
+
+    <!--
+    CONTENEDOR PRINCIPAL: <main class="cards-container">
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    <main> es el elemento semantico que indica el contenido principal de la
+    pagina. Solo debe haber UN <main> por pagina.
+
+    role="main": Este atributo ARIA es REDUNDANTE en <main>, porque <main>
+    ya tiene el rol implicito de "main". Lo incluimos aqui con fines
+    didacticos para mostrar que existe, pero en produccion se puede omitir.
+    La regla general es: no agregar roles ARIA que ya estan implicitos en
+    el elemento semantico HTML5.
+
+    La clase "cards-container" convierte a <main> en un contenedor Flexbox
+    que organiza las tarjetas (ver styles.css para los detalles).
+    -->
+    <main class="cards-container" role="main">
+
+    <!--
+    COMPONENTE CARD #1 - Tarjeta Roja
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    POR QUE <article> Y NO <div>?
+    <article> es semanticamente correcto para contenido AUTOCONTENIDO:
+    contenido que tiene sentido por si solo, incluso fuera de la pagina.
+    Una tarjeta de perfil cumple este criterio: si la extraes de la pagina,
+    sigue teniendo significado completo (nombre, foto, descripcion).
+
+    <div> no tiene significado semantico; es solo un contenedor generico.
+    Usar <article> le dice a los motores de busqueda y lectores de pantalla:
+    "esto es una unidad de contenido independiente".
+
+    CLASES DOBLES: class="card red-card"
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Un elemento puede tener MULTIPLES clases separadas por espacios:
+      - "card"     -> aplica los estilos BASE del componente (bordes, sombra, etc.)
+      - "red-card" -> aplica los estilos MODIFICADORES (gradiente rojo)
+
+    Este patron de "clase base + clase modificadora" permite tener estilos
+    compartidos en .card y variaciones en .red-card / .blue-card / .green-card.
+
+    MULTIPLES <h2> EN UNA PAGINA
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Es perfectamente valido tener varios <h2> cuando cada uno encabeza
+    una seccion o componente independiente. Aqui cada <article> es una
+    unidad autonoma, asi que cada uno tiene su propio <h2>. No se necesita
+    un <h1> previo porque estas tarjetas podrian insertarse en cualquier
+    pagina que ya tenga su propia jerarquia de encabezados.
+    -->
+    <article class="card red-card">
+        <!-- Imagen de perfil con alt descriptivo para accesibilidad -->
+        <img class="card_img" src="assets/FotoYo.jpg" alt="Foto de perfil de Natalia Edith Mejia Bautista">
+        <!-- Titulo principal de la tarjeta -->
+        <h2 class="card_title">Natalia Edith Mejia Bautista</h2>
+        <!-- Subtitulo: informacion secundaria -->
+        <p class="card_subtitle">Estudiante de Matematicas</p>
+        <!-- Contenido descriptivo de la tarjeta -->
         <p class="card_content">Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit porro animi, necessitatibus amet laborum fuga maxime dolores illum ullam vitae! Ipsa saepe placeat explicabo aspernatur soluta doloribus eius libero culpa!Lorem Lorem ipsum dolor, sit amet consectetur adipisicing elit. Culpa consectetur omnis odit fuga eveniet excepturi ipsam aut blanditiis error officia tempora quam modi, sunt iusto accusantium molestiae animi. Minus, quae. ipsum dolor sit amet consectetur adipisicing elit. Qui soluta, earum tempore dolores veniam libero ipsam, necessitatibus obcaecati, cumque consectetur odio doloremque tenetur! Error soluta reprehenderit animi quas eligendi incidunt.Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia molestias numquam iusto repudiandae quaerat laboriosam voluptates consectetur nemo, officia natus. Vero modi odit repellat quibusdam aperiam deserunt minima similique rem?</p>
-    </div>
+    </article>
+
+    <!--
+    COMPONENTE CARD #2 - Tarjeta Azul
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Observa la REUTILIZACION: la estructura HTML es identica a la tarjeta
+    anterior. Solo cambia la clase modificadora: "blue-card" en vez de
+    "red-card". Esto demuestra el poder de los componentes CSS:
+    el mismo HTML + la misma clase base = apariencia consistente,
+    y una clase modificadora diferente = variacion de color.
+    -->
+    <article class="card blue-card">
+        <img class="card_img" src="assets/FotoYo.jpg" alt="Foto de perfil de Natalia Edith Mejia Bautista">
+        <h2 class="card_title">Natalia Edith Mejia Bautista</h2>
+        <p class="card_subtitle">Estudiante de Matematicas</p>
+        <p class="card_content">Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit porro animi, necessitatibus amet laborum fuga maxime dolores illum ullam vitae! Ipsa saepe placeat explicabo aspernatur soluta doloribus eius libero culpa!Lorem Lorem ipsum dolor, sit amet consectetur adipisicing elit. Culpa consectetur omnis odit fuga eveniet excepturi ipsam aut blanditiis error officia tempora quam modi, sunt iusto accusantium molestiae animi. Minus, quae. ipsum dolor sit amet consectetur adipisicing elit. Qui soluta, earum tempore dolores veniam libero ipsam, necessitatibus obcaecati, cumque consectetur odio doloremque tenetur! Error soluta reprehenderit animi quas eligendi incidunt.Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia molestias numquam iusto repudiandae quaerat laboriosam voluptates consectetur nemo, officia natus. Vero modi odit repellat quibusdam aperiam deserunt minima similique rem?</p>
+    </article>
+
+    <!--
+    COMPONENTE CARD #3 - Tarjeta Verde
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Tercera repeticion del mismo componente con modificador "green-card".
+    Si necesitaras una cuarta tarjeta, solo copiarias este <article>,
+    crearias una nueva clase modificadora (ej. ".yellow-card") en CSS,
+    y listo. Esa es la ventaja del enfoque basado en componentes.
+    -->
+    <article class="card green-card">
+        <img class="card_img" src="assets/FotoYo.jpg" alt="Foto de perfil de Natalia Edith Mejia Bautista">
+        <h2 class="card_title">Natalia Edith Mejia Bautista</h2>
+        <p class="card_subtitle">Estudiante de Matematicas</p>
+        <p class="card_content">Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit porro animi, necessitatibus amet laborum fuga maxime dolores illum ullam vitae! Ipsa saepe placeat explicabo aspernatur soluta doloribus eius libero culpa!Lorem Lorem ipsum dolor, sit amet consectetur adipisicing elit. Culpa consectetur omnis odit fuga eveniet excepturi ipsam aut blanditiis error officia tempora quam modi, sunt iusto accusantium molestiae animi. Minus, quae. ipsum dolor sit amet consectetur adipisicing elit. Qui soluta, earum tempore dolores veniam libero ipsam, necessitatibus obcaecati, cumque consectetur odio doloremque tenetur! Error soluta reprehenderit animi quas eligendi incidunt.Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia molestias numquam iusto repudiandae quaerat laboriosam voluptates consectetur nemo, officia natus. Vero modi odit repellat quibusdam aperiam deserunt minima similique rem?</p>
+    </article>
+    </main>
 </body>
 </html>
