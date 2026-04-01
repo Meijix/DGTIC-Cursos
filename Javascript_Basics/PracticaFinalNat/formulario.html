@@ -1,0 +1,106 @@
+            </p>
+            </p>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!--link rel="icon" href="../../../../favicon.ico"-->
+
+    <title>Catálogo de películas</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link href="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.3.26/theme-default.min.css"
+    rel="stylesheet" type="text/css" />
+    <!-- Custom styles for this template -->
+    <link href="css/offcanvas.css" rel="stylesheet">
+    <link href="css/estilo.css" rel="stylesheet">
+  </head>
+
+  <body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark">
+      <a class="navbar-brand mr-auto mr-lg-0" href="index.html">Video Risa</a>
+      <button class="navbar-toggler p-0 border-0" type="button" data-toggle="offcanvas">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="navbar-collapse offcanvas-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link active" href="formulario.html">Registro</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="catalogo.html" id="boton-obtener">Nuestro catálogo</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="buscar.html">Buscar</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+
+    <main role="main" class="container">
+      <div class="d-flex align-items-center p-3 my-3 text-white-50 bg-info rounded shadow-sm">
+        <img class="mr-3" src="images/boton-de-reproduccion.png" alt="" width="48" height="48">
+        <div class="lh-100">
+          <h6 class="mb-0 text-white lh-100">Registro</h6>
+          <small>Llena los siguientes campos</small>
+        </div>
+      </div>
+      <div class="my-3 p-3 bg-light rounded shadow-sm">
+        <div class="container col-md-10">
+          <form action="" id="form-registro" method="POST">
+            <div class="form-group">
+              <label for="nombre">Nombre</label>
+              <input type="text" class="form-control" id="nombre" placeholder="Escriba su nombre" data-validation="required alphanumeric" data-validation-allowing=" ">
+            </div>  
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" class="form-control" id="email" placeholder="Escriba su correo electrónico" data-validation="email">
+              <small id="email" class="form-text text-muted">No compartiremos su correo con nadie.</small>
+            </div>
+            <div class="form-group">
+              <label for="password_confirmation">Contraseña</label>
+              <input type="password" class="form-control" name="password_confirmation" id="password_confirmation" placeholder="Escriba su contraseña" data-validation="length" data-validation-length="min8">
+            </div>  
+            <div class="form-group">
+              <label for="password">Confirmación</label>
+              <input type="password" class="form-control" id="password" name="password" placeholder="Confirma tu contraseña" data-validation="confirmation">
+            </div>
+            <div class="form-group">
+              <label for="genero">¿Cuál es tu género favorito?</label>
+              <select class="form-control" id="genero" data-validation="required">
+                <option value="">Seleccione</option>
+                <option value="accion">Acción</option>
+                <option value="sci-fi">SCi-Fi</option>
+                <option value="terror">Terror</option>
+                <option value="suspenso">Suspenso</option>
+                <option value="anime">Anime</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="comentario">Comentario</label>
+              <textarea class="form-control" id="comentario" rows="3" data-validation="alphanumeric" data-validation-allowing=" " data-validation-optional="true"></textarea>
+              restan <span id="maxlength">50</span> caracteres<br />
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+        </div>        
+      </div>
+      <div id="modals"></div>
+    </main>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.3.26/jquery.form-validator.min.js"></script>
+    <script src="js/offcanvas.js"></script>
+    <script src="js/formulario.js"></script>
+  </body>
+</html>
