@@ -306,12 +306,12 @@
     Cada elemento semantico tiene un "rol implicito" que los lectores
     de pantalla entienden automaticamente:
 
-      <header>  --> rol implicito: "banner" (cuando es hijo directo de <body>)
-      <nav>     --> rol implicito: "navigation"
-      <main>    --> rol implicito: "main"
-      <footer>  --> rol implicito: "contentinfo" (cuando es hijo directo de <body>)
-      <aside>   --> rol implicito: "complementary"
-      <section> --> rol implicito: "region" (solo si tiene aria-label o aria-labelledby)
+      <header>  rol implicito: "banner" (cuando es hijo directo de <body>)
+      <nav>     rol implicito: "navigation"
+      <main>    rol implicito: "main"
+      <footer>  rol implicito: "contentinfo" (cuando es hijo directo de <body>)
+      <aside>   rol implicito: "complementary"
+      <section> rol implicito: "region" (solo si tiene aria-label o aria-labelledby)
 
     Entonces, role="banner" en <header> es REDUNDANTE — el <header>
     ya lo tiene implicitamente. Agregarlo no causa dano, pero tampoco
@@ -456,8 +456,8 @@
       Pregunta para decidir si algo es <article>:
       "Si extraigo este contenido y lo pongo en otro sitio,
        tiene sentido por si solo?"
-      Si la respuesta es si --> <article>
-      Si la respuesta es no --> <section> o <div>
+      Si la respuesta es si  <article>
+      Si la respuesta es no <section> o <div>
 
       DIFERENCIA ENTRE <section> Y <article>:
       - <section>: Parte de algo mas grande (capitulo de un libro)
@@ -512,7 +512,7 @@
             COMO FUNCIONA:
             El atributo "for" del <label> se conecta con el "id" del
             <input>. Deben ser EXACTAMENTE iguales:
-              <label for="nombre">  <-->  <input id="nombre">
+              <label for="nombre">  sii  <input id="nombre">
 
             POR QUE ES CRUCIAL (no es solo visual):
             1. LECTORES DE PANTALLA: Sin label-for-id, cuando un
@@ -589,8 +589,8 @@
 
             POR QUE cada radio necesita un ID UNICO:
             - El id conecta cada radio con SU label (for/id)
-            - id="mex" <--> <label for="mex">
-            - id="ext" <--> <label for="ext">
+            - id="mex" sii <label for="mex">
+            - id="ext" sii <label for="ext">
             - Si ambos tuvieran el mismo id, solo funcionaria el
               primero (id DEBE ser unico en todo el documento)
 
@@ -621,7 +621,7 @@
             instruccion. Como no tiene valor real, puedes validar que
             el usuario eligio algo real.
 
-            La conexion label for="sabor" <--> select id="sabor"
+            La conexion label for="sabor" sii select id="sabor"
             funciona igual que con inputs.
           -->
           <label for="sabor">Sabor favorito:</label><br>
@@ -731,13 +731,13 @@
 
   MAPA COMPLETO DE ELEMENTOS SEMANTICOS DE ESTA PAGINA:
   ========================================================
-  <header>  --> Banner/encabezado del sitio
-  <nav>     --> Bloque de navegacion
-  <main>    --> Contenido principal (unico por pagina)
-  <section> --> Agrupacion tematica dentro de main
-  <article> --> Contenido independiente dentro de section
-  <aside>   --> Contenido complementario/lateral
-  <footer>  --> Pie de pagina del sitio
+  <header>  Banner/encabezado del sitio
+  <nav>      Bloque de navegacion
+  <main>     Contenido principal (unico por pagina)
+  <section>  Agrupacion tematica dentro de main
+  <article>  Contenido independiente dentro de section
+  <aside>    Contenido complementario/lateral
+  <footer>   Pie de pagina del sitio
 
   Sin elementos semanticos, esto seria:
   <div class="header">

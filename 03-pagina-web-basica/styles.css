@@ -36,7 +36,7 @@ Tambien puedes escribir colores en HEXADECIMAL:
 - Cada par de digitos hex (b9, ff, f8) corresponde a un canal (R, G, B).
 */
 body{
-    background-color: rgb(185, 255, 248);
+    background-color: rgb(185, 186, 255);
     /*
         font-family define una LISTA de fuentes en orden de preferencia.
         El navegador usa la primera que este disponible en el sistema del usuario.
@@ -116,7 +116,7 @@ LA CLASE .box — CONTENEDOR CON SOMBRA Y DEGRADADO
         Con ambos offsets en 0 y blur en 35px, se crea un RESPLANDOR
         (glow) uniforme alrededor de toda la caja.
     */
-    box-shadow: 0 0 35px 0 #5d3469;
+    box-shadow: 0 0 35px 0 #24022f;
 
     /*
         ============================================================
@@ -164,7 +164,7 @@ LA CLASE .box — CONTENEDOR CON SOMBRA Y DEGRADADO
         Nota: Se usa "background" (shorthand) en lugar de "background-color"
         porque los gradientes son tecnicamente IMAGENES de fondo, no colores solidos.
     */
-    background: linear-gradient(to right, rgb(120, 120, 225),#b4daf9) ;
+    background: linear-gradient(to right, rgb(253, 253, 253),#f9b4e0) ;
 }
 
 /*
@@ -255,7 +255,7 @@ h2{
 p{
     color: rgb(23, 23, 118);
     font-size: 15px;
-    border: 2px solid rgb(83, 222, 230);
+    border: 2px solid rgb(108, 83, 230);
     border-radius: 5px;
     padding: 5px;
     margin: 5px;
@@ -273,7 +273,7 @@ p{
     es mejor ser consistente con una sola convencion de nombres.
 */
 .Elemento-diferente{
-    color: rgb(209, 25, 56);
+    color: rgb(209, 25, 172);
     font-size: 18px;
     font-weight: bold;
 }
@@ -282,7 +282,7 @@ input{
     padding: 5px;
     margin: 5px;
     border-radius: 5px;
-    border: 2px solid rgb(118, 151, 36);
+    border: 2px solid rgb(151, 36, 124);
 
 }
 
@@ -310,7 +310,7 @@ label{
         pero tiene reglas estrictas de sintaxis.
     */
     font: tahoma;
-    color: #006060;
+    color: #b012ff;
     font-style: italic;
 }
 
@@ -385,4 +385,131 @@ form {
 */
 @media (min-width: 768px) {
     main { max-width: 900px; margin: 0 auto; padding: 1rem; }
+}
+
+/*
+============================================================
+VISOR DE CONCEPTOS.md (index.html)
+============================================================
+*/
+.conceptos-details {
+    margin: 1rem 0 1.5rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.45);
+}
+
+.conceptos-details summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1.05rem;
+}
+
+.conceptos-hint {
+    margin: 0.75rem 0 0.5rem;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.conceptos-estado {
+    margin: 0.5rem 0;
+    font-size: 0.95rem;
+    color: #444;
+}
+
+.conceptos-md {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    line-height: 1.55;
+}
+
+.conceptos-md h1 {
+    font-size: 1.5rem;
+    margin: 1rem 0 0.5rem;
+}
+
+.conceptos-md h2 {
+    font-size: 1.25rem;
+    margin: 1.25rem 0 0.5rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.conceptos-md h3 {
+    font-size: 1.1rem;
+    margin: 1rem 0 0.35rem;
+}
+
+.conceptos-md p,
+.conceptos-md li {
+    margin: 0.5rem 0;
+}
+
+.conceptos-md ul,
+.conceptos-md ol {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+}
+
+.conceptos-md blockquote {
+    margin: 0.75rem 0;
+    padding: 0.35rem 0.75rem;
+    border-left: 4px solid rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.35);
+}
+
+.conceptos-md pre {
+    overflow-x: auto;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    background: rgba(30, 30, 40, 0.92);
+    color: #f0f0f0;
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+
+.conceptos-md code {
+    font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+    font-size: 0.9em;
+}
+
+.conceptos-md pre code {
+    font-size: inherit;
+}
+
+.conceptos-md :not(pre) > code {
+    padding: 0.15em 0.35em;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.conceptos-md table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.75rem 0;
+    font-size: 0.9rem;
+}
+
+.conceptos-md th,
+.conceptos-md td {
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    padding: 0.4rem 0.5rem;
+    text-align: left;
+}
+
+.conceptos-md th {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.conceptos-md hr {
+    margin: 1rem 0;
+    border: none;
+    border-top: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.nav-sep {
+    color: rgba(0, 0, 0, 0.35);
+    user-select: none;
 }
