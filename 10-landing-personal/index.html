@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- ==================================================================
+       META DESCRIPTION — Impacto en SEO y resultados de busqueda
+       ==================================================================
+       La etiqueta meta description NO afecta el ranking de Google
+       directamente, pero SI afecta el CTR (Click-Through Rate) porque
+       Google la usa como el fragmento de texto ("snippet") que aparece
+       debajo del titulo en los resultados de busqueda.
+
+       Ejemplo en Google:
+         Natalia Mejia - Developer Portfolio              <- <title>
+         Portfolio de Natalia Edith Mejia Bautista...     <- meta description
+
+       Buenas practicas:
+         - Entre 120 y 160 caracteres (Google trunca mas alla de ~155)
+         - Incluir palabras clave naturales (no keyword stuffing)
+         - Escribir como un mini-anuncio que invite a hacer clic
+         - Cada pagina debe tener una description unica
+
+       Si no la incluyes, Google genera un snippet automatico tomando
+       texto de la pagina, que puede no ser el mas representativo.
+       ================================================================== -->
+  <meta name="description" content="Portfolio de Natalia Edith Mejía Bautista — Junior Python & Full-Stack Developer | AI & RAG Specialist.">
+
+  <title>Natalia Mejía — Developer Portfolio</title>
+
+  <!-- ==================================================================
+       OPEN GRAPH — Meta tags para redes sociales
+       ==================================================================
+       Cuando alguien comparte tu URL en LinkedIn, Twitter, Facebook, Slack,
+       etc., estas plataformas leen las etiquetas Open Graph (og:) para
+       generar una tarjeta de vista previa ("link preview card").
+
+       Sin OG tags, la plataforma intenta adivinar: usa el <title>, toma
+       un fragmento de texto aleatorio, y a veces no muestra imagen.
+       Con OG tags, TU controlas exactamente que se muestra.
+
+       og:title       -> Titulo de la tarjeta (puede diferir del <title>)
+       og:description -> Texto descriptivo debajo del titulo
+       og:type        -> Tipo de contenido (website, article, profile, etc.)
+       og:url         -> URL canonica de la pagina
+       og:locale      -> Idioma del contenido
+       ================================================================== -->
+  <meta property="og:title" content="Natalia Mejía — Full-Stack Developer & AI Specialist">
+  <meta property="og:description" content="Matemática y desarrolladora de software con experiencia en React, Node.js, Python e integración de IA Generativa y RAG.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://mejbau.github.io/DGTIC-Cursos/10-landing-personal/">
+  <meta property="og:locale" content="es_MX">
+
+  <!-- ==================================================================
+       FAVICON — Icono de pestana del navegador
+       ==================================================================
+       El favicon es el pequeño icono que aparece en:
+         - La pestana del navegador (junto al titulo de la pagina)
+         - La barra de marcadores/favoritos
+         - El historial del navegador
+         - Resultados de busqueda en algunos navegadores
+
+       Usamos formato SVG porque:
+         1. Escala perfectamente a cualquier tamano (es vectorial)
+         2. Soporta CSS variables y media queries (dark mode)
+         3. Un solo archivo para todas las resoluciones
+         4. Peso minimo (~200 bytes vs ~15KB de un .ico multi-tamano)
+
+       type="image/svg+xml" indica al navegador el formato.
+       Navegadores que no soporten SVG favicon (solo IE11, ya muerto)
+       usarian el favicon.ico por defecto si existiera en la raiz.
+       ================================================================== -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+
+  <!-- ==================================================================
+       HOJA DE ESTILOS EXTERNA
+       ==================================================================
+       A diferencia del ejercicio 09 (que tenia CSS embebido en <style>),
+       aqui se usa un archivo externo.  Ventajas:
+         - Separacion de responsabilidades (HTML = estructura, CSS = estilo)
+         - El navegador puede cachear styles.css independientemente
+         - Multiples paginas pueden compartir la misma hoja de estilos
+       ================================================================== -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ==================================================================
+       SIDEBARS FIJOS — Patron de portfolios profesionales
+       ==================================================================
+       Los sidebars fijos (position: fixed) son un patron popularizado
+       por portfolios como brittanychiang.com.  Aparecen flotando a los
+       lados de la pantalla y permanecen visibles durante todo el scroll.
+
+       Ventajas:
+         - Los links sociales y el email siempre estan accesibles
+         - No ocupan espacio en el flujo del documento
+         - Efecto visual profesional con la linea decorativa vertical
+         - Se ocultan automaticamente en movil (no hay espacio)
+
+       writing-mode: vertical-rl en el email rota el texto 90 grados
+       para que se lea de abajo hacia arriba, un patron visual comun
+       en portfolios de desarrolladores.
+       ================================================================== -->
+  <div class="side-social" aria-label="Redes sociales">
+    <a href="https://github.com/mejbau" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+    </a>
+    <a href="https://linkedin.com/in/nataliamejia3008" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+    </a>
+  </div>
+
+  <div class="side-email" aria-label="Correo electrónico">
+    <a href="mailto:natalia.mejbau@gmail.com">natalia.mejbau@gmail.com</a>
+  </div>
+
+  <!-- ==================================================================
+       SKIP LINK — Patron de accesibilidad para navegacion por teclado
+       ==================================================================
+       Mismo patron que en el ejercicio 09, pero aqui el CSS esta en el
+       archivo externo (styles.css).
+
+       Recapitulacion: este enlace es invisible hasta que recibe :focus
+       (cuando el usuario presiona Tab).  Permite a usuarios de teclado
+       y lectores de pantalla saltar directamente al contenido principal,
+       evitando tener que navegar por todos los enlaces del header.
+
+       Es requisito de accesibilidad WCAG 2.1, criterio 2.4.1 (Bypass
+       Blocks): "se proporciona un mecanismo para saltar bloques de
+       contenido que se repiten en multiples paginas".
+       ================================================================== -->
+  <a class="skip-link" href="#about">Saltar al contenido</a>
+
+  <!-- ════ HEADER ════ -->
+  <header role="banner">
+    <div class="nav-inner">
+
+      <!-- ================================================================
+           aria-hidden="true" en elementos decorativos
+           ================================================================
+           El logo "<NM />" es puramente decorativo — imita la sintaxis
+           de un componente JSX/React pero no transmite informacion
+           significativa.
+
+           aria-hidden="true" lo OCULTA del arbol de accesibilidad.
+           Sin este atributo, un lector de pantalla leeria literalmente:
+           "menor que, N, M, barra, mayor que" — confuso e inutil.
+
+           Regla general: usa aria-hidden="true" en:
+             - Iconos decorativos
+             - Separadores visuales
+             - Texto que duplica informacion ya disponible
+             - Emojis usados como adorno
+
+           NUNCA uses aria-hidden="true" si el elemento es la UNICA
+           forma de transmitir esa informacion (en ese caso, anade un
+           aria-label o texto alternativo).
+           ================================================================ -->
+      <span class="logo" aria-hidden="true">&lt;NM /&gt;</span>
+
+      <!-- ============================================================
+           HAMBURGER BUTTON — Menu movil
+           ============================================================
+           Este boton es visible solo en pantallas < 768px (controlado
+           por CSS media queries).  Al hacer clic, un script JS toglea
+           la clase "nav-open" en el <body>, que:
+             1. Transforma las tres lineas en una "X" (via CSS transforms)
+             2. Desliza el panel de navegacion desde la derecha
+             3. Anade un backdrop semitransparente
+
+           Atributos de accesibilidad:
+             aria-label:    nombre descriptivo para lectores de pantalla
+             aria-expanded: indica si el menu esta abierto (true) o
+                            cerrado (false) — se actualiza con JS
+             aria-controls: referencia el id del elemento que controla
+                            (el <ul> de navegacion)
+
+           Las tres <span> dentro del boton son las lineas del icono
+           hamburguesa (☰).  Se animan con CSS transitions cuando el
+           body tiene la clase "nav-open".
+           ============================================================ -->
+      <button class="hamburger" aria-label="Abrir menú" aria-expanded="false" aria-controls="nav-menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav aria-label="Navegación principal">
+        <ul id="nav-menu">
+          <!-- ============================================================
+               Spans .nav-number — Patron decorativo de portfolios dev
+               ============================================================
+               Los numeros "01.", "02.", etc. son un patron visual comun
+               en portfolios de desarrolladores (popularizado por sitios
+               como brittanychiang.com y temas de terminal).
+
+               Funcionan como indicadores visuales de orden pero NO son
+               semanticamente una lista ordenada (el contenido de las
+               secciones no depende del orden numerico).
+
+               El span es inline y se estiliza con color acento en CSS.
+               No necesita aria-hidden porque su contenido ("01.") no
+               confunde a los lectores de pantalla — se lee como parte
+               natural del texto del enlace.
+               ============================================================ -->
+          <li><a href="#about"><span class="nav-number">01.</span>Sobre mí</a></li>
+          <li><a href="#experience"><span class="nav-number">02.</span>Experiencia</a></li>
+          <li><a href="#projects"><span class="nav-number">03.</span>Proyectos</a></li>
+          <li><a href="#education"><span class="nav-number">04.</span>Educación</a></li>
+          <li><a href="#contact"><span class="nav-number">05.</span>Contacto</a></li>
+          <li><a href="/Users/mejbau/Downloads/CV 2026 Nat.pdf" class="btn-resume" target="_blank">Resume</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ==================================================================
+         HERO SECTION — Seccion de pantalla completa
+         ==================================================================
+         El "hero" es la primera seccion visible al cargar la pagina.
+         Ocupa toda la altura del viewport (min-height: 100vh en CSS)
+         para crear un impacto visual inmediato.
+
+         Este patron se conoce como "full-viewport hero" o "above the fold"
+         (tomado del periodismo: la informacion arriba del pliegue del
+         periodico es lo primero que ve el lector).
+
+         aria-label="Presentacion" da un nombre accesible a la seccion.
+         Usamos aria-label (texto directo) en vez de aria-labelledby
+         (referencia a un id) porque no hay un heading dedicado que
+         funcione como titulo de esta seccion — el h1 es el nombre
+         personal, no un titulo de seccion como "Presentacion".
+
+         Comparacion:
+           aria-label="Presentacion"     <- texto inline, no necesita
+                                            otro elemento
+           aria-labelledby="about-heading" <- referencia un <h2 id="about-heading">
+                                              que ya existe en el HTML
+         ================================================================== -->
+    <section class="hero" aria-label="Presentación">
+      <div class="hero-inner">
+        <!-- ============================================================
+             Clase .fade-in — Revelacion progresiva con IntersectionObserver
+             ============================================================
+             Cada elemento con clase "fade-in" empieza invisible
+             (opacity:0, translateY(20px) definidos en styles.css).
+
+             El script al final de la pagina usa IntersectionObserver
+             para detectar cuando el elemento entra al viewport y
+             anade la clase "visible", que activa la transicion a
+             opacity:1 y translateY(0).
+
+             Este patron de "revelacion progresiva" (progressive
+             disclosure) mejora la percepcion de velocidad: en vez de
+             mostrar todo de golpe, los elementos aparecen conforme
+             el usuario avanza, dirigiendo la atencion secuencialmente.
+             ============================================================ -->
+        <span class="hero-greeting hero-stagger">Hola, mi nombre es</span>
+        <h1 class="hero-stagger">
+          Natalia Mejía.
+          <span class="subtitle">Full-Stack Developer &amp; AI Specialist.</span>
+        </h1>
+        <p class="hero-description hero-stagger">
+          Matemática y desarrolladora de software con experiencia profesional
+          construyendo aplicaciones full-stack (React, Node.js, Python) e
+          integrando soluciones de IA Generativa y RAG. Actualmente cursando
+          la Maestría en Ciencias de la Computación en la UNAM.
+        </p>
+        <a href="#projects" class="btn hero-stagger">Ver mis proyectos</a>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         SECCION ABOUT — Usa aria-labelledby
+         ==================================================================
+         aria-labelledby="about-heading" referencia el <h2> con
+         id="about-heading" que ya existe mas abajo.  El lector de
+         pantalla anuncia: "region, Sobre mi" al entrar.
+
+         ¿Cuando usar aria-label vs aria-labelledby?
+           - aria-labelledby: cuando YA existe un heading visible que
+             describe la seccion.  Evita duplicar texto.
+           - aria-label: cuando NO hay un heading visible, o el heading
+             existente no describe bien la seccion (como en el hero).
+         ================================================================== -->
+    <section id="about" aria-labelledby="about-heading">
+      <div class="section-inner">
+        <h2 class="section-heading" id="about-heading">
+          <span class="number">01.</span> Sobre mí
+        </h2>
+        <div class="about-grid">
+          <div class="about-text fade-in">
+            <p>
+              Soy Natalia Edith Mejía Bautista, matemática egresada con
+              <strong>Mención Honorífica</strong> de la Facultad de Ciencias de la UNAM
+              y actualmente estudiante de la <strong>Maestría en Ciencias de la
+              Computación e Ingeniería</strong> en la UNAM, con enfoque en desarrollo
+              de software, bases de datos y sistemas distribuidos.
+            </p>
+            <p>
+              Mi trayectoria me ha llevado desde la simulación numérica de alta
+              fidelidad en <strong>Propulsión UNAM</strong> (2do lugar en Spaceport
+              America Cup 2024) hasta el desarrollo de software empresarial escalable.
+              He investigado en el <strong>Multi-Agent Robotics Lab de UC San Diego</strong>
+              y co-autoré investigación publicada sobre optimización de bases de datos
+              vectoriales para agentes de IA.
+            </p>
+            <p>Tecnologías con las que trabajo:</p>
+            <ul>
+              <li>Python</li>
+              <li>JavaScript / TypeScript</li>
+              <li>React / Next.js</li>
+              <li>Node.js / RESTful APIs</li>
+              <li>SQL / Postgres / MongoDB</li>
+              <li>LLMs / RAG / Prompt Engineering</li>
+              <li>Laravel / PHP</li>
+              <li>Git</li>
+            </ul>
+          </div>
+          <div class="about-photo fade-in">
+            <!-- ============================================================
+                 ATRIBUTOS DE IMAGEN: loading, width, height
+                 ============================================================
+                 loading="lazy"
+                   Atributo nativo HTML que DIFIERE la carga de la imagen
+                   hasta que este cerca del viewport.  El navegador no
+                   descarga la imagen hasta que el usuario hace scroll
+                   hacia ella (aproximadamente 1250px antes en Chrome).
+
+                   Beneficios:
+                     - Reduce el tiempo de carga inicial de la pagina
+                     - Ahorra ancho de banda en conexiones lentas
+                     - Mejora metricas de rendimiento (LCP, FCP)
+
+                   NO uses loading="lazy" en imagenes above-the-fold
+                   (como el hero), porque retrasarias su aparicion.
+                   Aqui es correcto porque la foto esta en la seccion
+                   About, que requiere scroll para llegar.
+
+                 width="260" height="260"
+                   Estos atributos le dicen al navegador las dimensiones
+                   INTRINSECAS de la imagen ANTES de descargarla.
+
+                   ¿Por que importa?  Sin ellos, el navegador no sabe
+                   cuanto espacio reservar.  Cuando la imagen finalmente
+                   carga, el contenido "salta" hacia abajo — esto se
+                   llama CLS (Cumulative Layout Shift), una metrica
+                   de Core Web Vitals que Google usa para ranking.
+
+                   Con width y height, el navegador calcula el aspect
+                   ratio (260/260 = 1:1) y reserva el espacio correcto
+                   aunque la imagen aun no haya cargado.
+
+                   Nota: CSS puede sobreescribir estas dimensiones
+                   (max-width: 100%; height: auto;), pero el navegador
+                   ya sabe el ratio para reservar espacio.
+                 ============================================================ -->
+            <img src="assets/FotoYo.jpg"
+                 alt="Foto de Natalia Edith Mejía Bautista"
+                 width="260" height="260"
+                 loading="lazy">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════ EXPERIENCE ════ -->
+    <section id="experience" aria-labelledby="experience-heading">
+      <div class="section-inner">
+        <h2 class="section-heading" id="experience-heading">
+          <span class="number">02.</span> Experiencia
+        </h2>
+
+        <div class="experience-list">
+
+          <article class="experience-item fade-in">
+            <div class="exp-header">
+              <h3>Software Developer</h3>
+              <span class="exp-company">SSO Agency (SmartAlly)</span>
+              <span class="exp-date">Jul 2025 — Mar 2026</span>
+            </div>
+            <ul class="exp-details">
+              <li>Lideré la transformación arquitectónica de SmartAlly de un dashboard
+                  mono-canal a una aplicación empresarial multi-tenant escalable.</li>
+              <li>Integré canales omnicanal (WhatsApp Business, Instagram, Telegram,
+                  Email) mediante RESTful APIs para crear un inbox unificado centralizado.</li>
+              <li>Implementé un sistema de Retrieval-Augmented Generation (RAG) con
+                  capacidades avanzadas de LLM para respuestas contextuales basadas en
+                  documentos del usuario.</li>
+            </ul>
+            <div class="project-tags">
+              <span>React</span>
+              <span>Node.js</span>
+              <span>Python</span>
+              <span>LLMs</span>
+              <span>RAG</span>
+              <span>REST APIs</span>
+            </div>
+          </article>
+
+          <article class="experience-item fade-in">
+            <div class="exp-header">
+              <h3>Software Development &amp; Research Fellow</h3>
+              <span class="exp-company">DGTIC, UNAM</span>
+              <span class="exp-date">Sept 2024 — Jun 2025</span>
+            </div>
+            <ul class="exp-details">
+              <li>Investigué y optimicé sistemas RAG para agentes de IA, analizando
+                  parámetros de chunk size y overlap en bases de datos vectoriales.</li>
+              <li>Apoyé el desarrollo de servicios backend y sistemas de información
+                  institucional con Laravel (PHP).</li>
+              <li>Co-autoré investigación publicada: <em>"Analysis of Vector Chunk and
+                  Overlap Sizes in Optimizing Vector Databases for AI Agents Automation."</em></li>
+            </ul>
+            <div class="project-tags">
+              <span>RAG</span>
+              <span>Vector Databases</span>
+              <span>Laravel</span>
+              <span>PHP</span>
+              <span>Python</span>
+            </div>
+          </article>
+
+          <article class="experience-item fade-in">
+            <div class="exp-header">
+              <h3>Engineering Lead &amp; Simulation Architect</h3>
+              <span class="exp-company">Propulsión UNAM, Facultad de Ingeniería</span>
+              <span class="exp-date">3.5 años</span>
+            </div>
+            <ul class="exp-details">
+              <li>Diseñé un simulador de vuelo suborbital 3-DOF completo en Python,
+                  con solvers ODE personalizados e interfaz gráfica para el equipo.</li>
+              <li>Colaboré con un equipo multidisciplinario para validar diseños
+                  aerodinámicos, logrando el <strong>2do lugar en Spaceport America
+                  Cup 2024</strong>.</li>
+            </ul>
+            <div class="project-tags">
+              <span>Python</span>
+              <span>NumPy</span>
+              <span>SciPy</span>
+              <span>GUI</span>
+              <span>ODE Solvers</span>
+            </div>
+          </article>
+
+          <article class="experience-item fade-in">
+            <div class="exp-header">
+              <h3>Research Intern (Robotics &amp; Algorithms)</h3>
+              <span class="exp-company">UC San Diego — ENLACE</span>
+              <span class="exp-date">Jun 2022 — Jul 2022</span>
+            </div>
+            <ul class="exp-details">
+              <li>Programé filtros de Kalman extendidos (EKF) en Python y desplegué
+                  algoritmos en plataformas autónomas TurtleBot para localización
+                  en tiempo real.</li>
+            </ul>
+            <div class="project-tags">
+              <span>Python</span>
+              <span>EKF</span>
+              <span>ROS</span>
+              <span>Robótica</span>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ════ PROJECTS ════ -->
+    <section id="projects" aria-labelledby="projects-heading">
+      <div class="section-inner">
+        <h2 class="section-heading" id="projects-heading">
+          <span class="number">03.</span> Proyectos destacados
+        </h2>
+        <div class="projects-grid">
+
+          <!-- Proyecto 1 -->
+          <article class="project-card fade-in">
+            <div class="project-card-top">
+              <!-- aria-hidden="true": el emoji es decorativo,
+                   no aporta informacion semantica.  Sin esto, un lector
+                   de pantalla leeria "robot" o similar. -->
+              <span class="project-icon" aria-hidden="true">&#129302;</span>
+              <div class="project-links">
+                <!-- ========================================================
+                     rel="noopener noreferrer" en target="_blank"
+                     ========================================================
+                     Seguridad contra "tabnabbing":
+                     Sin rel="noopener", la pagina que se abre en la nueva
+                     pestana puede acceder a window.opener (tu pagina) y
+                     redirigirla a un sitio de phishing.
+
+                     noopener:   bloquea el acceso a window.opener
+                     noreferrer: ademas, no envia la cabecera HTTP Referer
+                                 (protege la privacidad del usuario)
+
+                     aria-label proporciona un nombre descriptivo accesible
+                     para el enlace, ya que el texto visible "GitHub" no
+                     distingue entre los multiples enlaces GitHub de la pagina.
+                     ======================================================== -->
+                <a href="https://github.com/mejbau"
+                   target="_blank" rel="noopener noreferrer"
+                   aria-label="Ver repositorio de SmartAlly en GitHub">GitHub</a>
+              </div>
+            </div>
+            <h3>SmartAlly — Plataforma Omnicanal</h3>
+            <p>Aplicación empresarial multi-tenant con inbox unificado, integración
+               de WhatsApp/Instagram/Telegram/Email y agente IA con RAG.</p>
+            <div class="project-tags">
+              <span>React</span>
+              <span>Node.js</span>
+              <span>LLMs</span>
+              <span>RAG</span>
+            </div>
+          </article>
+
+          <!-- Proyecto 2 -->
+          <article class="project-card fade-in">
+            <div class="project-card-top">
+              <span class="project-icon" aria-hidden="true">&#128218;</span>
+              <div class="project-links">
+                <a href="https://github.com/mejbau"
+                   target="_blank" rel="noopener noreferrer"
+                   aria-label="Ver investigación RAG">GitHub</a>
+              </div>
+            </div>
+            <h3>Optimización de Vector Databases para IA</h3>
+            <p>Investigación publicada sobre análisis de chunk size y overlap en
+               bases de datos vectoriales para optimizar agentes de IA.</p>
+            <div class="project-tags">
+              <span>Python</span>
+              <span>RAG</span>
+              <span>Vector DB</span>
+              <span>Research</span>
+            </div>
+          </article>
+
+          <!-- Proyecto 3 -->
+          <article class="project-card fade-in">
+            <div class="project-card-top">
+              <span class="project-icon" aria-hidden="true">&#127891;</span>
+              <div class="project-links">
+                <a href="https://github.com/mejbau"
+                   target="_blank" rel="noopener noreferrer"
+                   aria-label="Ver repositorio de EduFlow en GitHub">GitHub</a>
+              </div>
+            </div>
+            <h3>EduFlow — Learning Management System</h3>
+            <p>Arquitectura de sistema y diseño de base de datos SQL relacional
+               escalable para tracking de flujos de aprendizaje complejos.</p>
+            <div class="project-tags">
+              <span>SQL</span>
+              <span>System Design</span>
+              <span>PRD</span>
+            </div>
+          </article>
+
+          <!-- Proyecto 4 -->
+          <article class="project-card fade-in">
+            <div class="project-card-top">
+              <span class="project-icon" aria-hidden="true">&#128640;</span>
+              <div class="project-links">
+                <a href="https://github.com/mejbau"
+                   target="_blank" rel="noopener noreferrer"
+                   aria-label="Ver repositorio de Propulsión UNAM en GitHub">GitHub</a>
+              </div>
+            </div>
+            <h3>Simulador de Vuelo Suborbital 3-DOF</h3>
+            <p>Simulador completo en Python con solvers ODE personalizados y GUI.
+               Proyecto de Propulsión UNAM — 2do lugar Spaceport America Cup 2024.</p>
+            <div class="project-tags">
+              <span>Python</span>
+              <span>NumPy</span>
+              <span>SciPy</span>
+              <span>GUI</span>
+            </div>
+          </article>
+
+          <!-- Proyecto 5 -->
+          <article class="project-card fade-in">
+            <div class="project-card-top">
+              <span class="project-icon" aria-hidden="true">&#128193;</span>
+              <div class="project-links">
+                <a href="https://github.com/mejbau/DGTIC-Cursos"
+                   target="_blank" rel="noopener noreferrer"
+                   aria-label="Ver repositorio de Cursos DGTIC en GitHub">GitHub</a>
+              </div>
+            </div>
+            <h3><a href="../index.html">Cursos DGTIC — Desarrollo Web</a></h3>
+            <p>Colección de ejercicios progresivos de HTML, CSS, Flexbox, Grid
+               y diseño responsivo desarrollados durante el curso de la DGTIC-UNAM.</p>
+            <div class="project-tags">
+              <span>HTML5</span>
+              <span>CSS3</span>
+              <span>Flexbox</span>
+              <span>CSS Grid</span>
+            </div>
+          </article>
+
+          <!-- Proyecto 6 -->
+          <article class="project-card fade-in">
+            <div class="project-card-top">
+              <span class="project-icon" aria-hidden="true">&#129302;</span>
+              <div class="project-links">
+                <a href="https://github.com/mejbau"
+                   target="_blank" rel="noopener noreferrer"
+                   aria-label="Ver repositorio de Kalman Filter en GitHub">GitHub</a>
+              </div>
+            </div>
+            <h3>Filtros de Kalman — TurtleBots</h3>
+            <p>Implementación de filtros de Kalman extendidos para localización de
+               robots autónomos en el Multi-Agent Robotics Lab de UC San Diego.</p>
+            <div class="project-tags">
+              <span>Python</span>
+              <span>EKF</span>
+              <span>ROS</span>
+              <span>Robótica</span>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ════ EDUCATION ════ -->
+    <section id="education" aria-labelledby="education-heading">
+      <div class="section-inner">
+        <h2 class="section-heading" id="education-heading">
+          <span class="number">04.</span> Educación
+        </h2>
+
+        <div class="education-list">
+
+          <article class="education-item fade-in">
+            <div class="edu-header">
+              <h3>M.Sc. en Ciencias de la Computación e Ingeniería</h3>
+              <span class="edu-school">Universidad Nacional Autónoma de México (UNAM)</span>
+              <span class="edu-date">2025 — Presente</span>
+            </div>
+            <ul class="exp-details">
+              <li>Enfoque: Desarrollo de Software, Bases de Datos y Sistemas Distribuidos.</li>
+              <li>Tesis: Aplicación de lógica epistémica y estructuras topológicas para
+                  modelar flujo de información en redes multi-agente.</li>
+            </ul>
+          </article>
+
+          <article class="education-item fade-in">
+            <div class="edu-header">
+              <h3>Licenciatura en Matemáticas</h3>
+              <span class="edu-school">Facultad de Ciencias, UNAM</span>
+              <span class="edu-date">Ago 2020 — Dic 2023</span>
+            </div>
+            <ul class="exp-details">
+              <li>Graduada con <strong>Mención Honorífica</strong>.</li>
+            </ul>
+          </article>
+
+        </div>
+
+        <!-- ── Idiomas ── -->
+        <h3 class="languages-heading fade-in">Idiomas</h3>
+        <div class="languages-grid fade-in">
+          <div class="lang-item">
+            <span class="lang-name">Español</span>
+            <div class="lang-bar"><div class="lang-fill" style="width:100%"></div></div>
+            <span class="lang-level">Nativo</span>
+          </div>
+          <div class="lang-item">
+            <span class="lang-name">Inglés</span>
+            <div class="lang-bar"><div class="lang-fill" style="width:85%"></div></div>
+            <span class="lang-level">Avanzado (C1/B2+)</span>
+          </div>
+          <div class="lang-item">
+            <span class="lang-name">Japonés</span>
+            <div class="lang-bar"><div class="lang-fill" style="width:25%"></div></div>
+            <span class="lang-level">Básico (A2)</span>
+          </div>
+          <div class="lang-item">
+            <span class="lang-name">Italiano</span>
+            <div class="lang-bar"><div class="lang-fill" style="width:20%"></div></div>
+            <span class="lang-level">Básico</span>
+          </div>
+          <div class="lang-item">
+            <span class="lang-name">Francés</span>
+            <div class="lang-bar"><div class="lang-fill" style="width:15%"></div></div>
+            <span class="lang-level">Básico (A1)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════ CONTACT ════ -->
+    <section id="contact" class="contact" aria-labelledby="contact-heading">
+      <div class="section-inner">
+        <h2 class="section-heading" id="contact-heading">
+          <span class="number">05.</span> Contacto
+        </h2>
+        <p class="contact-text fade-in">
+          Estoy abierta a oportunidades de desarrollo full-stack, proyectos de IA
+          y colaboraciones de investigación. No dudes en escribirme.
+        </p>
+        <div class="contact-methods fade-in">
+          <a href="mailto:natalia.mejbau@gmail.com" aria-label="Enviar correo personal">
+            natalia.mejbau@gmail.com
+          </a>
+          <a href="mailto:nmejia30@ciencias.unam.mx" aria-label="Enviar correo institucional">
+            nmejia30@ciencias.unam.mx
+          </a>
+          <a href="https://linkedin.com/in/nataliamejia3008"
+             target="_blank" rel="noopener noreferrer"
+             aria-label="Ver perfil de LinkedIn">
+            LinkedIn
+          </a>
+        </div>
+        <a href="mailto:natalia.mejbau@gmail.com" class="btn fade-in">Escríbeme</a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================================================================
+       SCROLL-TO-TOP — Boton flotante para volver al inicio
+       ==================================================================
+       Este boton aparece cuando el usuario ha scrolleado mas de 500px
+       (controlado por JS).  Usa position:fixed para flotar sobre el
+       contenido en la esquina inferior derecha.
+
+       aria-label es necesario porque el boton solo contiene un simbolo
+       visual (flecha), no texto descriptivo.
+       ================================================================== -->
+  <button class="scroll-top" aria-label="Volver al inicio">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+  </button>
+
+  <!-- ════ FOOTER ════ -->
+  <footer role="contentinfo">
+    <p>Diseñado y construido por
+      <a href="https://github.com/mejbau" target="_blank" rel="noopener noreferrer">
+        Natalia Mejía
+      </a>
+    </p>
+  </footer>
+
+  <!-- ==================================================================
+       SCROLL ANIMATION — IntersectionObserver
+       ==================================================================
+       Este script reemplaza el enfoque manual del ejercicio 09 con la
+       API moderna IntersectionObserver.
+
+       COMPARACION CON EL EJERCICIO 09:
+
+       Ejercicio 09 — Listener de scroll + getBoundingClientRect():
+         window.addEventListener('scroll', () => {
+           elements.forEach(el => {
+             const rect = el.getBoundingClientRect();
+             if (rect.top <= windowHeight * 0.75) el.classList.add('show');
+           });
+         });
+
+         Problemas:
+         1. El evento 'scroll' se dispara CIENTOS de veces por segundo
+            mientras el usuario desplaza la pagina.
+         2. Cada llamada a getBoundingClientRect() puede forzar un
+            "reflow" del layout (el navegador recalcula posiciones).
+         3. El callback recorre TODOS los elementos en cada disparo,
+            incluso los que ya fueron animados.
+         4. Necesita un listener adicional en 'load' para los elementos
+            above-the-fold.
+
+       Ejercicio 10 — IntersectionObserver (este archivo):
+         const observer = new IntersectionObserver(callback, options);
+         elements.forEach(el => observer.observe(el));
+
+         Ventajas:
+         1. DECLARATIVO: le dices al navegador "avisame cuando estos
+            elementos entren al viewport" y el se encarga internamente.
+         2. MAS EFICIENTE: el navegador optimiza las comprobaciones
+            internamente — no hay un callback por cada pixel de scroll.
+         3. NO NECESITA 'load': el Observer se activa automaticamente
+            para elementos ya visibles al momento de observarlos.
+         4. CONFIGURABLE: el objeto options permite definir:
+            - threshold: que porcentaje del elemento debe ser visible
+              (0.15 = 15% visible)
+            - rootMargin: margenes virtuales alrededor del viewport
+            - root: un contenedor personalizado en vez del viewport
+
+       El IntersectionObserver es el estandar moderno para:
+         - Animaciones de scroll (como aqui)
+         - Lazy loading de imagenes (antes de que loading="lazy" existiera)
+         - Infinite scrolling
+         - Tracking de visibilidad para analytics
+
+       Soporte: todos los navegadores modernos.  Para IE11, se necesita
+       un polyfill (pero IE11 ya esta oficialmente muerto).
+       ================================================================== -->
+  <script>
+    /* ── IntersectionObserver para .fade-in ── */
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
+    document.querySelectorAll('.fade-in').forEach((el) => observer.observe(el));
+
+    /* ── Hamburger menu toggle ── */
+    const hamburger = document.querySelector('.hamburger');
+    const navMenu = document.getElementById('nav-menu');
+
+    hamburger.addEventListener('click', () => {
+      const isOpen = document.body.classList.toggle('nav-open');
+      hamburger.setAttribute('aria-expanded', isOpen);
+    });
+
+    /* Cerrar menu al hacer clic en un enlace de navegacion */
+    navMenu.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        document.body.classList.remove('nav-open');
+        hamburger.setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    /* ── Scroll-to-top button ── */
+    const scrollBtn = document.querySelector('.scroll-top');
+
+    window.addEventListener('scroll', () => {
+      scrollBtn.classList.toggle('show', window.scrollY > 500);
+    }, { passive: true });
+
+    scrollBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  </script>
+
+</body>
+</html>

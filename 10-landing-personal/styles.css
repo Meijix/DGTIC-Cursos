@@ -1,0 +1,1209 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Landing Personal — CSS (mobile-first)
+   ══════════════════════════════════════════════════════════════════════
+
+   ARQUITECTURA CSS DE ESTE ARCHIVO
+   =================================
+   Este archivo sigue una organizacion en capas, de lo mas general a lo
+   mas especifico.  Esta estructura se conoce como ITCSS (Inverted
+   Triangle CSS) simplificada:
+
+     1. VARIABLES    — Design tokens: colores, fuentes, espaciados
+     2. RESET        — Normalizar el comportamiento entre navegadores
+     3. BASE         — Estilos de elementos HTML sin clases (body, a, img)
+     4. COMPONENTES  — Bloques reutilizables (.btn, .project-card, etc.)
+     5. UTILIDADES   — Clases de proposito unico (.fade-in)
+     6. RESPONSIVE   — Media queries al final (mobile-first: min-width)
+
+   Esta organizacion evita conflictos de especificidad: las reglas mas
+   generales van primero y las mas especificas al final.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════════════
+   1. VARIABLES — Design Tokens
+   ══════════════════════════════════════════════════════════════════════
+
+   CONVENCION DE NOMBRES: Semanticos vs Literales
+   ================================================
+   Aqui se usan nombres SEMANTICOS que describen el ROL del color, no
+   su apariencia literal:
+
+     --navy       (rol: fondo principal)         vs  --azuloscuro (literal)
+     --accent     (rol: color de enfasis/CTA)    vs  --verdeclaro (literal)
+     --slate      (rol: texto secundario)        vs  --grisazulado (literal)
+
+   ¿Por que importa?
+   Si manana el acento cambia de verde (#64ffda) a naranja (#ff6347),
+   con nombres semanticos solo cambias el VALOR de --accent y todo se
+   actualiza.  Con nombres literales, --verdeclaro apuntando a naranja
+   es contradictorio y confuso.
+
+   Otras variables del sistema de diseno:
+     --font-sans / --font-mono: familias tipograficas con fallbacks
+     --radius: border-radius consistente en toda la UI
+     --transition: duracion + timing reutilizable (DRY)
+   ══════════════════════════════════════════════════════════════════════ */
+:root {
+  --navy:       #0a192f;
+  --navy-light: #112240;
+  --slate:      #8892b0;
+  --light-slate:#a8b2d1;
+  --lightest:   #ccd6f6;
+  --white:      #e6f1ff;
+  --accent:     #64ffda;
+  --accent-dark:#3ad4ad;
+  --font-sans:  'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono:  'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --radius:     8px;
+  --transition: 0.25s ease;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   2. RESET UNIVERSAL
+   ══════════════════════════════════════════════════════════════════════
+
+   *, *::before, *::after — selecciona TODO: elementos reales Y
+   pseudo-elementos (::before, ::after).
+
+   box-sizing: border-box
+   =========================
+   Esta es LA regla de reset mas importante en CSS moderno.
+   El modelo de caja por defecto (content-box) calcula width/height
+   como SOLO el contenido; padding y border se SUMAN por fuera.
+   Ejemplo: width:200px + padding:20px + border:2px = 244px reales.
+
+   Con border-box, width:200px INCLUYE padding y border.
+   200px es 200px, punto.  Mucho mas intuitivo.
+
+   Aplicarlo a * asegura que TODOS los elementos (incluidos los de
+   terceros o futuros) se comporten de la misma manera.  Es la
+   convencion universal recomendada por MDN, CSS-Tricks, y todos
+   los frameworks modernos (Bootstrap, Tailwind, etc.).
+   ══════════════════════════════════════════════════════════════════════ */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   scroll-behavior: smooth  —  Scroll suave nativo con CSS
+   ══════════════════════════════════════════════════════════════════════
+   Esta propiedad CSS es la alternativa NATIVA al scroll suave por
+   JavaScript que usamos en el ejercicio 09:
+     element.scrollIntoView({ behavior: 'smooth' });
+
+   Con una sola linea de CSS, TODOS los clicks en enlaces internos
+   (href="#seccion") hacen scroll suave automaticamente, sin
+   necesidad de JavaScript.
+
+   Ventajas sobre la solucion JS del ejercicio 09:
+     - Cero JavaScript necesario para navegacion interna
+     - Respeta la preferencia del usuario: si tiene configurado
+       "prefers-reduced-motion: reduce", algunos navegadores
+       desactivan la animacion automaticamente
+     - Funciona con la navegacion del navegador (boton atras)
+
+   Limitaciones:
+     - Menos control que JS (no puedes ajustar duracion o easing)
+     - Solo aplica a la navegacion dentro de la misma pagina
+
+   scroll-padding-top: 5rem
+   =========================
+   Cuando el usuario hace click en <a href="#about">, el navegador
+   hace scroll hasta que #about este al TOP del viewport.  Pero
+   nuestro header fijo CUBRE los primeros ~5rem del viewport.
+
+   Sin scroll-padding-top, el titulo de la seccion queda DETRAS
+   del header.  Con 5rem de padding, el navegador hace scroll hasta
+   5rem ANTES del elemento, dejando espacio para el header fijo.
+
+   Este valor debe coincidir aproximadamente con la altura del header.
+   ══════════════════════════════════════════════════════════════════════ */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--navy);
+  color: var(--slate);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+img { max-width: 100%; height: auto; display: block; }
+a   { color: var(--accent); text-decoration: none; transition: color var(--transition); }
+a:hover { color: var(--white); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   SKIP LINK — Accesibilidad (version CSS externo)
+   ══════════════════════════════════════════════════════════════════════
+   Mismo patron que el ejercicio 09, pero aqui en archivo CSS separado.
+   top: -100% lo oculta visualmente; :focus lo trae a top: 0.
+   z-index: 2000 lo pone por encima de TODO (incluido el header a 1000).
+   ══════════════════════════════════════════════════════════════════════ */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  background: var(--accent);
+  color: var(--navy);
+  padding: 0.5rem 1rem;
+  border-radius: 0 0 var(--radius) var(--radius);
+  font-weight: 700;
+  z-index: 2000;
+}
+.skip-link:focus { top: 0; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   HEADER / NAV — Header fijo con efecto de vidrio esmerilado
+   ══════════════════════════════════════════════════════════════════════ */
+header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+
+  /* ════════════════════════════════════════════════════════════════════
+     rgba() con canal alfa — Fondos semi-transparentes
+     ════════════════════════════════════════════════════════════════════
+     rgba(10, 25, 47, 0.92) es el color --navy (#0a192f) pero con
+     92% de opacidad (8% transparente).
+
+     rgba = Red, Green, Blue, Alpha
+     El cuarto valor (Alpha) va de 0.0 (totalmente transparente) a
+     1.0 (totalmente opaco).
+
+     Esto permite que el contenido que pasa DEBAJO del header fijo
+     se vea ligeramente a traves, creando profundidad visual.
+     ════════════════════════════════════════════════════════════════════ */
+  background: rgba(10, 25, 47, 0.92);
+
+  /* ════════════════════════════════════════════════════════════════════
+     backdrop-filter: blur() — Efecto de vidrio esmerilado (glassmorphism)
+     ════════════════════════════════════════════════════════════════════
+     backdrop-filter aplica filtros graficos al area DETRAS del elemento
+     (no al elemento mismo, sino a lo que se ve a traves de el).
+
+     blur(10px) desenfoca el contenido que pasa debajo del header,
+     creando el efecto de "vidrio esmerilado" (frosted glass) popularizado
+     por macOS y iOS.
+
+     Requiere que el elemento tenga un fondo semi-transparente (como el
+     rgba de arriba) — si el fondo es 100% opaco, no se ve nada detras
+     y el blur no tiene efecto visible.
+
+     SOPORTE DE NAVEGADORES:
+       - Chrome 76+, Edge 79+, Safari 9+, Firefox 103+
+       - Para Firefox antes de 103, necesitabas una flag experimental
+       - Para IE11: no tiene soporte (pero el fondo rgba funciona como
+         fallback aceptable — se ve semi-transparente sin desenfoque)
+
+     Nota: backdrop-filter es costoso en rendimiento.  El navegador
+     debe renderizar lo que esta debajo, aplicar el filtro y componer.
+     Usalo solo en elementos pequenos como headers o modales, no en
+     secciones completas.
+     ════════════════════════════════════════════════════════════════════ */
+  backdrop-filter: blur(10px);
+  padding: 0.75rem 1.5rem;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+}
+
+header .nav-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-family: var(--font-mono);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+nav ul li a {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius);
+  transition: background var(--transition), color var(--transition);
+  color: var(--lightest);
+}
+
+nav ul li a:hover,
+nav ul li a:focus {
+  background: rgba(100, 255, 218, 0.1);
+  color: var(--accent);
+}
+
+nav ul li a .nav-number {
+  color: var(--accent);
+  margin-right: 0.25rem;
+}
+
+/* ── Resume button in nav ── */
+.btn-resume {
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  color: var(--accent) !important;
+  padding: 0.4rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  transition: background var(--transition);
+}
+
+.btn-resume:hover {
+  background: rgba(100, 255, 218, 0.1);
+  color: var(--accent) !important;
+}
+
+/* ── Hamburger button ── */
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 1100;
+}
+
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--accent);
+  margin: 5px 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Hamburger -> X animation when nav-open */
+.nav-open .hamburger span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.nav-open .hamburger span:nth-child(2) {
+  opacity: 0;
+}
+.nav-open .hamburger span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SECCIONES — Estilos compartidos
+   ══════════════════════════════════════════════════════════════════════ */
+section {
+  padding: 5rem 1.5rem 3rem;
+}
+
+.section-inner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2.5rem;
+  font-size: 1.6rem;
+  color: var(--lightest);
+  white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   ::after PSEUDO-ELEMENTO — Linea decorativa despues del heading
+   ══════════════════════════════════════════════════════════════════════
+   ::before y ::after son pseudo-elementos que crean "hijos virtuales"
+   del elemento, sin necesidad de anadir HTML extra.
+
+   ::before -> se inserta ANTES del contenido del elemento
+   ::after  -> se inserta DESPUES del contenido del elemento
+
+   Aqui, ::after crea una linea horizontal que se extiende hasta
+   llenar el espacio restante (width: 100% dentro de un flex container).
+
+   Requisitos para que funcionen:
+     1. DEBE tener content: '' (aunque sea vacio)
+     2. DEBE tener display (block o inline-block) si quieres dimensiones
+
+   Usos comunes de pseudo-elementos:
+     - Lineas decorativas (como aqui)
+     - Iconos antes de listas (li::before { content: '>' })
+     - Overlays sobre imagenes
+     - Bordes decorativos (como en .about-photo::after mas abajo)
+     - Contadores CSS
+   ══════════════════════════════════════════════════════════════════════ */
+.section-heading::after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 1px;
+  background: var(--navy-light);
+}
+
+.section-heading .number {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  color: var(--accent);
+  font-weight: 400;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   HERO — Seccion de pantalla completa
+   ══════════════════════════════════════════════════════════════════════
+   min-height: 100vh hace que la seccion ocupe AL MENOS toda la
+   altura del viewport (100vh = 100% del viewport height).
+
+   display: flex + align-items: center centra verticalmente el
+   contenido dentro de esa altura completa.
+
+   padding-top: 5rem compensa el header fijo para que el contenido
+   no quede escondido detras de el.
+   ══════════════════════════════════════════════════════════════════════ */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding-top: 5rem;
+}
+
+.hero-inner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.hero-greeting {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  color: var(--accent);
+  margin-bottom: 1.25rem;
+  display: block;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   clamp() — Tipografia responsiva sin media queries
+   ══════════════════════════════════════════════════════════════════════
+   clamp(MIN, PREFERIDO, MAX) devuelve:
+     - MIN si el valor preferido calculado es menor que MIN
+     - MAX si el valor preferido calculado es mayor que MAX
+     - PREFERIDO en cualquier otro caso
+
+   clamp(2rem, 6vw, 3.5rem) significa:
+     - Minimo: 2rem (32px) — en pantallas muy pequenas
+     - Preferido: 6vw (6% del ancho del viewport) — escala fluidamente
+     - Maximo: 3.5rem (56px) — en pantallas muy grandes
+
+   En un viewport de 375px (movil): 6vw = 22.5px -> se usa 2rem (32px)
+   En un viewport de 768px (tablet): 6vw = 46px -> se usa 46px
+   En un viewport de 1200px (desktop): 6vw = 72px -> se usa 3.5rem (56px)
+
+   Esto reemplaza el patron antiguo de multiples media queries:
+     h1 { font-size: 2rem; }
+     @media (min-width: 600px) { h1 { font-size: 2.5rem; } }
+     @media (min-width: 900px) { h1 { font-size: 3.5rem; } }
+
+   Con clamp(), una sola linea logra una transicion FLUIDA y continua
+   en vez de saltos discretos.  Soporte: todos los navegadores modernos.
+   ══════════════════════════════════════════════════════════════════════ */
+.hero h1 {
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: 700;
+  color: var(--lightest);
+  line-height: 1.15;
+}
+
+.hero h1 .subtitle {
+  display: block;
+  color: var(--slate);
+  margin-top: 0.25rem;
+}
+
+.hero-description {
+  max-width: 520px;
+  margin: 1.5rem 0 2rem;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.btn {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 0.85rem 1.75rem;
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  color: var(--accent);
+  transition: background var(--transition);
+}
+
+.btn:hover,
+.btn:focus {
+  background: rgba(100, 255, 218, 0.1);
+  color: var(--accent);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SIDEBARS FIJOS — Links sociales y email
+   ══════════════════════════════════════════════════════════════════════ */
+.side-social,
+.side-email {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  z-index: 10;
+}
+
+.side-social {
+  left: 2rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.side-social::after,
+.side-email::after {
+  content: '';
+  display: block;
+  width: 1px;
+  height: 90px;
+  background: var(--slate);
+}
+
+.side-social a {
+  color: var(--slate);
+  transition: color var(--transition), transform var(--transition);
+}
+
+.side-social a:hover {
+  color: var(--accent);
+  transform: translateY(-3px);
+}
+
+.side-social a svg {
+  display: block;
+}
+
+.side-email {
+  right: 2rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.side-email a {
+  writing-mode: vertical-rl;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--slate);
+  letter-spacing: 0.1em;
+  transition: color var(--transition), transform var(--transition);
+}
+
+.side-email a:hover {
+  color: var(--accent);
+  transform: translateY(-3px);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   HERO STAGGER — Animacion escalonada de entrada
+   ══════════════════════════════════════════════════════════════════════
+   Cada elemento del hero aparece con un retardo incremental (100ms,
+   200ms, 300ms, 400ms) creando un efecto de "cascada" que dirige
+   la atencion del visitante de arriba hacia abajo.
+
+   Se usa @keyframes en vez de transition porque la animacion se
+   ejecuta automaticamente al cargar la pagina (no necesita un trigger
+   como hover o una clase JS).
+
+   animation-fill-mode: both mantiene el estado final (opacity:1)
+   despues de que la animacion termina.
+   ══════════════════════════════════════════════════════════════════════ */
+@keyframes heroFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-stagger {
+  opacity: 0;
+  animation: heroFadeUp 0.6s ease forwards;
+}
+
+.hero-stagger:nth-child(1) { animation-delay: 0.1s; }
+.hero-stagger:nth-child(2) { animation-delay: 0.2s; }
+.hero-stagger:nth-child(3) { animation-delay: 0.4s; }
+.hero-stagger:nth-child(4) { animation-delay: 0.6s; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   ABOUT
+   ══════════════════════════════════════════════════════════════════════ */
+.about-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.about-text p {
+  margin-bottom: 1rem;
+}
+
+.about-text ul {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem 1rem;
+  margin-top: 1rem;
+}
+
+.about-text ul li {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--light-slate);
+}
+
+/* Pseudo-elemento ::before para crear el marcador de lista personalizado.
+   content: '> ' muestra un triangulo de acento antes de cada item.
+   Esto reemplaza list-style-type con un marcador totalmente controlable. */
+.about-text ul li::before {
+  content: '▹ ';
+  color: var(--accent);
+}
+
+.about-photo {
+  position: relative;
+  max-width: 260px;
+  margin: 0 auto;
+}
+
+.about-photo img {
+  border-radius: var(--radius);
+  filter: grayscale(30%);
+  transition: filter var(--transition);
+}
+
+.about-photo:hover img {
+  filter: grayscale(0);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   ::after como BORDE DECORATIVO — Marco desplazado en la foto
+   ══════════════════════════════════════════════════════════════════════
+   Este pseudo-elemento crea un rectangulo con borde de color acento
+   posicionado 14px abajo y a la derecha de la foto, simulando un
+   "marco desplazado" que da profundidad y elegancia.
+
+   position: absolute lo posiciona relativo a .about-photo (que tiene
+   position: relative).
+
+   z-index: -1 lo coloca DETRAS de la foto, asi se ve como un marco.
+
+   La transicion en top/left permite que al hacer hover, el marco
+   se acerque a la foto (de 14px a 8px), creando un efecto interactivo
+   sutil.
+
+   Este es un ejemplo clasico de como los pseudo-elementos eliminan
+   la necesidad de <div> extras en el HTML solo para decoracion.
+   ══════════════════════════════════════════════════════════════════════ */
+.about-photo::after {
+  content: '';
+  position: absolute;
+  top: 14px; left: 14px;
+  width: 100%; height: 100%;
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  z-index: -1;
+  transition: top var(--transition), left var(--transition);
+}
+
+.about-photo:hover::after {
+  top: 8px;
+  left: 8px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   EXPERIENCE — Timeline de experiencia profesional
+   ══════════════════════════════════════════════════════════════════════
+   Usa Flexbox en columna para apilar las tarjetas de experiencia
+   verticalmente con un gap uniforme entre ellas.
+   ══════════════════════════════════════════════════════════════════════ */
+.experience-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* border-left: 3px solid var(--accent) crea una linea lateral que
+   funciona como indicador visual de "timeline", conectando visualmente
+   las experiencias y dando un punto de referencia al ojo. */
+.experience-item {
+  background: var(--navy-light);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  border-left: 3px solid var(--accent);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+/* translateX(5px) en hover: un desplazamiento horizontal sutil que
+   refuerza la idea de "timeline" (la tarjeta se "separa" del borde). */
+.experience-item:hover {
+  transform: translateX(5px);
+  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+
+.exp-header {
+  margin-bottom: 1rem;
+}
+
+.exp-header h3 {
+  font-size: 1.15rem;
+  color: var(--lightest);
+  margin-bottom: 0.25rem;
+}
+
+.exp-company {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--accent);
+  margin-bottom: 0.25rem;
+}
+
+.exp-date {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--slate);
+}
+
+.exp-details {
+  list-style: none;
+  margin: 0.75rem 0 1rem;
+}
+
+.exp-details li {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  padding-left: 1.25rem;
+  position: relative;
+}
+
+/* Marcador personalizado con posicion absoluta: el triangulo se
+   posiciona a la izquierda del texto sin alterar el flujo normal. */
+.exp-details li::before {
+  content: '▹';
+  color: var(--accent);
+  position: absolute;
+  left: 0;
+}
+
+.experience-item .project-tags {
+  margin-top: 0.5rem;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   PROJECTS — CSS Grid para tarjetas de altura uniforme
+   ══════════════════════════════════════════════════════════════════════
+
+   CSS GRID vs FLEXBOX — ¿Cuando usar cada uno?
+   ==============================================
+   Aqui se usa GRID para las tarjetas de proyectos. ¿Por que no Flexbox?
+
+   GRID es ideal para LAYOUTS BIDIMENSIONALES (filas Y columnas):
+     - Todas las tarjetas de una fila tienen la misma altura automaticamente
+     - Las columnas se definen de forma explicita y predecible
+     - grid-template-columns: repeat(3, 1fr) = exactamente 3 columnas
+       iguales, sin calculos de flex-basis ni min-width
+
+   FLEXBOX es ideal para LAYOUTS UNIDIMENSIONALES (una fila O una columna):
+     - Distribuir elementos en una direccion
+     - Cuando los elementos deben crecer/encogerse dinamicamente
+     - Cuando no necesitas alineacion entre filas
+
+   En el ejercicio 09, las skill-items usan Flexbox con flex-wrap,
+   que funciona pero tiene un problema: la ultima fila puede tener
+   tarjetas mas anchas si sobra espacio (flex-grow:1 las estira).
+   Con Grid, cada celda mantiene su tamano definido.
+
+   Base mobile-first: empieza con 1 columna, luego 2 (tablet), luego 3
+   (desktop) — ver las media queries al final del archivo.
+   ══════════════════════════════════════════════════════════════════════ */
+.projects-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   PATRON transform + opacity — Animaciones "baratas" (compositor-only)
+   ══════════════════════════════════════════════════════════════════════
+   La transicion en hover usa SOLO transform y box-shadow:
+     transform: translateY(-5px) -> mueve la tarjeta 5px arriba
+     box-shadow: sombra mas pronunciada
+
+   ¿Por que estas propiedades son "baratas" de animar?
+
+   El navegador renderiza en 3 fases:
+     1. LAYOUT   — calcula tamanos y posiciones de TODOS los elementos
+     2. PAINT    — rellena pixeles (colores, bordes, sombras, texto)
+     3. COMPOSITE — combina capas, aplica transform y opacity
+
+   transform y opacity SOLO requieren la fase 3 (composite):
+     - El navegador promueve el elemento a su propia "capa GPU"
+     - La GPU mueve/cambia la opacidad de esa capa sin recalcular nada
+     - Resultado: animacion fluida a 60fps
+
+   Propiedades que disparan LAYOUT (CARAS de animar):
+     width, height, margin, padding, top, left, font-size
+     -> recalcula posicion de TODOS los elementos afectados
+
+   Propiedades que disparan PAINT (moderadas):
+     background, color, border, box-shadow
+     -> repinta pixeles pero no recalcula posiciones
+
+   box-shadow aqui dispara paint, pero es aceptable para un hover
+   puntual.  En animaciones continuas (scroll), evitalo.
+   ══════════════════════════════════════════════════════════════════════ */
+.project-card {
+  background: var(--navy-light);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.project-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.project-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.project-icon {
+  font-size: 2rem;
+}
+
+.project-links {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.project-links a {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--light-slate);
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--slate);
+  border-radius: var(--radius);
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.project-links a:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.project-card h3 {
+  font-size: 1.15rem;
+  color: var(--lightest);
+  margin-bottom: 0.75rem;
+}
+
+.project-card h3 a {
+  color: inherit;
+}
+.project-card h3 a:hover { color: var(--accent); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   flex: 1 — Shorthand y su expansion completa
+   ══════════════════════════════════════════════════════════════════════
+   flex: 1 se expande a:
+     flex-grow:   1   -> el elemento PUEDE crecer para llenar espacio
+     flex-shrink: 1   -> el elemento PUEDE encogerse si falta espacio
+     flex-basis:  0%  -> el tamano base es 0 (todo el tamano viene de grow)
+
+   OJO: flex: 1 NO es lo mismo que flex: 1 1 auto.
+     flex: 1     -> flex: 1 1 0%   (basis es 0%)
+     flex: auto  -> flex: 1 1 auto (basis es el tamano del contenido)
+     flex: none  -> flex: 0 0 auto (no crece ni encoge)
+
+   Aqui, flex:1 en el parrafo de la tarjeta hace que el texto ocupe
+   TODO el espacio vertical disponible, empujando los tags al fondo
+   de la tarjeta.  Esto garantiza que los tags esten siempre alineados
+   en la parte inferior, sin importar cuanto texto tenga cada tarjeta.
+   ══════════════════════════════════════════════════════════════════════ */
+.project-card p {
+  font-size: 0.9rem;
+  flex: 1;
+  margin-bottom: 1.25rem;
+}
+
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.project-tags span {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--accent);
+  background: rgba(100, 255, 218, 0.08);
+  padding: 0.2rem 0.6rem;
+  border-radius: 50px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   EDUCATION
+   ══════════════════════════════════════════════════════════════════════ */
+.education-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.education-item {
+  background: var(--navy-light);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  border-left: 3px solid var(--accent);
+}
+
+.edu-header {
+  margin-bottom: 0.75rem;
+}
+
+.edu-header h3 {
+  font-size: 1.15rem;
+  color: var(--lightest);
+  margin-bottom: 0.25rem;
+}
+
+.edu-school {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--accent);
+  margin-bottom: 0.25rem;
+}
+
+.edu-date {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--slate);
+}
+
+/* ── Languages ── */
+.languages-heading {
+  font-size: 1.15rem;
+  color: var(--lightest);
+  margin-bottom: 1.5rem;
+}
+
+.languages-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.lang-item {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.lang-name {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--lightest);
+}
+
+.lang-bar {
+  height: 6px;
+  background: var(--navy-light);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.lang-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 1s ease;
+}
+
+.lang-level {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--slate);
+  white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SCROLL-TO-TOP BUTTON
+   ══════════════════════════════════════════════════════════════════════ */
+.scroll-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  background: var(--navy);
+  color: var(--accent);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease, background 0.3s ease;
+  z-index: 900;
+}
+
+.scroll-top.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.scroll-top:hover {
+  background: rgba(100, 255, 218, 0.1);
+}
+
+.scroll-top svg {
+  display: block;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   CONTACT
+   ══════════════════════════════════════════════════════════════════════ */
+.contact {
+  text-align: center;
+  padding-bottom: 5rem;
+}
+
+.contact .section-heading {
+  justify-content: center;
+}
+
+/* Se oculta la linea decorativa ::after en la seccion de contacto
+   porque el heading esta centrado y la linea no queda bien visualmente. */
+.contact .section-heading::after {
+  display: none;
+}
+
+.contact-text {
+  max-width: 500px;
+  margin: 0 auto 2rem;
+  font-size: 1rem;
+}
+
+.contact-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.contact-methods a {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--lightest);
+}
+
+.contact-methods a:hover {
+  color: var(--accent);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   FOOTER
+   ══════════════════════════════════════════════════════════════════════ */
+footer {
+  text-align: center;
+  padding: 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--slate);
+}
+
+footer a { color: var(--accent); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   ANIMACIONES — Clase .fade-in controlada por IntersectionObserver
+   ══════════════════════════════════════════════════════════════════════
+   Estado inicial: invisible y desplazado 20px abajo.
+   La transicion define COMO se anima (0.6s con curva ease).
+
+   IMPORTANTE: solo animamos opacity y transform porque son
+   "compositor-only" — el navegador las delega a la GPU sin
+   recalcular layout ni repintar pixeles.  Ver la explicacion
+   detallada en la seccion PROJECTS arriba.
+
+   La clase .visible se anade desde JavaScript (IntersectionObserver
+   en index.html) cuando el elemento entra al viewport.
+   ══════════════════════════════════════════════════════════════════════ */
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   RESPONSIVE — Estrategia MOBILE-FIRST con min-width
+   ══════════════════════════════════════════════════════════════════════
+
+   MOBILE-FIRST significa que el CSS BASE (arriba) esta disenado para
+   la pantalla mas pequena.  Las media queries ANADEN complejidad
+   progresivamente para pantallas mas grandes.
+
+   Usamos @media (min-width: ...) que significa:
+     "Aplica estas reglas cuando la pantalla sea X pixeles o MAS"
+
+   Contraste con el ejercicio 09 que usa DESKTOP-FIRST:
+     @media (max-width: 768px) -> "aplica cuando sea 768px o MENOS"
+
+   Breakpoints elegidos:
+     600px  — Tablet: suficiente espacio para 2 columnas de tarjetas
+     860px  — Desktop: espacio para layout horizontal (about) y 3 columnas
+
+   Estos breakpoints NO se basan en dispositivos especificos (iPhone,
+   iPad, etc.) sino en donde el DISENO necesita cambiar.  Los
+   dispositivos cambian cada ano; los breakpoints basados en contenido
+   son atemporales.
+
+   Beneficios de mobile-first:
+     1. Performance: los dispositivos moviles (mas lentos) procesan
+        el CSS base mas ligero; las reglas extras solo se evaluan
+        en dispositivos mas potentes.
+     2. Contenido prioritario: te obliga a decidir que es esencial
+        para la experiencia movil y que es "extra" para desktop.
+     3. Es la recomendacion de Google para Core Web Vitals.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════════════
+   RESPONSIVE — Mobile (< 768px): Hamburger menu + panel deslizante
+   ══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 767px) {
+  .hamburger {
+    display: block;
+  }
+
+  nav ul {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: min(75vw, 300px);
+    height: 100vh;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    background: var(--navy-light);
+    box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+
+  .nav-open nav ul {
+    transform: translateX(0);
+  }
+
+  nav ul li a {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+  }
+
+  /* Backdrop overlay when menu is open */
+  .nav-open::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 25, 47, 0.7);
+    z-index: 999;
+  }
+}
+
+/* ── Tablet (600px+) ── */
+@media (min-width: 600px) {
+  .projects-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .languages-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .lang-item {
+    grid-template-columns: 80px 1fr auto;
+  }
+}
+
+/* ── Desktop (860px+) ── */
+@media (min-width: 860px) {
+  section { padding: 6rem 2rem 4rem; }
+
+  .about-grid {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .about-text { flex: 1; }
+  .about-photo { flex-shrink: 0; }
+
+  .projects-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .contact-methods {
+    flex-direction: row;
+    justify-content: center;
+    gap: 2rem;
+  }
+}
+
+/* ── Wide desktop (1080px+): Show sidebars ── */
+@media (min-width: 1080px) {
+  .side-social,
+  .side-email {
+    display: flex;
+  }
+
+  /* Move scroll-to-top left so it doesn't overlap email sidebar */
+  .scroll-top {
+    right: 5rem;
+  }
+}
