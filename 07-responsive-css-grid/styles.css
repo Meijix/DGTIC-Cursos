@@ -1,0 +1,116 @@
+:root {
+  --azulclaro: #7ee8fd;
+  --azulmarino: #101348;
+  --moradooscuro: #9e19dc;
+  --grande: 1rem;
+  --mediano: 12px;
+}
+
+ul {
+  list-style: none;
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+}
+
+li {
+  padding: 0.5rem;
+  background: var(--azulclaro);
+  color: var(--azulmarino);
+  border-radius: 0.5rem;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  font-size: var(--grande);
+  font-weight: bold;
+  background: var(--azulmarino);
+  color: var(--azulclaro);
+}
+
+section {
+  font-size: var(--mediano);
+  background: #d2a8fd;
+  color: var(--azulmarino);
+  flex: 1 1 100%;
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+article {
+  background: var(--moradooscuro);
+  padding: 1rem;
+}
+
+aside {
+  background: var(--azulclaro);
+  color: var(--azulmarino);
+  flex: 1 1 100%;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+a:hover {
+  color: white;
+}
+
+li:hover{
+  background-color: var(--moradooscuro);
+}
+
+.contenedor {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.grid {
+  display: grid;
+  row-gap: 10px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  padding: 0 5px;
+}
+
+.op-procede {
+  display: flex;
+  flex-direction: row;
+  gap: 2px; /* Puedes ajustar el espacio entre los elementos si es necesario */
+  align-items: center; /* Alinea verticalmente el radio button y el label */
+}
+
+@media (min-width: 798px) {
+  .contenedor {
+    display: flex;
+  }
+
+  section {
+    flex: 1 1 66.66%;
+  }
+
+  aside {
+    flex: 1 1 33.33%;
+  }
+
+  .grid {
+    grid-template-columns: repeat(6, 16.66%);
+  }
+
+  .nombre {
+    grid-column: 1 / 4;}
+
+  .correo {
+    grid-column: 4 / 7;
+  }
+
+  .procede {
+    grid-column: 1/3;
+  }
+
+  .sabor {
+    grid-column: 3/7;
+  }
+
+}

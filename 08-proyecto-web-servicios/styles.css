@@ -1,0 +1,138 @@
+:root{
+  --azulclaro: #b0e1ff;
+  --naranja:#fbb273;
+  --verde:#8cfe84;
+  --morado:#efa3fb;
+  --azulmarino: #001f3f;
+  --mediano: 1rem;
+}
+
+/* Centrar logo */
+header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0px;
+}
+
+.logo{
+  width: 150px;
+  height: auto;
+}
+
+nav{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 0px;
+  flex-direction: column;
+  align-items: center;
+}
+
+ul{
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+  color: rgba(106, 102, 102, 0.906);
+
+}
+
+li{
+  margin: 10px;
+  padding: 5px 15px;
+  border-radius: 10px;
+  flex: 1, 1, 25%;
+  font-family: sans-serif;
+  font-weight: 900;
+}
+
+
+li:hover{
+  background-color: #a9c0ed;
+}
+
+.contenedor{
+  display: flex;
+  flex-direction: column;
+}
+
+img{
+  width: 60%;
+  height: auto;
+  display: block;
+  margin: 0 auto ;
+}
+
+.cajita{
+  flex: 1 1 100%;
+  border-radius: 20px;
+  margin: 10px;
+  padding: 10px;
+  align-content: center;
+  text-align: justify;
+  
+}
+
+.titulo-cajita{
+  font: 1.3em sans-serif;;
+  color: white;
+  text-shadow: #244467 3px 2px;
+  border-bottom: 5px solid white;
+}
+
+
+.sistemas {
+  background: linear-gradient(180deg, var(--azulclaro), #ffffff);
+
+}
+
+.aplicaciones {
+  background: linear-gradient(180deg, var(--naranja), #ffffff);
+}
+
+.web {
+  background: linear-gradient(180deg, var(--verde), #ffffff);
+}
+
+.consultorias {
+  background: linear-gradient(180deg, var(--morado), #ffffff);
+}
+
+
+/* Computadoras (una fila) */
+@media screen and (min-width: 768px) {
+  .contenedor {
+    flex-direction: row;
+    flex-wrap: nowrap;
+  }
+
+  .cajita {
+    flex: 1 1 calc(100% / 4); /* Cada cajita ocupa un cuarto del ancho */
+  }
+
+  header {
+    justify-content: left;
+  }
+}
+
+
+/* Tablets (dos columnas) */
+@media screen and (min-width: 560px) and (max-width: 768px) {
+  .contenedor {
+    display: flex;      
+    flex-direction: row;  
+    flex-wrap: wrap; 
+    justify-content: center;
+  }
+
+  .cajita {
+    flex: 1 1 45%;
+    margin: 8px;            
+    box-sizing: border-box; 
+  }
+
+  li{
+    flex: 1 1 25%;
+  }
+}

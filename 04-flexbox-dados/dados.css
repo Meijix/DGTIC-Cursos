@@ -1,0 +1,93 @@
+.contenedor {
+    background-color: darkgreen;
+    margin: auto;
+    display: flex;
+    flex-wrap: wrap;
+  
+  }
+
+  .contenedor .cara1,
+  .contenedor .cara2,
+  .contenedor .cara3,
+  .contenedor .cara4,
+  .contenedor .cara5,
+  .contenedor .cara6 
+  {
+    background: white;
+    width: 100px;
+    height: 100px;
+    padding: 10px;
+    margin: 10px;
+    box-shadow: 2px 2px 3px #000;
+    display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        position: relative;
+  }
+      
+      .punto{
+          width: 20px;
+          height: 20px;
+          background: black;
+          border-radius: 10px;
+          display: flex;
+  
+      }
+      .contenedor .cara1{
+         justify-content: center;
+       
+      }
+  
+      .contenedor .cara2{
+  justify-content: space-between;
+        flex-direction: column;
+  }
+  
+   .cara2 .punto:first-child, .cara3 .punto:first-child {
+        align-self: flex-start;
+      }
+      .cara2 .punto:last-child, .cara3 .punto:last-child {
+        align-self: flex-end;
+      }
+  
+      /* Cara 3 */
+      .cara3 {
+        justify-content: space-between;
+        flex-direction: column;
+        gap:20px;
+      }
+      .cara3 .punto:nth-child(2) {
+        align-self: center;
+      }
+  
+      /* Cara 4 */
+      .cara4 {
+        justify-content: space-between;
+        flex-wrap:wrap;
+        gap:40px;
+        
+        
+      }
+  
+      /* Cara 5 */
+      .cara5 {
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 40px;
+      }
+  
+  .cara5 .punto:nth-child(3){
+    justify-content: center;
+    position: absolute;
+    
+  }
+  
+      /* Cara 6 */
+      .cara6
+  {
+    justify-content: space-between;
+    flex-direction:column;
+    flex-wrap:wrap;
+    gap:20px;
+      }

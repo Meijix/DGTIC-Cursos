@@ -1,0 +1,38 @@
+:root{
+  --azulclaro: #7ee8fd;
+  --azulmarino: #001f3f;
+  --grande: 1rem;
+  --mediano: 0.8rem;
+}
+
+
+div,
+header,
+nav,
+main,
+footer,
+section,
+article,
+aside,
+ul{
+  padding: 0 .5rem; border: 1px solid rgb(245, 241, 241);
+}
+
+body{
+  font-family: 'Arial', sans-serif;
+  font-size: var(--grande);
+  font-weight: bold;
+  background: var(--azulmarino);
+  color: var(--azulclaro);
+}
+
+section{ 
+  font-size: var(--mediano);
+  background: #d2a8fd;
+  color:var(--azulmarino);
+}
+article{ background: #9005a57a}
+aside{ 
+  background: var(--azulclaro);
+  color:var(--azulmarino)
+}
