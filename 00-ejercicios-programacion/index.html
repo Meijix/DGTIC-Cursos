@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicios de Programacion — Python</title>
+
+  <!--
+  ╔══════════════════════════════════════════════════════════════════════════════╗
+  ║  INDEX.HTML — EJERCICIOS DE PROGRAMACION EN PYTHON                        ║
+  ║                                                                            ║
+  ║  Pagina de navegacion para los 15 ejercicios progresivos de               ║
+  ║  introduccion a la programacion con Python.                               ║
+  ║                                                                            ║
+  ║  ESTRUCTURA:                                                               ║
+  ║  • Header con titulo y subtitulo                                           ║
+  ║  • Seccion de progresion (ruta de aprendizaje)                             ║
+  ║  • Grid de tarjetas con los 15 ejercicios                                 ║
+  ║  • Cada tarjeta: numero, nombre, tema, dificultad, conceptos, enlace     ║
+  ║                                                                            ║
+  ║  TEMA: Oscuro con acento #ffd166                                           ║
+  ╚══════════════════════════════════════════════════════════════════════════════╝
+  -->
+
+  <style>
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       RESET Y VARIABLES
+       ═══════════════════════════════════════════════════════════════════════ */
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #1a1a2e;
+      --bg-card: #16213e;
+      --bg-card-hover: #1b2a4a;
+      --accent: #ffd166;
+      --accent-dim: rgba(255, 209, 102, 0.15);
+      --text-primary: #e8e8e8;
+      --text-secondary: #a0a0b8;
+      --text-muted: #6b6b80;
+      --badge-basico: #2d6a4f;
+      --badge-intermedio: #e76f51;
+      --badge-avanzado: #e63946;
+      --radius: 12px;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       ENLACE DE RETORNO — Navegacion superior
+       ═══════════════════════════════════════════════════════════════════════ */
+    .back-link {
+      display: inline-block;
+      padding: 1rem 1.5rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: opacity 0.2s;
+    }
+
+    .back-link:hover {
+      opacity: 0.8;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       HEADER
+       ═══════════════════════════════════════════════════════════════════════ */
+    header {
+      text-align: center;
+      padding: 2rem 1.5rem 2.5rem;
+      background: linear-gradient(135deg, #1a1a2e, #0f3460);
+      border-bottom: 3px solid var(--accent);
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.5rem;
+      color: var(--accent);
+    }
+
+    header p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       SECCION DE PROGRESION — Ruta de aprendizaje visual
+       ═══════════════════════════════════════════════════════════════════════
+       Muestra las 3 etapas del curso (Basico, Intermedio, Avanzado)
+       con una linea conectora que indica progresion.
+    */
+    .progression {
+      max-width: 900px;
+      margin: 2rem auto 1rem;
+      padding: 1.5rem;
+    }
+
+    .progression h2 {
+      text-align: center;
+      font-size: 1.3rem;
+      color: var(--text-primary);
+      margin-bottom: 1.5rem;
+    }
+
+    .progression-track {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+
+    .progression-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 1rem 1.5rem;
+      min-width: 180px;
+    }
+
+    .progression-step .step-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    .progression-step .step-label {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .progression-step .step-range {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .step-basico .step-icon { background: var(--badge-basico); }
+    .step-intermedio .step-icon { background: var(--badge-intermedio); }
+    .step-avanzado .step-icon { background: var(--badge-avanzado); }
+
+    /* Linea conectora entre pasos */
+    .progression-connector {
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--text-muted), var(--accent));
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       GRID DE TARJETAS
+       ═══════════════════════════════════════════════════════════════════════
+       CSS Grid con auto-fill para layout adaptable sin media queries.
+       Cada tarjeta tiene un minimo de 280px para mantener legibilidad.
+    */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: 1.5rem auto 2.5rem;
+      padding: 0 1.5rem;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       TARJETA — Componente para cada ejercicio
+       ═══════════════════════════════════════════════════════════════════════
+       Estructura: barra de acento + cuerpo (numero, titulo, tema,
+       dificultad, conceptos) + enlace al archivo .py
+    */
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Barra superior de acento con color segun dificultad */
+    .card-accent {
+      height: 5px;
+    }
+
+    .card-accent.basico { background: var(--badge-basico); }
+    .card-accent.intermedio { background: var(--badge-intermedio); }
+    .card-accent.avanzado { background: var(--badge-avanzado); }
+
+    .card-body {
+      padding: 1.25rem 1.25rem 0.75rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Cabecera de la tarjeta: numero + titulo en linea */
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .card-body h2 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Tema del ejercicio */
+    .card-topic {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.75rem;
+      flex: 1;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       BADGE DE DIFICULTAD
+       ═══════════════════════════════════════════════════════════════════════
+       Codificacion por colores:
+       - Verde (#2d6a4f): Basico
+       - Naranja (#e76f51): Intermedio
+       - Rojo (#e63946): Avanzado
+    */
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.2rem 0.6rem;
+      border-radius: 50px;
+      color: #fff;
+      margin-bottom: 0.75rem;
+    }
+
+    .badge.basico { background: var(--badge-basico); }
+    .badge.intermedio { background: var(--badge-intermedio); }
+    .badge.avanzado { background: var(--badge-avanzado); }
+
+    /* Tags de conceptos clave */
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      padding: 0 1.25rem 1rem;
+    }
+
+    .tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.2rem 0.55rem;
+      border-radius: 50px;
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    /* Enlace al archivo .py */
+    .card-link {
+      display: block;
+      text-align: center;
+      padding: 0.75rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-decoration: none;
+      color: var(--accent);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .card-link:hover {
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════════════════════════════════════ */
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       RESPONSIVE
+       ═══════════════════════════════════════════════════════════════════════ */
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.6rem; }
+      header p { font-size: 0.95rem; }
+      .grid { padding: 0 1rem; gap: 1rem; }
+      .progression-connector { width: 30px; }
+      .progression-step { min-width: 120px; padding: 0.75rem; }
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       NAVEGACION SUPERIOR — Enlace de retorno al indice principal
+       ════════════════════════════════════════════════════════════════════ -->
+  <a class="back-link" href="../index.html">&larr; Volver al indice</a>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       HEADER — Titulo y descripcion de la seccion
+       ════════════════════════════════════════════════════════════════════ -->
+  <header>
+    <h1>Ejercicios de Programacion — Python</h1>
+    <p>15 ejercicios progresivos de introduccion a la programacion. Desde lo basico hasta conceptos avanzados.</p>
+  </header>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SECCION DE PROGRESION — Ruta de aprendizaje
+       ════════════════════════════════════════════════════════════════════
+       Muestra visualmente las 3 etapas del aprendizaje y que
+       ejercicios corresponden a cada una.
+  -->
+  <section class="progression">
+    <h2>Ruta de aprendizaje</h2>
+    <div class="progression-track">
+
+      <div class="progression-step step-basico">
+        <div class="step-icon">1</div>
+        <div class="step-label">Basico</div>
+        <div class="step-range">Ejercicios 01 – 06</div>
+      </div>
+
+      <div class="progression-connector"></div>
+
+      <div class="progression-step step-intermedio">
+        <div class="step-icon">2</div>
+        <div class="step-label">Intermedio</div>
+        <div class="step-range">Ejercicios 07 – 13</div>
+      </div>
+
+      <div class="progression-connector"></div>
+
+      <div class="progression-step step-avanzado">
+        <div class="step-icon">3</div>
+        <div class="step-label">Avanzado</div>
+        <div class="step-range">Ejercicios 14 – 15</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       GRID DE EJERCICIOS — 15 tarjetas
+       ════════════════════════════════════════════════════════════════════
+       Cada tarjeta contiene:
+       - Barra de color segun dificultad
+       - Numero circular + nombre del ejercicio
+       - Tema descriptivo
+       - Badge de dificultad
+       - Tags con conceptos clave
+       - Enlace al archivo .py correspondiente
+  -->
+  <main class="grid">
+
+    <!-- Ejercicio 01 -->
+    <article class="card">
+      <div class="card-accent basico"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">01</span>
+          <h2>Numeros pares</h2>
+        </div>
+        <p class="card-topic">Iteracion basica con ciclos y operador modulo</p>
+        <span class="badge basico">Basico</span>
+      </div>
+      <div class="card-tags">
+        <span class="tag">for</span>
+        <span class="tag">range</span>
+        <span class="tag">%</span>
+      </div>
+      <a class="card-link" href="Ejercicio-01_Numeros_pares/ejercicio01.py">Ver ejercicio01.py</a>
+    </article>
+
+    <!-- Ejercicio 02 -->
+    <article class="card">
+      <div class="card-accent basico"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">02</span>
+          <h2>Suma consecutivos</h2>
+        </div>
+        <p class="card-topic">Funciones y acumulacion con ciclo while</p>
+        <span class="badge basico">Basico</span>
+      </div>
+      <div class="card-tags">
+        <span class="tag">funciones</span>
+        <span class="tag">while</span>
+      </div>
+      <a class="card-link" href="Ejercicio-02_Suma_consecutivos/ejercicio02.py">Ver ejercicio02.py</a>
+    </article>
+
+    <!-- Ejercicio 03 -->
+    <article class="card">
+      <div class="card-accent basico"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">03</span>
+          <h2>Dolares a pesos</h2>
+        </div>
+        <p class="card-topic">Conversion de tipos y parametros de funcion</p>
+        <span class="badge basico">Basico</span>
+      </div>
+      <div class="card-tags">
+        <span class="tag">float</span>
+        <span class="tag">parametros</span>
+      </div>
+      <a class="card-link" href="Ejercicio-03_Dolares_pesos/ejercicio03.py">Ver ejercicio03.py</a>
+    </article>
+
+    <!-- Ejercicio 04 -->
+    <article class="card">
+      <div class="card-accent basico"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">04</span>
+          <h2>Triangulo equilatero</h2>
+        </div>
+        <p class="card-topic">Funciones aplicadas a geometria basica</p>
+        <span class="badge basico">Basico</span>
+      </div>
+      <div class="card-tags">
+        <span class="tag">funciones</span>
+        <span class="tag">geometria</span>
+      </div>
+      <a class="card-link" href="Ejercicio-04_equilatero/ejercicio04.py">Ver ejercicio04.py</a>
+    </article>
+
+    <!-- Ejercicio 05 -->
+    <article class="card">
+      <div class="card-accent basico"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">05</span>
+          <h2>Triangulo isosceles</h2>
+        </div>
+        <p class="card-topic">Funciones con dos parametros y validacion</p>
+        <span class="badge basico">Basico</span>
+      </div>
+      <div class="card-tags">
+        <span class="tag">2 params</span>
+        <span class="tag">validacion</span>
+      </div>
+      <a class="card-link" href="Ejercicio-05_isoceles/ejercicio05.py">Ver ejercicio05.py</a>
+    </article>
+
+    <!-- Ejercicio 06 -->
+    <article class="card">
+      <div class="card-accent basico"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">06</span>
+          <h2>Triangulo escaleno</h2>
+        </div>
+        <p class="card-topic">Funciones con tres parametros independientes</p>
+        <span class="badge basico">Basico</span>
+      </div>
+      <div class="card-tags">
+        <span class="tag">3 params</span>
+      </div>
+      <a class="card-link" href="Ejercicio-06_escaleno/ejercicio06.py">Ver ejercicio06.py</a>
+    </article>
+
+    <!-- Ejercicio 07 -->
+    <article class="card">
+      <div class="card-accent intermedio"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">07</span>
+          <h2>Menu triangulos</h2>
+        </div>
+        <p class="card-topic">Condicionales encadenados y menu interactivo</p>
+        <span class="badge intermedio">Intermedio</span>
+      </div>
+      <div class="card-tags">
+        <span class="tag">if/elif</span>
+        <span class="tag">menu</span>
+      </div>
+      <a class="card-link" href="Ejercicio-07_perimetro_trinagulo/ejercicio07.py">Ver ejercicio07.py</a>
+    </article>
+
+    <!-- Ejercicio 08 -->
+    <article class="card">
+      <div class="card-accent intermedio"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">08</span>
+          <h2>Tablas multiplicar</h2>
+        </div>
+        <p class="card-topic">Funciones sin return, efectos secundarios con print</p>
+        <span class="badge intermedio">Intermedio</span>
+      </div>
+      <div class="card-tags">
+        <span class="tag">funciones sin return</span>
+      </div>
+      <a class="card-link" href="Ejercicio-08_tablas_multiplicar/ejercicio08.py">Ver ejercicio08.py</a>
+    </article>
+
+    <!-- Ejercicio 09 -->
+    <article class="card">
+      <div class="card-accent intermedio"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">09</span>
+          <h2>Desigualdad triangulo</h2>
+        </div>
+        <p class="card-topic">Logica booleana y operador and</p>
+        <span class="badge intermedio">Intermedio</span>
+      </div>
+      <div class="card-tags">
+        <span class="tag">booleanos</span>
+        <span class="tag">and</span>
+      </div>
+      <a class="card-link" href="Ejercicio-09_Desigualdad_triangulo/ejercicio09.py">Ver ejercicio09.py</a>
+    </article>
+
+    <!-- Ejercicio 10 -->
+    <article class="card">
+      <div class="card-accent intermedio"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">10</span>
+          <h2>Ano bisiesto</h2>
+        </div>
+        <p class="card-topic">Condicionales complejas con multiples reglas</p>
+        <span class="badge intermedio">Intermedio</span>
+      </div>
+      <div class="card-tags">
+        <span class="tag">condicionales complejas</span>
+      </div>
+      <a class="card-link" href="Ejercicio-10_es_bisiesto/ejercicio10.py">Ver ejercicio10.py</a>
+    </article>
+
+    <!-- Ejercicio 11 -->
+    <article class="card">
+      <div class="card-accent intermedio"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">11</span>
+          <h2>Meses</h2>
+        </div>
+        <p class="card-topic">Listas como estructuras de datos e indexacion</p>
+        <span class="badge intermedio">Intermedio</span>
+      </div>
+      <div class="card-tags">
+        <span class="tag">listas</span>
+        <span class="tag">indexacion</span>
+      </div>
+      <a class="card-link" href="Ejercicio-11_Meses/ejercicio11.py">Ver ejercicio11.py</a>
+    </article>
+
+    <!-- Ejercicio 12 -->
+    <article class="card">
+      <div class="card-accent intermedio"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">12</span>
+          <h2>Fecha valida</h2>
+        </div>
+        <p class="card-topic">Reutilizacion de funciones previas para validar</p>
+        <span class="badge intermedio">Intermedio</span>
+      </div>
+      <div class="card-tags">
+        <span class="tag">reutilizacion funciones</span>
+      </div>
+      <a class="card-link" href="Ejercicio-12_Fecha_real/ejercicio12.py">Ver ejercicio12.py</a>
+    </article>
+
+    <!-- Ejercicio 13 -->
+    <article class="card">
+      <div class="card-accent intermedio"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">13</span>
+          <h2>Ping Pong</h2>
+        </div>
+        <p class="card-topic">Patron FizzBuzz y orden de condiciones</p>
+        <span class="badge intermedio">Intermedio</span>
+      </div>
+      <div class="card-tags">
+        <span class="tag">FizzBuzz</span>
+        <span class="tag">orden condiciones</span>
+      </div>
+      <a class="card-link" href="Ejercicio-13_Ping_pong/ejercicio13.py">Ver ejercicio13.py</a>
+    </article>
+
+    <!-- Ejercicio 14 -->
+    <article class="card">
+      <div class="card-accent avanzado"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">14</span>
+          <h2>Adivina numero</h2>
+        </div>
+        <p class="card-topic">Numeros aleatorios, break y while/else</p>
+        <span class="badge avanzado">Avanzado</span>
+      </div>
+      <div class="card-tags">
+        <span class="tag">random</span>
+        <span class="tag">break</span>
+        <span class="tag">while/else</span>
+      </div>
+      <a class="card-link" href="Ejercicio-14_Adivina_numero/ejercicio14.py">Ver ejercicio14.py</a>
+    </article>
+
+    <!-- Ejercicio 15 -->
+    <article class="card">
+      <div class="card-accent avanzado"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">15</span>
+          <h2>Volados</h2>
+        </div>
+        <p class="card-topic">Manejo de excepciones, estado y temporizacion</p>
+        <span class="badge avanzado">Avanzado</span>
+      </div>
+      <div class="card-tags">
+        <span class="tag">try/except</span>
+        <span class="tag">estado</span>
+        <span class="tag">time</span>
+      </div>
+      <a class="card-link" href="Ejercicio-15_Volados/ejercicio15.py">Ver ejercicio15.py</a>
+    </article>
+
+  </main>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       FOOTER
+       ════════════════════════════════════════════════════════════════════ -->
+  <footer>
+    <p>DGTIC — Ejercicios de Programacion con Python</p>
+  </footer>
+
+</body>
+</html>

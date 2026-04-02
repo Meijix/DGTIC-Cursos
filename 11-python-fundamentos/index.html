@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Python — Fundamentos a Avanzado</title>
+
+  <!--
+  ╔══════════════════════════════════════════════════════════════════════════════╗
+  ║  INDEX.HTML — CURSO COMPLETO DE PYTHON                                    ║
+  ║                                                                            ║
+  ║  Pagina de navegacion para las 10 secciones del curso de Python,          ║
+  ║  desde fundamentos basicos hasta proyectos completos.                     ║
+  ║                                                                            ║
+  ║  ESTRUCTURA:                                                               ║
+  ║  • Header con titulo y subtitulo                                           ║
+  ║  • Barra de progresion visual                                              ║
+  ║  • Grid de tarjetas con las 10 secciones                                  ║
+  ║  • Cada tarjeta: numero, titulo, descripcion, dificultad, archivos       ║
+  ║  • Enlace a CONCEPTOS.md de cada seccion                                  ║
+  ║                                                                            ║
+  ║  TEMA: Oscuro con acento #ffd166                                           ║
+  ╚══════════════════════════════════════════════════════════════════════════════╝
+  -->
+
+  <style>
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       RESET Y VARIABLES
+       ═══════════════════════════════════════════════════════════════════════ */
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #1a1a2e;
+      --bg-card: #16213e;
+      --bg-card-hover: #1b2a4a;
+      --accent: #ffd166;
+      --accent-dim: rgba(255, 209, 102, 0.15);
+      --text-primary: #e8e8e8;
+      --text-secondary: #a0a0b8;
+      --text-muted: #6b6b80;
+      --badge-basico: #2d6a4f;
+      --badge-intermedio: #e76f51;
+      --badge-avanzado: #e63946;
+      --radius: 12px;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       ENLACE DE RETORNO
+       ═══════════════════════════════════════════════════════════════════════ */
+    .back-link {
+      display: inline-block;
+      padding: 1rem 1.5rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: opacity 0.2s;
+    }
+
+    .back-link:hover {
+      opacity: 0.8;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       HEADER
+       ═══════════════════════════════════════════════════════════════════════ */
+    header {
+      text-align: center;
+      padding: 2rem 1.5rem 2.5rem;
+      background: linear-gradient(135deg, #1a1a2e, #0f3460);
+      border-bottom: 3px solid var(--accent);
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.5rem;
+      color: var(--accent);
+    }
+
+    header p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       BARRA DE PROGRESION — Ruta visual de aprendizaje
+       ═══════════════════════════════════════════════════════════════════════
+       Muestra las 4 etapas del curso en una linea horizontal con nodos
+       conectados. Cada nodo representa un grupo de secciones.
+    */
+    .progression {
+      max-width: 1000px;
+      margin: 2rem auto 1rem;
+      padding: 1.5rem;
+    }
+
+    .progression h2 {
+      text-align: center;
+      font-size: 1.3rem;
+      color: var(--text-primary);
+      margin-bottom: 1.5rem;
+    }
+
+    .progression-path {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+
+    .path-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 1rem;
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      min-width: 160px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .path-node .node-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    .path-node .node-label {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .path-node .node-sections {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .node-basico .node-number { background: var(--badge-basico); }
+    .node-intermedio .node-number { background: var(--badge-intermedio); }
+    .node-avanzado .node-number { background: var(--badge-avanzado); }
+
+    .path-arrow {
+      display: flex;
+      align-items: center;
+      padding: 0 0.5rem;
+      color: var(--text-muted);
+      font-size: 1.4rem;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       GRID DE TARJETAS
+       ═══════════════════════════════════════════════════════════════════════ */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: 1.5rem auto 2.5rem;
+      padding: 0 1.5rem;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       TARJETA — Componente para cada seccion del curso
+       ═══════════════════════════════════════════════════════════════════════
+       Estructura: barra de acento + cuerpo (numero, titulo, descripcion,
+       dificultad, conteo de archivos) + enlace a CONCEPTOS.md
+    */
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-accent {
+      height: 5px;
+    }
+
+    .card-accent.basico { background: var(--badge-basico); }
+    .card-accent.intermedio { background: var(--badge-intermedio); }
+    .card-accent.avanzado { background: var(--badge-avanzado); }
+
+    .card-body {
+      padding: 1.25rem 1.25rem 0.75rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .card-body h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .card-description {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.75rem;
+      flex: 1;
+      line-height: 1.5;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       METADATA — Badge de dificultad y conteo de archivos
+       ═══════════════════════════════════════════════════════════════════════ */
+    .card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.2rem 0.6rem;
+      border-radius: 50px;
+      color: #fff;
+    }
+
+    .badge.basico { background: var(--badge-basico); }
+    .badge.intermedio { background: var(--badge-intermedio); }
+    .badge.avanzado { background: var(--badge-avanzado); }
+
+    .file-count {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* Tags con los temas de cada seccion */
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      padding: 0 1.25rem 1rem;
+    }
+
+    .tag {
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.2rem 0.55rem;
+      border-radius: 50px;
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    /* Enlace a CONCEPTOS.md */
+    .card-link {
+      display: block;
+      text-align: center;
+      padding: 0.75rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-decoration: none;
+      color: var(--accent);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .card-link:hover {
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════════════════════════════════════ */
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       RESPONSIVE
+       ═══════════════════════════════════════════════════════════════════════ */
+    @media (max-width: 700px) {
+      header h1 { font-size: 1.6rem; }
+      header p { font-size: 0.95rem; }
+      .grid { padding: 0 1rem; gap: 1rem; }
+      .progression-path { flex-direction: column; align-items: center; }
+      .path-arrow { transform: rotate(90deg); padding: 0.25rem 0; }
+      .path-node { min-width: 200px; width: 100%; max-width: 280px; }
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       NAVEGACION SUPERIOR
+       ════════════════════════════════════════════════════════════════════ -->
+  <a class="back-link" href="../index.html">&larr; Volver al indice</a>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       HEADER
+       ════════════════════════════════════════════════════════════════════ -->
+  <header>
+    <h1>Python — Fundamentos a Avanzado</h1>
+    <p>Curso completo de Python en 10 secciones. Desde tipos basicos hasta proyectos integradores.</p>
+  </header>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       BARRA DE PROGRESION — Ruta visual del curso
+       ════════════════════════════════════════════════════════════════════
+       4 nodos conectados por flechas, cada uno representa un nivel
+       de dificultad y las secciones que abarca.
+  -->
+  <section class="progression">
+    <h2>Ruta de aprendizaje</h2>
+    <div class="progression-path">
+
+      <div class="path-node node-basico">
+        <div class="node-number">1</div>
+        <div class="node-label">Basico</div>
+        <div class="node-sections">Secciones 01 – 02</div>
+      </div>
+
+      <div class="path-arrow">&rarr;</div>
+
+      <div class="path-node node-intermedio">
+        <div class="node-number">2</div>
+        <div class="node-label">Intermedio</div>
+        <div class="node-sections">Secciones 03 – 06</div>
+      </div>
+
+      <div class="path-arrow">&rarr;</div>
+
+      <div class="path-node node-avanzado">
+        <div class="node-number">3</div>
+        <div class="node-label">Avanzado</div>
+        <div class="node-sections">Secciones 07 – 09</div>
+      </div>
+
+      <div class="path-arrow">&rarr;</div>
+
+      <div class="path-node node-avanzado">
+        <div class="node-number">4</div>
+        <div class="node-label">Proyectos</div>
+        <div class="node-sections">Seccion 10</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       GRID DE SECCIONES — 10 tarjetas
+       ════════════════════════════════════════════════════════════════════
+       Cada tarjeta contiene:
+       - Barra de color segun dificultad
+       - Numero circular + titulo de la seccion
+       - Descripcion con los temas cubiertos
+       - Badge de dificultad + conteo de archivos
+       - Tags con los subtemas
+       - Enlace al CONCEPTOS.md de esa seccion
+  -->
+  <main class="grid">
+
+    <!-- Seccion 01: Basicos -->
+    <article class="card">
+      <div class="card-accent basico"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">01</span>
+          <h2>Basicos</h2>
+        </div>
+        <p class="card-description">Tipos de datos, operadores, strings, condicionales y ciclos. Los cimientos de Python.</p>
+        <div class="card-meta">
+          <span class="badge basico">Basico</span>
+          <span class="file-count">5 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">tipos</span>
+        <span class="tag">operadores</span>
+        <span class="tag">strings</span>
+        <span class="tag">condicionales</span>
+        <span class="tag">ciclos</span>
+      </div>
+      <a class="card-link" href="01-basicos/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <!-- Seccion 02: Estructuras de datos -->
+    <article class="card">
+      <div class="card-accent basico"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">02</span>
+          <h2>Estructuras de datos</h2>
+        </div>
+        <p class="card-description">Listas, tuplas, diccionarios, sets y comprehensions. Las estructuras fundamentales.</p>
+        <div class="card-meta">
+          <span class="badge basico">Basico</span>
+          <span class="file-count">5 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">listas</span>
+        <span class="tag">tuplas</span>
+        <span class="tag">dicts</span>
+        <span class="tag">sets</span>
+        <span class="tag">comprehensions</span>
+      </div>
+      <a class="card-link" href="02-estructuras-datos/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <!-- Seccion 03: Funciones avanzadas -->
+    <article class="card">
+      <div class="card-accent intermedio"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">03</span>
+          <h2>Funciones avanzadas</h2>
+        </div>
+        <p class="card-description">Closures, lambdas, *args/**kwargs y type hints. Funciones como ciudadanos de primera clase.</p>
+        <div class="card-meta">
+          <span class="badge intermedio">Intermedio</span>
+          <span class="file-count">4 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">closures</span>
+        <span class="tag">lambdas</span>
+        <span class="tag">*args</span>
+        <span class="tag">type hints</span>
+      </div>
+      <a class="card-link" href="03-funciones-avanzadas/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <!-- Seccion 04: POO -->
+    <article class="card">
+      <div class="card-accent intermedio"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">04</span>
+          <h2>POO</h2>
+        </div>
+        <p class="card-description">Clases, herencia, polimorfismo y dataclasses. Programacion orientada a objetos completa.</p>
+        <div class="card-meta">
+          <span class="badge intermedio">Intermedio</span>
+          <span class="file-count">5 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">clases</span>
+        <span class="tag">herencia</span>
+        <span class="tag">polimorfismo</span>
+        <span class="tag">dataclasses</span>
+      </div>
+      <a class="card-link" href="04-poo/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <!-- Seccion 05: Modulos y paquetes -->
+    <article class="card">
+      <div class="card-accent intermedio"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">05</span>
+          <h2>Modulos y paquetes</h2>
+        </div>
+        <p class="card-description">Sistema de import, __init__.py y entornos virtuales. Organizacion profesional de codigo.</p>
+        <div class="card-meta">
+          <span class="badge intermedio">Intermedio</span>
+          <span class="file-count">4 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">import</span>
+        <span class="tag">__init__.py</span>
+        <span class="tag">venv</span>
+      </div>
+      <a class="card-link" href="05-modulos-paquetes/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <!-- Seccion 06: Archivos I/O -->
+    <article class="card">
+      <div class="card-accent intermedio"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">06</span>
+          <h2>Archivos I/O</h2>
+        </div>
+        <p class="card-description">open(), CSV, JSON y pathlib. Lectura, escritura y manipulacion de archivos.</p>
+        <div class="card-meta">
+          <span class="badge intermedio">Intermedio</span>
+          <span class="file-count">4 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">open</span>
+        <span class="tag">CSV</span>
+        <span class="tag">JSON</span>
+        <span class="tag">pathlib</span>
+      </div>
+      <a class="card-link" href="06-archivos-io/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <!-- Seccion 07: Decoradores y generadores -->
+    <article class="card">
+      <div class="card-accent avanzado"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">07</span>
+          <h2>Decoradores y generadores</h2>
+        </div>
+        <p class="card-description">@decorator, yield e itertools. Patrones avanzados de Python para codigo elegante.</p>
+        <div class="card-meta">
+          <span class="badge avanzado">Avanzado</span>
+          <span class="file-count">4 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">@decorator</span>
+        <span class="tag">yield</span>
+        <span class="tag">itertools</span>
+      </div>
+      <a class="card-link" href="07-decoradores-generadores/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <!-- Seccion 08: Manejo de errores -->
+    <article class="card">
+      <div class="card-accent avanzado"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">08</span>
+          <h2>Manejo de errores</h2>
+        </div>
+        <p class="card-description">try/except, logging y context managers. Codigo robusto y profesional.</p>
+        <div class="card-meta">
+          <span class="badge avanzado">Avanzado</span>
+          <span class="file-count">4 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">try/except</span>
+        <span class="tag">logging</span>
+        <span class="tag">context managers</span>
+      </div>
+      <a class="card-link" href="08-manejo-errores/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <!-- Seccion 09: Testing -->
+    <article class="card">
+      <div class="card-accent avanzado"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">09</span>
+          <h2>Testing</h2>
+        </div>
+        <p class="card-description">unittest, pytest, mocking y TDD. Pruebas automatizadas para codigo confiable.</p>
+        <div class="card-meta">
+          <span class="badge avanzado">Avanzado</span>
+          <span class="file-count">7 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">unittest</span>
+        <span class="tag">pytest</span>
+        <span class="tag">mocking</span>
+        <span class="tag">TDD</span>
+      </div>
+      <a class="card-link" href="09-testing/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <!-- Seccion 10: Proyectos -->
+    <article class="card">
+      <div class="card-accent avanzado"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">10</span>
+          <h2>Proyectos</h2>
+        </div>
+        <p class="card-description">Gestor de tareas, analizador de texto y API del clima. Proyectos integradores completos.</p>
+        <div class="card-meta">
+          <span class="badge avanzado">Avanzado</span>
+          <span class="file-count">3 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">gestor tareas</span>
+        <span class="tag">analizador texto</span>
+        <span class="tag">API clima</span>
+      </div>
+      <a class="card-link" href="10-proyectos/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+  </main>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       FOOTER
+       ════════════════════════════════════════════════════════════════════ -->
+  <footer>
+    <p>DGTIC — Python: Fundamentos a Avanzado</p>
+  </footer>
+
+</body>
+</html>

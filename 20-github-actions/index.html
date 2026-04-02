@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Actions — CI/CD</title>
+
+  <!--
+  ╔══════════════════════════════════════════════════════════════════════════════╗
+  ║  INDEX.HTML — CURSO DE GITHUB ACTIONS CI/CD                               ║
+  ║                                                                            ║
+  ║  Pagina de navegacion para las 6 secciones del curso de GitHub Actions,   ║
+  ║  cubriendo desde conceptos basicos de CI/CD hasta proyectos completos.    ║
+  ║                                                                            ║
+  ║  ESTRUCTURA:                                                               ║
+  ║  • Header con titulo y subtitulo                                           ║
+  ║  • Diagrama visual del pipeline CI/CD                                     ║
+  ║  • Grid de tarjetas con las 6 secciones                                   ║
+  ║  • Cada tarjeta: numero, titulo, descripcion, dificultad, workflows      ║
+  ║  • Enlace a CONCEPTOS.md de cada seccion                                  ║
+  ║                                                                            ║
+  ║  TEMA: Oscuro con acento #2d6a4f (verde)                                   ║
+  ╚══════════════════════════════════════════════════════════════════════════════╝
+  -->
+
+  <style>
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       RESET Y VARIABLES
+       ═══════════════════════════════════════════════════════════════════════ */
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #1a1a2e;
+      --bg-card: #16213e;
+      --bg-card-hover: #1b2a4a;
+      --accent: #2d6a4f;
+      --accent-light: #40916c;
+      --accent-dim: rgba(45, 106, 79, 0.2);
+      --accent-text: #52b788;
+      --text-primary: #e8e8e8;
+      --text-secondary: #a0a0b8;
+      --text-muted: #6b6b80;
+      --badge-basico: #2d6a4f;
+      --badge-intermedio: #e76f51;
+      --badge-avanzado: #e63946;
+      --radius: 12px;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       ENLACE DE RETORNO
+       ═══════════════════════════════════════════════════════════════════════ */
+    .back-link {
+      display: inline-block;
+      padding: 1rem 1.5rem;
+      color: var(--accent-text);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: opacity 0.2s;
+    }
+
+    .back-link:hover {
+      opacity: 0.8;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       HEADER
+       ═══════════════════════════════════════════════════════════════════════ */
+    header {
+      text-align: center;
+      padding: 2rem 1.5rem 2.5rem;
+      background: linear-gradient(135deg, #1a1a2e, #0f3460);
+      border-bottom: 3px solid var(--accent);
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.5rem;
+      color: var(--accent-text);
+    }
+
+    header p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       DIAGRAMA CI/CD — Representacion visual del pipeline
+       ═══════════════════════════════════════════════════════════════════════
+       Diagrama horizontal que muestra las fases clasicas de un pipeline
+       de CI/CD: Code > Build > Test > Deploy > Monitor.
+       Cada fase es un nodo con icono y etiqueta conectados por flechas.
+    */
+    .pipeline {
+      max-width: 1000px;
+      margin: 2rem auto 1rem;
+      padding: 1.5rem;
+    }
+
+    .pipeline h2 {
+      text-align: center;
+      font-size: 1.3rem;
+      color: var(--text-primary);
+      margin-bottom: 1.5rem;
+    }
+
+    .pipeline-track {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+
+    .pipeline-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 1rem;
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      min-width: 120px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: border-color 0.3s;
+    }
+
+    .pipeline-stage:hover {
+      border-color: var(--accent-light);
+    }
+
+    .pipeline-stage .stage-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .pipeline-stage .stage-label {
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--text-primary);
+    }
+
+    .pipeline-stage .stage-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    .pipeline-arrow {
+      display: flex;
+      align-items: center;
+      padding: 0 0.4rem;
+      color: var(--accent-light);
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    /* Secciones del curso mapeadas a fases del pipeline */
+    .pipeline-stage.active {
+      border-color: var(--accent-light);
+      background: rgba(45, 106, 79, 0.1);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       GRID DE TARJETAS
+       ═══════════════════════════════════════════════════════════════════════ */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: 1.5rem auto 2.5rem;
+      padding: 0 1.5rem;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       TARJETA — Componente para cada seccion del curso
+       ═══════════════════════════════════════════════════════════════════════ */
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-accent {
+      height: 5px;
+    }
+
+    .card-accent.basico { background: var(--badge-basico); }
+    .card-accent.intermedio { background: var(--badge-intermedio); }
+    .card-accent.avanzado { background: var(--badge-avanzado); }
+
+    .card-body {
+      padding: 1.25rem 1.25rem 0.75rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .card-body h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .card-description {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.75rem;
+      flex: 1;
+      line-height: 1.5;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       METADATA — Badge + conteo de workflows
+       ═══════════════════════════════════════════════════════════════════════ */
+    .card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.2rem 0.6rem;
+      border-radius: 50px;
+      color: #fff;
+    }
+
+    .badge.basico { background: var(--badge-basico); }
+    .badge.intermedio { background: var(--badge-intermedio); }
+    .badge.avanzado { background: var(--badge-avanzado); }
+
+    .workflow-count {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* Tags con los temas */
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      padding: 0 1.25rem 1rem;
+    }
+
+    .tag {
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.2rem 0.55rem;
+      border-radius: 50px;
+      background: var(--accent-dim);
+      color: var(--accent-text);
+    }
+
+    /* Enlace a CONCEPTOS.md */
+    .card-link {
+      display: block;
+      text-align: center;
+      padding: 0.75rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-decoration: none;
+      color: var(--accent-text);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .card-link:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════════════════════════════════════ */
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       RESPONSIVE
+       ═══════════════════════════════════════════════════════════════════════ */
+    @media (max-width: 700px) {
+      header h1 { font-size: 1.6rem; }
+      header p { font-size: 0.95rem; }
+      .grid { padding: 0 1rem; gap: 1rem; }
+      .pipeline-track { flex-direction: column; align-items: center; }
+      .pipeline-arrow { transform: rotate(90deg); padding: 0.25rem 0; }
+      .pipeline-stage { min-width: 180px; width: 100%; max-width: 250px; }
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       NAVEGACION SUPERIOR
+       ════════════════════════════════════════════════════════════════════ -->
+  <a class="back-link" href="../index.html">&larr; Volver al indice</a>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       HEADER
+       ════════════════════════════════════════════════════════════════════ -->
+  <header>
+    <h1>GitHub Actions — CI/CD</h1>
+    <p>Curso completo de integracion y despliegue continuo. Desde tu primer workflow hasta proyectos de produccion.</p>
+  </header>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       DIAGRAMA CI/CD — Pipeline visual
+       ════════════════════════════════════════════════════════════════════
+       Representacion de las 5 fases clasicas de un pipeline CI/CD.
+       Cada fase se mapea a las secciones del curso:
+       - Code: Sec 01-02 (introduccion y workflows basicos)
+       - Build: Sec 03 (CI testing y linting)
+       - Test: Sec 03 (CI multi-lenguaje)
+       - Deploy: Sec 04 (CD, Pages, Docker, releases)
+       - Avanzado: Sec 05-06 (actions avanzadas y proyectos)
+  -->
+  <section class="pipeline">
+    <h2>Pipeline CI/CD</h2>
+    <div class="pipeline-track">
+
+      <div class="pipeline-stage">
+        <div class="stage-icon">{ }</div>
+        <div class="stage-label">Code</div>
+        <div class="stage-desc">Push / PR</div>
+      </div>
+
+      <div class="pipeline-arrow">&rarr;</div>
+
+      <div class="pipeline-stage">
+        <div class="stage-icon">CI</div>
+        <div class="stage-label">Build</div>
+        <div class="stage-desc">Compilar</div>
+      </div>
+
+      <div class="pipeline-arrow">&rarr;</div>
+
+      <div class="pipeline-stage">
+        <div class="stage-icon">T</div>
+        <div class="stage-label">Test</div>
+        <div class="stage-desc">Lint + Tests</div>
+      </div>
+
+      <div class="pipeline-arrow">&rarr;</div>
+
+      <div class="pipeline-stage">
+        <div class="stage-icon">CD</div>
+        <div class="stage-label">Deploy</div>
+        <div class="stage-desc">Produccion</div>
+      </div>
+
+      <div class="pipeline-arrow">&rarr;</div>
+
+      <div class="pipeline-stage">
+        <div class="stage-icon">M</div>
+        <div class="stage-label">Monitor</div>
+        <div class="stage-desc">Badges / Logs</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       GRID DE SECCIONES — 6 tarjetas
+       ════════════════════════════════════════════════════════════════════
+       Cada tarjeta contiene:
+       - Barra de color segun dificultad
+       - Numero circular + titulo de la seccion
+       - Descripcion de los temas cubiertos
+       - Badge de dificultad + conteo de workflows
+       - Tags con los subtemas principales
+       - Enlace al CONCEPTOS.md de esa seccion
+  -->
+  <main class="grid">
+
+    <!-- Seccion 01: Introduccion -->
+    <article class="card">
+      <div class="card-accent basico"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">01</span>
+          <h2>Introduccion</h2>
+        </div>
+        <p class="card-description">Conceptos de CI/CD, terminologia de GitHub Actions, sintaxis YAML y tu primer workflow funcional.</p>
+        <div class="card-meta">
+          <span class="badge basico">Basico</span>
+          <span class="workflow-count">2 workflows</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">CI/CD</span>
+        <span class="tag">terminologia</span>
+        <span class="tag">YAML</span>
+        <span class="tag">primer workflow</span>
+      </div>
+      <a class="card-link" href="01-introduccion/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <!-- Seccion 02: Workflows basicos -->
+    <article class="card">
+      <div class="card-accent basico"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">02</span>
+          <h2>Workflows basicos</h2>
+        </div>
+        <p class="card-description">Eventos y triggers, jobs paralelos, secretos, cache de dependencias y matrices de build.</p>
+        <div class="card-meta">
+          <span class="badge basico">Basico</span>
+          <span class="workflow-count">7 workflows</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">eventos</span>
+        <span class="tag">jobs</span>
+        <span class="tag">secretos</span>
+        <span class="tag">cache</span>
+        <span class="tag">matrices</span>
+      </div>
+      <a class="card-link" href="02-workflows-basicos/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <!-- Seccion 03: CI Testing -->
+    <article class="card">
+      <div class="card-accent intermedio"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">03</span>
+          <h2>CI Testing</h2>
+        </div>
+        <p class="card-description">CI multi-lenguaje (Python, Node, Go), linting automatizado y badges de estado del proyecto.</p>
+        <div class="card-meta">
+          <span class="badge intermedio">Intermedio</span>
+          <span class="workflow-count">5 workflows + badge</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">CI multi-lenguaje</span>
+        <span class="tag">linting</span>
+        <span class="tag">badges</span>
+      </div>
+      <a class="card-link" href="03-ci-testing/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <!-- Seccion 04: CD Deploy -->
+    <article class="card">
+      <div class="card-accent intermedio"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">04</span>
+          <h2>CD Deploy</h2>
+        </div>
+        <p class="card-description">Despliegue a GitHub Pages, integracion con Docker, creacion automatica de releases.</p>
+        <div class="card-meta">
+          <span class="badge intermedio">Intermedio</span>
+          <span class="workflow-count">4 workflows</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">GitHub Pages</span>
+        <span class="tag">Docker</span>
+        <span class="tag">releases</span>
+      </div>
+      <a class="card-link" href="04-cd-deploy/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <!-- Seccion 05: Actions avanzadas -->
+    <article class="card">
+      <div class="card-accent avanzado"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">05</span>
+          <h2>Actions avanzadas</h2>
+        </div>
+        <p class="card-description">Actions compuestas, workflows reutilizables, seguridad y mejores practicas de produccion.</p>
+        <div class="card-meta">
+          <span class="badge avanzado">Avanzado</span>
+          <span class="workflow-count">4 workflows</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">compuestas</span>
+        <span class="tag">reutilizables</span>
+        <span class="tag">seguridad</span>
+      </div>
+      <a class="card-link" href="05-actions-avanzadas/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <!-- Seccion 06: Proyectos -->
+    <article class="card">
+      <div class="card-accent avanzado"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">06</span>
+          <h2>Proyectos</h2>
+        </div>
+        <p class="card-description">Pipeline fullstack completo, monorepo con deploys selectivos y auto-review con IA.</p>
+        <div class="card-meta">
+          <span class="badge avanzado">Avanzado</span>
+          <span class="workflow-count">4 workflows</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">fullstack</span>
+        <span class="tag">monorepo</span>
+        <span class="tag">auto-review</span>
+      </div>
+      <a class="card-link" href="06-proyectos/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+  </main>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       FOOTER
+       ════════════════════════════════════════════════════════════════════ -->
+  <footer>
+    <p>DGTIC — GitHub Actions: CI/CD</p>
+  </footer>
+
+</body>
+</html>
