@@ -31,7 +31,8 @@ El repositorio esta organizado en modulos progresivos, desde los fundamentos has
 
 | # | Modulo | Temas principales | Contenido |
 |---|--------|-------------------|-----------|
-| 11 | [Python - Programación](11-python-programacion/) | Condicionales, ciclos, funciones, validacion, logica de juegos | 15 ejercicios `.py` con enunciados `.md` |
+| 00 | [Ejercicios de programación](00-ejercicios-programacion/) | Condicionales, ciclos, funciones, validacion, logica de juegos | 15 ejercicios `.py` (prerequisito) |
+| 11 | [Python - Fundamentos](11-python-fundamentos/) | Tipos, estructuras de datos, POO, decoradores, testing, proyectos | 10 secciones con 55 archivos |
 | 12 | [JavaScript - Fundamentos](12-javascript-fundamentos/) | Variables, ciclos, funciones, POO, eventos DOM, consumo de API | Scripts progresivos + proyecto final (TMDB API) |
 | 13 | [PHP - Fundamentos](13-php-fundamentos/) | Funciones, regex, sesiones, formularios, gestion de usuarios | Ejercicios + proyecto con autenticacion |
 
@@ -45,6 +46,7 @@ El repositorio esta organizado en modulos progresivos, desde los fundamentos has
 | 17 | [Laravel - Evaluación](17-laravel-evaluacion/) | Livewire avanzado, model binding, factories, testing | Proyecto evaluado de clientes |
 | 18 | [Node.js - Introducción](18-nodejs-intro/) | Express, AWS DynamoDB/Lambda/API Gateway, OpenAI SDK | Arquitectura serverless |
 | 19 | [Node.js - Challenge API](19-nodejs-challenge-api/) | CLI + Express, consumo de API OpenAI, async/await | Mini-proyecto de integracion |
+| 20 | [GitHub Actions](20-github-actions/) | CI/CD, workflows, testing, deploy, acciones personalizadas, seguridad | 6 secciones con 34 archivos |
 
 ---
 
@@ -80,7 +82,7 @@ Los modulos 11-13 incluyen sus propios enunciados y documentacion dentro de cada
                  BLOQUE 2: Programación
 ┌─────────────────────────────────────────────────────────┐
 │                                                         │
-│  11 Python (logica) ──► 12 JavaScript (DOM + API)       │
+│  00 Ejercicios ──► 11 Python ──► 12 JavaScript           │
 │                              │                          │
 │                              ▼                          │
 │                         13 PHP (backend)                │
@@ -96,6 +98,8 @@ Los modulos 11-13 incluyen sus propios enunciados y documentacion dentro de cada
 │                                    17 Evaluación        │
 │                                                         │
 │  18 Node.js Intro ──► 19 Node.js Challenge (API)       │
+│                                                         │
+│  20 GitHub Actions (CI/CD)                              │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -110,6 +114,7 @@ Los modulos 11-13 incluyen sus propios enunciados y documentacion dentro de cada
 - **PHP** — funciones, regex, sesiones, POO, formularios server-side
 - **Laravel** — MVC, Eloquent ORM, Blade, Livewire, validacion, email
 - **Node.js** — Express, async/await, AWS (DynamoDB, Lambda), OpenAI API
+- **GitHub Actions** — CI/CD, workflows, testing automatizado, deploy, seguridad
 
 ## Como usar
 
