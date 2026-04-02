@@ -35,6 +35,17 @@ El repositorio esta organizado en modulos progresivos, desde los fundamentos has
 | 12 | [JavaScript - Fundamentos](12-javascript-fundamentos/) | Variables, ciclos, funciones, POO, eventos DOM, consumo de API | Scripts progresivos + proyecto final (TMDB API) |
 | 13 | [PHP - Fundamentos](13-php-fundamentos/) | Funciones, regex, sesiones, formularios, gestion de usuarios | Ejercicios + proyecto con autenticacion |
 
+### Bloque 3 — Backend y Frameworks
+
+| # | Modulo | Temas principales | Contenido |
+|---|--------|-------------------|-----------|
+| 14 | [PHP - Orientado a Objetos](14-php-orientado-a-objetos/) | Clases, metodos, acceso privado/protegido, constructores, herencia | 7 ejercicios progresivos de POO |
+| 15 | [Laravel - CRUD](15-laravel-crud/) | Controladores REST, Blade, validacion, paginacion, email | App de gestion de cursos |
+| 16 | [Laravel - Livewire](16-laravel-livewire/) | Componentes reactivos, Livewire 3, Tailwind CSS | CRUD reactivo sin JS |
+| 17 | [Laravel - Evaluación](17-laravel-evaluacion/) | Livewire avanzado, model binding, factories, testing | Proyecto evaluado de clientes |
+| 18 | [Node.js - Introducción](18-nodejs-intro/) | Express, AWS DynamoDB/Lambda/API Gateway, OpenAI SDK | Arquitectura serverless |
+| 19 | [Node.js - Challenge API](19-nodejs-challenge-api/) | CLI + Express, consumo de API OpenAI, async/await | Mini-proyecto de integracion |
+
 ---
 
 ## Material de aprendizaje
@@ -74,6 +85,18 @@ Los modulos 11-13 incluyen sus propios enunciados y documentacion dentro de cada
 │                              ▼                          │
 │                         13 PHP (backend)                │
 └─────────────────────────────────────────────────────────┘
+                         │
+                         ▼
+             BLOQUE 3: Backend y Frameworks
+┌─────────────────────────────────────────────────────────┐
+│                                                         │
+│  14 PHP POO ──► 15 Laravel CRUD ──► 16 Livewire        │
+│                                         │               │
+│                                         ▼               │
+│                                    17 Evaluación        │
+│                                                         │
+│  18 Node.js Intro ──► 19 Node.js Challenge (API)       │
+└─────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -84,7 +107,9 @@ Los modulos 11-13 incluyen sus propios enunciados y documentacion dentro de cada
 - **CSS3** — Flexbox, Grid, variables, media queries, gradientes, transiciones
 - **JavaScript** — DOM, eventos, clases, fetch/API, IntersectionObserver
 - **Python** — logica de programacion, funciones, manejo de errores
-- **PHP** — funciones, regex, sesiones, formularios server-side
+- **PHP** — funciones, regex, sesiones, POO, formularios server-side
+- **Laravel** — MVC, Eloquent ORM, Blade, Livewire, validacion, email
+- **Node.js** — Express, async/await, AWS (DynamoDB, Lambda), OpenAI API
 
 ## Como usar
 
@@ -92,7 +117,9 @@ Los modulos 11-13 incluyen sus propios enunciados y documentacion dentro de cada
 2. Cada carpeta es un modulo independiente — puedes abrir el archivo principal directamente.
 3. Lee el `CONCEPTOS.md` de cada modulo (01-10) para entender la teoria.
 4. Los ejercicios de Python (11) se ejecutan con `python3 ejercicioNN.py`.
-5. Los archivos PHP (13) requieren un servidor local (`php -S localhost:8000`).
+5. Los archivos PHP (13-14) requieren un servidor local (`php -S localhost:8000`).
+6. Los proyectos Laravel (15-17) necesitan `composer install` y `php artisan serve`.
+7. Los proyectos Node.js (18-19) necesitan `npm install` y `node index.js`.
 
 ```bash
 # Abrir la tabla de contenidos

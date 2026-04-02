@@ -3,7 +3,7 @@
 > **Cursos:** Desarrollo de Páginas Web (HTML/CSS/JS), Introducción a la Programación (Python), Fundamentos de PHP
 > **Institución:** Dirección General de Cómputo y de Tecnologías de Información y
 > Comunicación (DGTIC), UNAM
-> **Formato:** 13 módulos progresivos en 2 bloques: desarrollo web (01-10) y programación (11-13)
+> **Formato:** 19 módulos progresivos en 3 bloques: desarrollo web (01-10), programación (11-13) y backend/frameworks (14-19)
 
 ---
 
@@ -33,6 +33,9 @@ Al completar este curso serás capaz de:
 - Programar lógica básica con Python (condicionales, ciclos, funciones).
 - Manejar JavaScript a nivel intermedio (POO, eventos, consumo de APIs).
 - Desarrollar aplicaciones web server-side con PHP (sesiones, formularios, regex).
+- Aplicar Programación Orientada a Objetos en PHP (clases, herencia, polimorfismo).
+- Construir aplicaciones web con Laravel (CRUD, Blade, Livewire, Eloquent).
+- Crear APIs y servicios con Node.js, Express y servicios cloud (AWS, OpenAI).
 
 ### Prerequisitos
 
@@ -61,6 +64,13 @@ DGTIC-Cursos/
 ├── 11-python-programacion/     ← 15 ejercicios de Python
 ├── 12-javascript-fundamentos/  ← Scripts JS + proyecto final con API
 ├── 13-php-fundamentos/         ← Ejercicios PHP + proyecto con sesiones
+│
+├── 14-php-orientado-a-objetos/ ← 7 ejercicios de POO en PHP
+├── 15-laravel-crud/            ← CRUD con Laravel 11 (MVC)
+├── 16-laravel-livewire/        ← CRUD reactivo con Livewire 3
+├── 17-laravel-evaluacion/      ← Proyecto evaluado con Livewire
+├── 18-nodejs-intro/            ← Node.js + Express + AWS
+├── 19-nodejs-challenge-api/    ← Challenge: CLI + API OpenAI
 │
 ├── index.html                  ← Página principal del repositorio
 ├── GUIA_DEL_CURSO.md           ← Este archivo (guía general)
@@ -197,6 +207,59 @@ DGTIC-Cursos/
                                │                    │
                                │  Sesiones, regex,  │
                                │  formularios       │
+                               └────────┬──────────┘
+                                        │
+                                        ▼
+  FASE 8: POO + FRAMEWORKS    ┌───────────────────┐
+  ────────────────────        │  14                │
+                               │  PHP POO           │
+                               │                    │
+                               │  Clases, herencia, │
+                               │  encapsulamiento   │
+                               └────────┬──────────┘
+                                        │
+                                        ▼
+                               ┌───────────────────┐
+                               │  15                │
+                               │  Laravel CRUD      │
+                               │                    │
+                               │  MVC, Eloquent,    │
+                               │  Blade, email      │
+                               └────────┬──────────┘
+                                        │
+                                        ▼
+                               ┌───────────────────┐
+                               │  16                │
+                               │  Laravel Livewire  │
+                               │                    │
+                               │  Componentes       │
+                               │  reactivos         │
+                               └────────┬──────────┘
+                                        │
+                                        ▼
+  FASE 9: EVALUACIÓN          ┌───────────────────┐
+  ──────────────────          │  17                │
+                               │  Laravel Eval      │
+                               │                    │
+                               │  Proyecto evaluado │
+                               │  Livewire avanzado │
+                               └───────────────────┘
+
+  FASE 10: NODE.js            ┌───────────────────┐
+  ────────────────            │  18                │
+                               │  Node.js Intro     │
+                               │                    │
+                               │  Express, AWS,     │
+                               │  DynamoDB, Lambda  │
+                               └────────┬──────────┘
+                                        │
+                                        ▼
+                               ┌───────────────────┐
+                               │  19                │
+                               │  Node.js Challenge │
+                               │                    │
+                               │  CLI + API,        │
+                               │  OpenAI, JSON      │
                                └───────────────────┘
 ```
 
@@ -211,7 +274,9 @@ DGTIC-Cursos/
                                                                           │
          ┌────────────────────────────────────────────────────────────────┘
          ▼
-11 Python ──► 12 JavaScript ──► 13 PHP
+11 Python ──► 12 JavaScript ──► 13 PHP ──► 14 PHP POO ──► 15 Laravel ──► 16 Livewire ──► 17 Eval
+                    │
+                    └──► 18 Node.js ──► 19 Challenge API
 ```
 
 ### Qué construye cada módulo
@@ -232,6 +297,12 @@ Módulo  Qué construyes                         Habilidad principal
   11    15 ejercicios de Python                Lógica de programación
   12    Scripts JS + proyecto con API          JavaScript, DOM, fetch
   13    Ejercicios PHP + app de usuarios       Backend, sesiones, regex
+  14    7 ejercicios de POO en PHP             Clases, herencia, polimorfismo
+  15    App CRUD de cursos con Laravel         MVC, Eloquent, Blade, email
+  16    CRUD reactivo con Livewire             Componentes sin JS, reactivo
+  17    Proyecto evaluado de clientes          Livewire avanzado, testing
+  18    Node.js con Express y AWS              Serverless, DynamoDB, Lambda
+  19    Challenge: CLI + API OpenAI            Integración de APIs, JSON
 ```
 
 ---
@@ -253,6 +324,12 @@ Módulo  Qué construyes                         Habilidad principal
 | **11** Python | Variables, condicionales (`if`/`elif`/`else`), ciclos (`for`/`while`), funciones, `input()`, `try`/`except`, `random`, lógica de juegos | 15 carpetas con `.py` + `.md` | — |
 | **12** JavaScript | Variables, ciclos, funciones (arrow, anonymous), clases, herencia, DOM (`getElementById`, `querySelector`), eventos (`onclick`, `DOMContentLoaded`), `fetch()` + API REST | `script00-02.js`, `Eventos1/`, `PracticaFinalNat/` | 09, 10 |
 | **13** PHP | Variables, funciones, ciclos, `str_repeat()`, expresiones regulares (`preg_match`), sesiones (`$_SESSION`), formularios (`$_POST`), autenticación, `htmlspecialchars()` | `.php` files, `TareaFormulario_NEMB/` | 12 |
+| **14** PHP POO | Clases, objetos, propiedades (public/private/protected), métodos, constructores/destructores, herencia, polimorfismo | `Clases/`, `Vistas/`, `index.php` | 13 |
+| **15** Laravel CRUD | Controladores REST (index/create/store/edit/update/destroy), Blade templates, Eloquent ORM, validación, paginación, Mailable, rutas con nombre | `app/Http/Controllers/`, `resources/views/`, `routes/web.php` | 14 |
+| **16** Laravel Livewire | Componentes Livewire 3, propiedades reactivas, validación en tiempo real, Tailwind CSS, Vite | `app/Livewire/`, `resources/views/livewire/` | 15 |
+| **17** Laravel Evaluación | Múltiples componentes Livewire, model binding en rutas, CustomerFactory, composición de componentes, proyecto evaluado | `app/Http/Livewire/`, `database/factories/` | 16 |
+| **18** Node.js Intro | `require`/módulos, Express (rutas, middleware, JSON), AWS SDK (DynamoDB DocumentClient), Lambda functions, API Gateway, OpenAI SDK, `dotenv` | `index.js`, `modules.js` | 12 |
+| **19** Node.js Challenge | `readline` (CLI interactivo), `axios` (HTTP client), async/await, Express POST endpoint, integración OpenAI chat completions | `index.js`, `server.js` | 18 |
 
 ---
 
