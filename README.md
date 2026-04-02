@@ -123,7 +123,7 @@ Los modulos 11-13 incluyen sus propios enunciados y documentacion dentro de cada
 3. Lee el `CONCEPTOS.md` de cada modulo (01-10) para entender la teoria.
 4. Los ejercicios de Python (11) se ejecutan con `python3 ejercicioNN.py`.
 5. Los archivos PHP (13-14) requieren un servidor local (`php -S localhost:8000`).
-6. Los proyectos Laravel (15-17) necesitan `composer install` y `php artisan serve`.
+6. Los proyectos Laravel (15-17) tienen instrucciones detalladas en su `SETUP.md`.
 7. Los proyectos Node.js (18-19) necesitan `npm install` y `node index.js`.
 
 ```bash
@@ -138,4 +138,8 @@ python3 11-python-programacion/Ejercicio-01_Numeros_pares/ejercicio01.py
 
 # Levantar servidor PHP local
 cd 13-php-fundamentos/TareaFormulario_NEMB && php -S localhost:8000
+
+# Levantar un proyecto Laravel (ver SETUP.md de cada uno)
+cd 15-laravel-crud && composer install && cp .env.example .env && php artisan key:generate
+touch database/database.sqlite && php artisan migrate && php artisan serve
 ```
