@@ -15,8 +15,8 @@ It sends that question to the OpenAI API using the provided API key.
 It prints the result as a JSON object like this:
 
 { "answer": "Your response from OpenAI goes here." }
-Please don't use your own money to do the testing, here is an API key with couple bucks that you can use to make requests to open ai API
-TU_API_KEY_AQUI
+Para usar este proyecto necesitas una API key de OpenAI. Configúrala en un archivo .env:
+OPENAI_API_KEY=tu-api-key-aqui
 We recommend using axios to make the request.
 
 ## Bonus, with Express:
