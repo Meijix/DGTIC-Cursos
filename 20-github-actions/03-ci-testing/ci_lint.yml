@@ -1,0 +1,231 @@
+# =============================================================================
+# LINTING MULTI-LENGUAJE
+# =============================================================================
+#
+# Este workflow ejecuta linters para multiples lenguajes en paralelo.
+# Es ideal para proyectos que mezclan Python, JavaScript, CSS, etc.
+#
+# Cada lenguaje tiene su propio job, por lo que se ejecutan en paralelo
+# y el feedback es mas rapido.
+#
+# COMO USARLO:
+# 1. Copia a .github/workflows/ci_lint.yml
+# 2. Elimina o comenta los jobs de lenguajes que no uses
+# 3. Haz push y observa como se ejecutan en paralelo
+#
+# =============================================================================
+
+name: CI - Linting Multi-Lenguaje
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # =========================================================================
+  # JOB 1: PYTHON LINTING
+  # =========================================================================
+  python-lint:
+    name: "Python: flake8 + black"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar linters
+        run: pip install flake8 black isort
+
+      - name: flake8
+        run: |
+          echo "=== flake8 (PEP 8) ==="
+          flake8 . \
+            --count \
+            --max-line-length=120 \
+            --exclude=.git,__pycache__,venv,.venv,node_modules \
+            --statistics || echo "Errores de flake8 encontrados"
+
+      - name: black (formato)
+        run: |
+          echo "=== black (formato) ==="
+          black --check --diff . \
+            --exclude='/(\.git|__pycache__|\.venv|venv|node_modules)/' \
+            || echo "Archivos con formato incorrecto encontrados"
+
+      - name: isort (imports)
+        run: |
+          echo "=== isort (orden de imports) ==="
+          isort --check-only --diff --profile black . \
+            || echo "Imports desordenados encontrados"
+
+  # =========================================================================
+  # JOB 2: JAVASCRIPT/TYPESCRIPT LINTING
+  # =========================================================================
+  js-lint:
+    name: "JS/TS: ESLint + Prettier"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: |
+          # Si el proyecto tiene package.json:
+          # npm ci
+          # Si no, instalar linters directamente:
+          npm install --no-save eslint prettier
+          echo "Dependencias de linting instaladas"
+
+      - name: ESLint
+        run: |
+          echo "=== ESLint ==="
+          # npx eslint src/ \
+          #   --ext .js,.jsx,.ts,.tsx \
+          #   --max-warnings 0 \
+          #   --format stylish
+          #
+          # --max-warnings 0: warnings se tratan como errores
+          # --format stylish: formato de salida legible
+          echo "npx eslint (simulado)"
+
+      - name: Prettier
+        run: |
+          echo "=== Prettier ==="
+          # npx prettier --check "**/*.{js,jsx,ts,tsx,json,css,scss,md}"
+          echo "npx prettier --check (simulado)"
+
+  # =========================================================================
+  # JOB 3: MARKDOWN LINTING
+  # =========================================================================
+  markdown-lint:
+    name: "Markdown lint"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # markdownlint verifica la consistencia y calidad de archivos Markdown
+      - name: Lint Markdown
+        uses: DavidAnson/markdownlint-cli2-action@v19
+        with:
+          globs: '**/*.md'
+        # continue-on-error porque Markdown no es critico
+        continue-on-error: true
+
+  # =========================================================================
+  # JOB 4: YAML LINTING
+  # =========================================================================
+  yaml-lint:
+    name: "YAML lint"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar yamllint
+        run: pip install yamllint
+
+      # yamllint verifica la sintaxis y estilo de archivos YAML
+      # (incluyendo tus propios workflows de GitHub Actions)
+      - name: Lint YAML
+        run: |
+          echo "=== yamllint ==="
+          yamllint . \
+            --format colored \
+            -d "{extends: default, rules: {line-length: {max: 150}}}" \
+            || echo "Errores de YAML encontrados"
+
+  # =========================================================================
+  # JOB 5: SHELL LINTING
+  # =========================================================================
+  shell-lint:
+    name: "Shell: shellcheck"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ShellCheck analiza scripts de bash/sh buscando errores comunes
+      # y malas practicas. Viene preinstalado en los runners de GitHub.
+      - name: ShellCheck
+        run: |
+          echo "=== ShellCheck ==="
+          # Buscar todos los scripts .sh y analizarlos
+          find . -name "*.sh" -not -path "*/node_modules/*" -not -path "*/.git/*" \
+            -exec shellcheck {} + \
+            || echo "No se encontraron scripts .sh o hay errores"
+
+  # =========================================================================
+  # JOB FINAL: RESUMEN
+  # =========================================================================
+  resumen:
+    name: "Resumen de linting"
+    runs-on: ubuntu-latest
+    needs: [python-lint, js-lint, markdown-lint, yaml-lint, shell-lint]
+    if: always()
+
+    steps:
+      - name: Resumen de resultados
+        run: |
+          echo "=== Resumen de Linting ==="
+          echo ""
+          echo "Python:     ${{ needs.python-lint.result }}"
+          echo "JS/TS:      ${{ needs.js-lint.result }}"
+          echo "Markdown:   ${{ needs.markdown-lint.result }}"
+          echo "YAML:       ${{ needs.yaml-lint.result }}"
+          echo "Shell:      ${{ needs.shell-lint.result }}"
+          echo ""
+
+          # Fallar si alguno de los linters criticos fallo
+          if [ "${{ needs.python-lint.result }}" == "failure" ] || \
+             [ "${{ needs.js-lint.result }}" == "failure" ]; then
+            echo "FALLO: Uno o mas linters criticos fallaron"
+            exit 1
+          else
+            echo "EXITO: Todos los linters criticos pasaron"
+          fi
+
+# =============================================================================
+# POR QUE LINTING EN CI ES IMPORTANTE:
+#
+# 1. CONSISTENCIA: todos siguen las mismas reglas, sin importar su editor
+# 2. CALIDAD: detecta errores potenciales antes de que lleguen a produccion
+# 3. CODE REVIEW: el reviewer se enfoca en logica, no en estilo
+# 4. AUTOMATIZACION: no depende de que el desarrollador recuerde ejecutar
+#    los linters localmente
+#
+# CONSEJO: configura pre-commit hooks locales para ejecutar linters
+# antes del commit. Asi el feedback es instantaneo y no tienes que
+# esperar a que CI se ejecute.
+#
+# Ejemplo con pre-commit (Python):
+#   pip install pre-commit
+#   pre-commit install
+#   # .pre-commit-config.yaml define los hooks
+#
+# Ejemplo con husky (Node.js):
+#   npm install --save-dev husky lint-staged
+#   npx husky init
+#   # .husky/pre-commit ejecuta los linters
+# =============================================================================

@@ -1,0 +1,368 @@
+# =============================================================================
+# ANATOMIA COMPLETA DE UN WORKFLOW
+# =============================================================================
+#
+# Este archivo muestra TODAS las secciones principales de un workflow de
+# GitHub Actions con explicaciones detalladas. NO es para ejecutar tal cual,
+# sino para estudiar cada parte.
+#
+# Estructura general de un workflow:
+#
+#   name:          <- Nombre del workflow
+#   on:            <- Eventos que lo activan
+#   env:           <- Variables de entorno globales
+#   permissions:   <- Permisos del token GITHUB_TOKEN
+#   concurrency:   <- Control de ejecuciones concurrentes
+#   defaults:      <- Valores por defecto
+#   jobs:          <- Definicion de trabajos
+#     job-id:
+#       runs-on:   <- Runner donde se ejecuta
+#       env:       <- Variables de entorno del job
+#       needs:     <- Dependencias con otros jobs
+#       if:        <- Condicion para ejecutar el job
+#       strategy:  <- Estrategia de ejecucion (matrix)
+#       steps:     <- Lista de pasos
+#         - name:  <- Nombre del paso
+#           uses:  <- Action a usar
+#           run:   <- Comando a ejecutar
+#           with:  <- Parametros para la action
+#           env:   <- Variables de entorno del paso
+#           if:    <- Condicion para ejecutar el paso
+#
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# SECCION 1: NOMBRE
+# ---------------------------------------------------------------------------
+# El nombre del workflow. Aparece en:
+# - La pestana "Actions" de GitHub
+# - Los checks de los Pull Requests
+# - Las badges de estado
+#
+# Si no lo defines, GitHub usa el nombre del archivo.
+name: Anatomia de un Workflow
+
+# ---------------------------------------------------------------------------
+# SECCION 2: EVENTOS (on)
+# ---------------------------------------------------------------------------
+# Define CUANDO se ejecuta el workflow. Puedes combinar multiples eventos.
+#
+# Formatos posibles:
+#   on: push                              <- Un solo evento
+#   on: [push, pull_request]              <- Varios eventos (lista)
+#   on:                                   <- Eventos con configuracion
+#     push:
+#       branches: [main]
+#
+on:
+  # --- Evento: push ---
+  # Se activa cuando alguien hace push al repositorio.
+  push:
+    # Solo en estas ramas (filtro de inclusion)
+    branches:
+      - main                # Rama principal
+      - 'release/**'        # Cualquier rama que empiece con release/
+                            # Ejemplo: release/v1.0, release/hotfix
+    # Tambien puedes filtrar por rutas de archivos:
+    paths:
+      - 'src/**'            # Solo si se modifican archivos en src/
+      - '*.js'              # O archivos .js en la raiz
+    # paths-ignore es lo contrario: se activa en TODO excepto estas rutas
+    # paths-ignore:
+    #   - 'docs/**'         # Ignorar cambios en documentacion
+    #   - '*.md'            # Ignorar cambios en archivos markdown
+
+    # NOTA: No puedes usar paths y paths-ignore a la vez.
+
+    # Filtrar por tags:
+    tags:
+      - 'v*'                # Solo en tags que empiecen con "v" (v1.0, v2.3.1)
+
+  # --- Evento: pull_request ---
+  # Se activa cuando se crea o modifica un Pull Request.
+  pull_request:
+    branches:
+      - main                # Solo PRs dirigidos a main
+    # Tipos de actividad del PR:
+    types:
+      - opened              # Cuando se abre el PR
+      - synchronize         # Cuando se agregan commits al PR
+      - reopened            # Cuando se reabre un PR cerrado
+    # Otros tipos disponibles: closed, edited, labeled, etc.
+
+  # --- Evento: schedule ---
+  # Se ejecuta segun un cron schedule (horario programado).
+  # IMPORTANTE: solo funciona en la rama por defecto (main/master).
+  schedule:
+    # Formato cron: minuto hora dia-mes mes dia-semana
+    - cron: '0 6 * * 1'    # Todos los lunes a las 6:00 UTC
+    # Otros ejemplos:
+    # - cron: '*/15 * * * *'  # Cada 15 minutos
+    # - cron: '0 0 * * *'     # Cada dia a medianoche UTC
+    # - cron: '0 12 1 * *'    # El primero de cada mes a las 12:00 UTC
+
+  # --- Evento: workflow_dispatch ---
+  # Permite ejecutar el workflow manualmente desde la UI de GitHub.
+  # Opcionalmente puedes definir inputs (parametros).
+  workflow_dispatch:
+    inputs:
+      entorno:
+        description: 'Entorno de despliegue'
+        required: true
+        default: 'staging'
+        # "type" define el tipo de input en la interfaz grafica
+        type: choice
+        options:
+          - staging
+          - production
+      debug:
+        description: 'Activar modo debug'
+        required: false
+        type: boolean
+        default: false
+
+# ---------------------------------------------------------------------------
+# SECCION 3: VARIABLES DE ENTORNO GLOBALES
+# ---------------------------------------------------------------------------
+# Variables disponibles en TODOS los jobs y steps del workflow.
+# Se accede a ellas como variables de entorno normales ($VARIABLE) en
+# comandos shell, o como ${{ env.VARIABLE }} en expresiones de GitHub.
+env:
+  # Variables con valores fijos
+  NODE_VERSION: '20'
+  PYTHON_VERSION: '3.12'
+  # Variable que usa un secreto almacenado en GitHub
+  # Los secretos se configuran en: Settings > Secrets and variables > Actions
+  API_TOKEN: ${{ secrets.API_TOKEN }}
+
+# ---------------------------------------------------------------------------
+# SECCION 4: PERMISOS
+# ---------------------------------------------------------------------------
+# Controla los permisos del token GITHUB_TOKEN que GitHub genera
+# automaticamente para cada ejecucion del workflow.
+#
+# Principio de minimo privilegio: solo otorga los permisos necesarios.
+permissions:
+  contents: read          # Leer el contenido del repositorio
+  pull-requests: write    # Escribir comentarios en PRs
+  issues: read            # Leer issues
+  # Otros permisos disponibles:
+  # actions, checks, deployments, id-token, packages,
+  # pages, repository-projects, security-events, statuses
+
+# ---------------------------------------------------------------------------
+# SECCION 5: CONCURRENCIA
+# ---------------------------------------------------------------------------
+# Evita que multiples ejecuciones del mismo workflow corran simultaneamente.
+# Util para deploys donde no quieres dos despliegues al mismo tiempo.
+concurrency:
+  # El grupo agrupa ejecuciones. Si dos ejecuciones tienen el mismo grupo,
+  # se aplica el control de concurrencia.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # cancel-in-progress: true cancela la ejecucion anterior cuando llega
+  # una nueva. Ideal para CI en PRs (solo importa el ultimo commit).
+  cancel-in-progress: true
+
+# ---------------------------------------------------------------------------
+# SECCION 6: DEFAULTS
+# ---------------------------------------------------------------------------
+# Valores por defecto para todos los steps de tipo "run".
+defaults:
+  run:
+    shell: bash             # Shell por defecto (bash, pwsh, python, etc.)
+    working-directory: src  # Directorio de trabajo por defecto
+
+# ---------------------------------------------------------------------------
+# SECCION 7: JOBS
+# ---------------------------------------------------------------------------
+# Los jobs son las unidades principales de trabajo. Cada job se ejecuta en
+# un runner independiente (maquina virtual separada).
+#
+# Por defecto, los jobs se ejecutan en PARALELO.
+# Usa "needs" para crear dependencias y ejecutar en secuencia.
+jobs:
+
+  # =========================================================================
+  # JOB 1: PREPARACION
+  # =========================================================================
+  preparacion:
+    # Nombre legible que aparece en la UI (opcional pero recomendable)
+    name: "Preparar entorno"
+
+    # Runner donde se ejecuta este job
+    runs-on: ubuntu-latest
+
+    # Variables de entorno solo para este job
+    env:
+      JOB_SPECIFIC: "solo disponible en este job"
+
+    # Outputs: valores que este job puede pasar a otros jobs
+    outputs:
+      version: ${{ steps.extraer_version.outputs.version }}
+
+    steps:
+      # STEP 1: Checkout del codigo
+      # actions/checkout descarga el codigo del repositorio al runner.
+      # Sin esto, el runner esta vacio (no tiene tu codigo).
+      - name: Checkout del codigo
+        uses: actions/checkout@v4
+        # "with" pasa parametros a la action
+        with:
+          # fetch-depth: 0 descarga TODO el historial de git.
+          # Por defecto es 1 (solo el ultimo commit), lo cual es mas rapido.
+          # Usa 0 solo si necesitas el historial completo (ej: para changelogs).
+          fetch-depth: 0
+
+      # STEP 2: Extraer la version del proyecto
+      # Este step define un "output" que otros steps o jobs pueden leer.
+      - name: Extraer version
+        id: extraer_version    # El "id" permite referenciar este step
+        run: |
+          # Ejemplo: leer version de package.json
+          # VERSION=$(node -p "require('./package.json').version")
+          VERSION="1.0.0"
+          echo "La version es: $VERSION"
+
+          # Para definir un output del step, se escribe en $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      # STEP 3: Mostrar que el output funciona
+      - name: Verificar output
+        run: |
+          echo "Version extraida: ${{ steps.extraer_version.outputs.version }}"
+
+  # =========================================================================
+  # JOB 2: TESTS (depende del job 1)
+  # =========================================================================
+  tests:
+    name: "Ejecutar pruebas"
+    runs-on: ubuntu-latest
+
+    # "needs" establece dependencia. Este job NO empieza hasta que
+    # "preparacion" termine exitosamente.
+    # Si "preparacion" falla, este job se salta automaticamente.
+    needs: preparacion
+
+    # --- STRATEGY: MATRIX ---
+    # Ejecuta este job multiples veces con diferentes combinaciones
+    # de variables. Muy util para probar en multiples versiones.
+    strategy:
+      # Si un job de la matrix falla, no cancelar los demas.
+      # Por defecto es true (un fallo cancela todo).
+      fail-fast: false
+      matrix:
+        # Define las variables de la matrix
+        node-version: [18, 20, 22]
+        os: [ubuntu-latest, windows-latest]
+        # Esto genera 3 x 2 = 6 combinaciones (jobs)
+
+        # Puedes excluir combinaciones especificas:
+        exclude:
+          - node-version: 18
+            os: windows-latest
+
+        # O incluir combinaciones adicionales con variables extra:
+        include:
+          - node-version: 20
+            os: ubuntu-latest
+            experimental: true
+
+    # El job se ejecuta en el OS de la matrix
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Usar la variable de la matrix para instalar la version correcta
+      - name: Instalar Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Mostrar version
+        run: |
+          node --version
+          echo "Version del proyecto: ${{ needs.preparacion.outputs.version }}"
+
+      - name: Ejecutar tests
+        run: echo "Ejecutando tests con Node ${{ matrix.node-version }}..."
+
+  # =========================================================================
+  # JOB 3: DEPLOY (depende de tests)
+  # =========================================================================
+  deploy:
+    name: "Desplegar"
+    runs-on: ubuntu-latest
+    needs: tests             # Espera a que TODOS los jobs de la matrix terminen
+
+    # --- CONDICIONAL ---
+    # Solo ejecutar si estamos en la rama main.
+    # "if" acepta expresiones de GitHub Actions.
+    if: github.ref == 'refs/heads/main'
+
+    # --- ENVIRONMENT ---
+    # Vincula este job a un "environment" de GitHub.
+    # Los environments pueden tener:
+    # - Secretos especificos
+    # - Reglas de proteccion (aprobacion manual)
+    # - URLs de despliegue
+    environment:
+      name: production
+      url: https://mi-app.ejemplo.com
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Step condicional: solo se ejecuta si el input debug es true
+      - name: Modo debug
+        if: github.event.inputs.debug == 'true'
+        run: echo "Debug activado"
+
+      - name: Simular despliegue
+        run: |
+          echo "Desplegando version ${{ needs.preparacion.outputs.version }}..."
+          echo "Entorno: ${{ github.event.inputs.entorno || 'staging' }}"
+          echo "Despliegue exitoso!"
+
+      # --- CONTINUAR EN CASO DE FALLO ---
+      # Por defecto, si un step falla, los siguientes no se ejecutan.
+      # Con "continue-on-error: true", el workflow sigue aunque este step falle.
+      - name: Paso que podria fallar
+        continue-on-error: true
+        run: |
+          echo "Este paso podria fallar sin detener el workflow"
+          # exit 1   # Descomentar para probar
+
+      # Step que se ejecuta SIEMPRE, incluso si hay fallos previos
+      - name: Notificar resultado
+        if: always()    # always(), success(), failure(), cancelled()
+        run: |
+          echo "El workflow ha terminado"
+          echo "Estado: ${{ job.status }}"
+
+# =============================================================================
+# RESUMEN DE LA JERARQUIA:
+#
+#   WORKFLOW
+#   +-- name, on, env, permissions, concurrency, defaults
+#   +-- jobs:
+#         +-- JOB 1 (preparacion)
+#         |     +-- runs-on, env, outputs
+#         |     +-- steps: [checkout, extraer_version, verificar]
+#         |
+#         +-- JOB 2 (tests) -- needs: preparacion
+#         |     +-- strategy.matrix: [node 18/20/22 x ubuntu/windows]
+#         |     +-- steps: [checkout, setup-node, tests]
+#         |
+#         +-- JOB 3 (deploy) -- needs: tests
+#               +-- if: solo en main
+#               +-- environment: production
+#               +-- steps: [checkout, debug?, deploy, notificar]
+#
+# FLUJO DE EJECUCION:
+#
+#   preparacion --> tests (6 combinaciones en paralelo) --> deploy (si main)
+#
+# =============================================================================

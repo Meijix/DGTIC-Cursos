@@ -1,0 +1,264 @@
+# =============================================================================
+# CI PARA NODE.JS - npm test + ESLint + cobertura
+# =============================================================================
+#
+# Pipeline completo de CI para un proyecto Node.js/JavaScript.
+# Incluye:
+# - Instalacion de dependencias con cache (npm ci)
+# - Linting con ESLint
+# - Verificacion de formato con Prettier
+# - Ejecucion de tests con Jest (o Vitest)
+# - Reporte de cobertura de codigo
+# - Build de produccion
+#
+# REQUISITOS DEL PROYECTO:
+# - package.json con scripts: "test", "lint", "build"
+# - package-lock.json (necesario para npm ci)
+# - tests con Jest o Vitest configurados
+#
+# COMO USARLO:
+# 1. Copia a .github/workflows/ci_node.yml
+# 2. Ajusta los scripts segun tu package.json
+# 3. Haz push y observa el pipeline
+#
+# =============================================================================
+
+name: CI - Node.js
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - '**.js'
+      - '**.ts'
+      - '**.jsx'
+      - '**.tsx'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.eslintrc*'
+      - '.github/workflows/ci_node.yml'
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-node-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # =========================================================================
+  # JOB 1: LINT Y FORMATO
+  # =========================================================================
+  lint:
+    name: "Lint y Formato"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'    # Cache automatico de ~/.npm
+
+      # npm ci es MEJOR que npm install para CI porque:
+      # 1. Es mas rapido (no resuelve versiones, usa package-lock.json)
+      # 2. Es determinista (siempre las mismas versiones)
+      # 3. Borra node_modules primero (estado limpio)
+      # 4. Falla si package-lock.json no esta sincronizado
+      - name: Instalar dependencias
+        run: npm ci
+
+      # --- ESLINT ---
+      # ESLint analiza el codigo JavaScript/TypeScript buscando
+      # errores potenciales y violaciones de estilo.
+      - name: Ejecutar ESLint
+        run: |
+          # Si tienes un script "lint" en package.json:
+          # npm run lint
+          #
+          # O directamente:
+          # npx eslint src/ --ext .js,.jsx,.ts,.tsx --max-warnings 0
+          #
+          # --max-warnings 0: trata warnings como errores (mas estricto)
+          echo "npx eslint src/ (simulado)"
+
+      # --- PRETTIER ---
+      # Prettier verifica el formato del codigo (indentacion, comillas, etc.)
+      # Con --check, solo verifica sin modificar.
+      - name: Verificar formato con Prettier
+        run: |
+          # npx prettier --check "src/**/*.{js,jsx,ts,tsx,json,css,md}"
+          echo "npx prettier --check (simulado)"
+
+      # --- TYPESCRIPT ---
+      # Si tu proyecto usa TypeScript, verifica que no haya errores de tipos
+      - name: Verificar tipos TypeScript
+        run: |
+          # npx tsc --noEmit
+          # --noEmit: solo verifica tipos, no genera archivos .js
+          echo "npx tsc --noEmit (simulado - solo si usas TypeScript)"
+
+  # =========================================================================
+  # JOB 2: TESTS
+  # =========================================================================
+  test:
+    name: "Tests (Node ${{ matrix.node-version }})"
+    runs-on: ubuntu-latest
+    needs: lint
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [18, 20, 22]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      # --- JEST/VITEST con cobertura ---
+      - name: Ejecutar tests con cobertura
+        run: |
+          # Para Jest (el mas comun):
+          # npx jest --coverage --ci --reporters=default
+          #
+          # --coverage: genera reporte de cobertura
+          # --ci: modo CI (no interactivo, falla en snapshots desactualizados)
+          # --reporters=default: output estandar
+          #
+          # Para Vitest:
+          # npx vitest run --coverage
+          #
+          # Si tienes un script "test" en package.json:
+          # npm test -- --coverage --ci
+          echo "npm test -- --coverage --ci (simulado)"
+
+      # Subir reporte de cobertura
+      - name: Subir reporte de cobertura
+        if: always() && matrix.node-version == 20
+        # Solo subir el reporte de la version principal (evita duplicados)
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-node-${{ matrix.node-version }}
+          path: coverage/
+          retention-days: 14
+
+  # =========================================================================
+  # JOB 3: BUILD
+  # =========================================================================
+  build:
+    name: "Build de produccion"
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      # Construir el proyecto para produccion
+      - name: Build
+        run: |
+          # npm run build
+          echo "npm run build (simulado)"
+        env:
+          # Variables de entorno comunes para builds de produccion
+          NODE_ENV: production
+          # CI=true hace que warnings se traten como errores en React
+          CI: true
+
+      # Subir el build como artefacto (para deploy posterior)
+      - name: Subir build
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: |
+            dist/
+            build/
+          retention-days: 7
+
+  # =========================================================================
+  # JOB 4: AUDITORIA DE SEGURIDAD
+  # =========================================================================
+  seguridad:
+    name: "Auditoria de seguridad"
+    runs-on: ubuntu-latest
+    continue-on-error: true    # No bloquear por vulnerabilidades
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # npm audit revisa las dependencias contra la base de datos de
+      # vulnerabilidades conocidas de npm.
+      - name: Auditar dependencias
+        run: |
+          # --production: solo auditar dependencias de produccion
+          # (ignora devDependencies)
+          npm audit --production || echo "Se encontraron vulnerabilidades"
+
+          # Para un reporte mas detallado:
+          # npm audit --production --json > audit-report.json
+
+# =============================================================================
+# EJEMPLO DE package.json CON SCRIPTS:
+#
+# {
+#   "name": "mi-proyecto",
+#   "version": "1.0.0",
+#   "scripts": {
+#     "test": "jest",
+#     "test:coverage": "jest --coverage",
+#     "lint": "eslint src/ --ext .js,.ts",
+#     "lint:fix": "eslint src/ --ext .js,.ts --fix",
+#     "format": "prettier --write .",
+#     "format:check": "prettier --check .",
+#     "build": "webpack --mode production",
+#     "typecheck": "tsc --noEmit"
+#   },
+#   "devDependencies": {
+#     "jest": "^29.0.0",
+#     "eslint": "^8.0.0",
+#     "prettier": "^3.0.0"
+#   }
+# }
+#
+# EJEMPLO DE jest.config.js:
+#
+# module.exports = {
+#   testEnvironment: 'node',
+#   coverageDirectory: 'coverage',
+#   coverageThreshold: {
+#     global: {
+#       branches: 70,
+#       functions: 70,
+#       lines: 70,
+#       statements: 70
+#     }
+#   }
+# };
+# =============================================================================

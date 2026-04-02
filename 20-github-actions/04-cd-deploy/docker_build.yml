@@ -1,0 +1,208 @@
+# =============================================================================
+# DOCKER BUILD Y PUSH
+# =============================================================================
+#
+# Este workflow construye una imagen Docker y la publica en GitHub Container
+# Registry (ghcr.io). Tambien muestra como publicar en Docker Hub.
+#
+# FLUJO:
+# 1. Build de la imagen Docker
+# 2. Tag con version semantica y SHA
+# 3. Push a GitHub Container Registry (ghcr.io)
+# 4. (Opcional) Push a Docker Hub
+#
+# CONFIGURACION PREVIA:
+# - Tener un Dockerfile en la raiz del proyecto
+# - Para Docker Hub: crear secretos DOCKERHUB_USERNAME y DOCKERHUB_TOKEN
+# - Para GHCR: no necesita configuracion extra (usa GITHUB_TOKEN)
+#
+# COMO USARLO:
+# 1. Copia a .github/workflows/docker_build.yml
+# 2. Asegurate de tener un Dockerfile
+# 3. Haz push a main o crea un tag v*
+#
+# =============================================================================
+
+name: Docker Build y Push
+
+on:
+  push:
+    branches: [main]
+    # Activar en tags de version
+    tags:
+      - 'v*'            # v1.0.0, v2.1.3, etc.
+  pull_request:
+    branches: [main]
+
+# Permisos para publicar en GHCR
+permissions:
+  contents: read
+  packages: write       # Necesario para push a ghcr.io
+
+env:
+  # Nombre de la imagen (ajustar segun tu proyecto)
+  # Para GHCR: ghcr.io/OWNER/IMAGE_NAME
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  # Para Docker Hub: usar docker.io/USUARIO/IMAGEN
+
+jobs:
+  # =========================================================================
+  # JOB: BUILD Y PUSH
+  # =========================================================================
+  build-and-push:
+    name: "Build y Push Docker"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # --- DOCKER BUILDX ---
+      # Buildx es el builder avanzado de Docker. Soporta:
+      # - Cache de capas
+      # - Multi-plataforma (amd64, arm64)
+      # - Exportar directamente a un registro
+      - name: Configurar Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # --- LOGIN A GHCR ---
+      # GitHub Container Registry usa el GITHUB_TOKEN para autenticacion.
+      # No necesitas crear un token adicional.
+      - name: Login a GitHub Container Registry
+        # Solo hacer login si no es un PR (los PRs no deben publicar)
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # --- LOGIN A DOCKER HUB (opcional) ---
+      # Descomenta si tambien quieres publicar en Docker Hub
+      # - name: Login a Docker Hub
+      #   if: github.event_name != 'pull_request'
+      #   uses: docker/login-action@v3
+      #   with:
+      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # --- METADATA ---
+      # docker/metadata-action genera automaticamente los tags y labels
+      # para la imagen basandose en el evento (rama, tag, PR, etc.)
+      - name: Extraer metadata (tags y labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          # Reglas para generar tags:
+          tags: |
+            # Tag "latest" para la rama main
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            # Tag con la version del tag git (v1.2.3 -> 1.2.3)
+            type=semver,pattern={{version}}
+            # Tag con major.minor (v1.2.3 -> 1.2)
+            type=semver,pattern={{major}}.{{minor}}
+            # Tag con major (v1.2.3 -> 1)
+            type=semver,pattern={{major}}
+            # Tag con el SHA corto del commit
+            type=sha,prefix=sha-
+            # Tag con el nombre de la rama
+            type=ref,event=branch
+            # Tag con el numero del PR
+            type=ref,event=pr
+          # Labels OCI estandar (buena practica):
+          labels: |
+            org.opencontainers.image.title=${{ github.event.repository.name }}
+            org.opencontainers.image.description=${{ github.event.repository.description }}
+
+      # Ejemplo de tags generados para un push del tag v1.2.3:
+      #   ghcr.io/usuario/repo:1.2.3
+      #   ghcr.io/usuario/repo:1.2
+      #   ghcr.io/usuario/repo:1
+      #   ghcr.io/usuario/repo:sha-abc1234
+      #   ghcr.io/usuario/repo:latest
+
+      # --- BUILD Y PUSH ---
+      - name: Build y Push de imagen Docker
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          # Solo hacer push si NO es un PR
+          # En PRs, solo se hace build (verificar que compila)
+          push: ${{ github.event_name != 'pull_request' }}
+          # Tags y labels generados por metadata-action
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # --- CACHE ---
+          # Cachear las capas de Docker para builds mas rapidos.
+          # Usa el cache de GitHub Actions (gha = GitHub Actions)
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          # "mode=max" cachea TODAS las capas intermedias, no solo las finales.
+          # Esto maximiza el cache hit en builds futuros.
+
+          # --- MULTI-PLATAFORMA (opcional) ---
+          # Descomentar para construir para multiples arquitecturas:
+          # platforms: linux/amd64,linux/arm64
+          # Nota: multi-plataforma es mas lento
+
+      # Mostrar que se publico
+      - name: Resumen del build
+        if: github.event_name != 'pull_request'
+        run: |
+          echo "=== Imagen Docker publicada ==="
+          echo ""
+          echo "Registro: ${{ env.REGISTRY }}"
+          echo "Tags:"
+          echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n'
+          echo ""
+          echo "Para descargar:"
+          echo "  docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+
+# =============================================================================
+# EJEMPLO DE DOCKERFILE:
+#
+# # Multi-stage build (recomendado: imagen final mas pequena)
+#
+# # ===== STAGE 1: Build =====
+# FROM node:20-alpine AS build
+# WORKDIR /app
+# COPY package*.json ./
+# RUN npm ci --production=false
+# COPY . .
+# RUN npm run build
+#
+# # ===== STAGE 2: Produccion =====
+# FROM node:20-alpine AS production
+# WORKDIR /app
+# # Copiar solo lo necesario del stage de build
+# COPY --from=build /app/dist ./dist
+# COPY --from=build /app/node_modules ./node_modules
+# COPY --from=build /app/package.json ./
+# # Usuario no-root (seguridad)
+# RUN addgroup -g 1001 -S nodejs && \
+#     adduser -S nextjs -u 1001
+# USER nextjs
+# EXPOSE 3000
+# CMD ["node", "dist/index.js"]
+#
+# BUENAS PRACTICAS:
+# 1. Multi-stage builds: imagen final solo tiene lo necesario
+# 2. .dockerignore: excluir node_modules, .git, etc.
+# 3. Usuario no-root: nunca correr como root en produccion
+# 4. COPY package*.json primero: aprovecha el cache de capas
+# 5. Alpine base: imagenes mas pequenas
+# 6. Fijar versiones: FROM node:20.11-alpine (no "latest")
+#
+# EJEMPLO DE .dockerignore:
+# node_modules
+# .git
+# .github
+# .env
+# .env.*
+# Dockerfile
+# docker-compose.yml
+# README.md
+# coverage/
+# =============================================================================

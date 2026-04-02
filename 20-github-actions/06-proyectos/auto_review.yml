@@ -1,0 +1,302 @@
+# =============================================================================
+# AUTOMATIZACION DE PULL REQUESTS
+# =============================================================================
+#
+# Este workflow automatiza tareas comunes al trabajar con PRs:
+#   1. Etiquetar el PR segun los archivos modificados
+#   2. Ejecutar checks (lint y tests)
+#   3. Comentar en el PR con un resumen de resultados
+#   4. Notificar en Slack si los checks fallan (opcional)
+#
+# CONCEPTOS QUE INTEGRA:
+#   - Seccion 01: Trigger pull_request con tipos de actividad
+#   - Seccion 02: Jobs, steps, outputs
+#   - Seccion 03: Linting y testing
+#   - Seccion 05: actions/github-script (API de GitHub), permisos
+#
+# COMO USARLO:
+# 1. Copia a .github/workflows/auto-review.yml
+# 2. Crea los labels en tu repositorio (frontend, backend, docs, config)
+# 3. Para Slack: agrega el secreto SLACK_WEBHOOK_URL (opcional)
+#
+# =============================================================================
+
+name: Auto Review PR
+
+on:
+  pull_request:
+    # Tipos de actividad que activan el workflow.
+    # Por defecto solo se activa en: opened, synchronize, reopened
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+# ---------------------------------------------------------------------------
+# PERMISOS
+# ---------------------------------------------------------------------------
+# Necesitamos escribir en PRs (labels, comentarios) y leer contenido.
+permissions:
+  contents: read
+  pull-requests: write
+  # NOTA: Estos permisos aplican al GITHUB_TOKEN, no al usuario.
+  # Para que funcione, el repo debe permitir que Actions escriba en PRs:
+  # Settings > Actions > General > Workflow permissions > Read and write
+
+jobs:
+  # =========================================================================
+  # JOB 1: ETIQUETAR PR SEGUN ARCHIVOS CAMBIADOS
+  # =========================================================================
+  etiquetar:
+    name: "Auto-label"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del codigo
+        uses: actions/checkout@v4
+
+      # actions/github-script permite ejecutar JavaScript con acceso
+      # completo a la API de GitHub (via octokit).
+      #
+      # Variables disponibles dentro del script:
+      #   github  -> instancia autenticada de octokit
+      #   context -> contexto del evento (repo, PR, actor, etc.)
+      #   core    -> utilidades (@actions/core: setOutput, info, warning, etc.)
+      #   glob    -> patron matching de archivos
+      #   io      -> utilidades de I/O
+      - name: Asignar labels segun archivos cambiados
+        uses: actions/github-script@v7
+        with:
+          # El script recibe automaticamente un token GITHUB_TOKEN
+          script: |
+            // Obtener la lista de archivos cambiados en el PR
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              per_page: 100
+            });
+
+            // Definir reglas de etiquetado: si algun archivo coincide, se agrega el label
+            const labelRules = {
+              'frontend':  (f) => f.startsWith('frontend/') || f.endsWith('.jsx') || f.endsWith('.tsx'),
+              'backend':   (f) => f.startsWith('backend/') || f.startsWith('api/'),
+              'docs':      (f) => f.startsWith('docs/') || f.endsWith('.md'),
+              'config':    (f) => f.startsWith('.github/') || f === 'package.json' || f === 'pyproject.toml',
+              'tests':     (f) => f.includes('test') || f.includes('spec')
+            };
+
+            // Determinar que labels aplicar
+            const labelsToAdd = [];
+            const changedFiles = files.map(f => f.filename);
+
+            for (const [label, matchFn] of Object.entries(labelRules)) {
+              if (changedFiles.some(matchFn)) {
+                labelsToAdd.push(label);
+              }
+            }
+
+            // Aplicar labels al PR
+            if (labelsToAdd.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: labelsToAdd
+              });
+              core.info(`Labels asignados: ${labelsToAdd.join(', ')}`);
+            } else {
+              core.info('Ningun label coincide con los archivos cambiados');
+            }
+
+  # =========================================================================
+  # JOB 2: EJECUTAR CHECKS (lint y test)
+  # =========================================================================
+  checks:
+    name: "Checks"
+    runs-on: ubuntu-latest
+
+    # Outputs: exponer resultados para que el job de comentario los use
+    outputs:
+      lint-result: ${{ steps.lint.outcome }}
+      test-result: ${{ steps.test.outcome }}
+
+    steps:
+      - name: Checkout del codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar entorno
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: echo "npm ci (simulado)"
+
+      - name: Lint
+        id: lint
+        # continue-on-error: true permite que el step "falle" sin detener el job.
+        # Esto nos permite capturar el resultado y reportarlo en el comentario.
+        continue-on-error: true
+        run: |
+          echo "npx eslint src/ (simulado)"
+          # En un proyecto real, si eslint falla, el exit code sera != 0
+
+      - name: Tests
+        id: test
+        continue-on-error: true
+        run: |
+          echo "npx jest --ci --coverage (simulado)"
+          # Simular cobertura de tests
+          echo "Cobertura: 87%"
+
+  # =========================================================================
+  # JOB 3: COMENTAR EN EL PR CON RESULTADOS
+  # =========================================================================
+  comentar:
+    name: "Comentar resultados"
+    runs-on: ubuntu-latest
+    needs: checks
+    # Ejecutar siempre, incluso si checks fallo
+    if: always() && needs.checks.result != 'cancelled'
+
+    steps:
+      # Usar github-script para postear un comentario con los resultados
+      - name: Postear resumen en el PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Obtener resultados del job de checks
+            const lintResult = '${{ needs.checks.outputs.lint-result }}';
+            const testResult = '${{ needs.checks.outputs.test-result }}';
+
+            // Emojis para indicar estado visualmente
+            const icon = (result) => result === 'success' ? '✅' : '❌';
+
+            // Construir el comentario en Markdown
+            const body = [
+              '## Resultados del CI',
+              '',
+              '| Check | Resultado |',
+              '|-------|-----------|',
+              `| Lint | ${icon(lintResult)} ${lintResult} |`,
+              `| Tests | ${icon(testResult)} ${testResult} |`,
+              '',
+              `**Commit:** \`${context.sha.substring(0, 7)}\``,
+              `**Ejecutado por:** @${context.actor}`,
+              '',
+              '---',
+              '*Comentario generado automaticamente por GitHub Actions*'
+            ].join('\n');
+
+            // Buscar si ya existe un comentario nuestro (para editarlo en vez de crear otro)
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+
+            const botComment = comments.find(
+              c => c.body.includes('Resultados del CI') && c.user.type === 'Bot'
+            );
+
+            if (botComment) {
+              // Actualizar comentario existente
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+              core.info('Comentario actualizado');
+            } else {
+              // Crear nuevo comentario
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+              core.info('Comentario creado');
+            }
+
+  # =========================================================================
+  # JOB 4: NOTIFICAR EN SLACK (opcional)
+  # =========================================================================
+  notificar:
+    name: "Notificar fallo"
+    runs-on: ubuntu-latest
+    needs: checks
+    # Solo notificar si algun check fallo
+    if: failure()
+    # NOTA: "failure()" evalua si algun job en "needs" fallo.
+
+    steps:
+      # Notificar via Slack webhook.
+      # Para configurar:
+      # 1. Crea una Slack App con Incoming Webhook
+      # 2. Guarda la URL del webhook como secreto: SLACK_WEBHOOK_URL
+      # 3. Descomenta este paso
+      - name: Enviar notificacion a Slack
+        # Solo ejecutar si el secreto existe
+        if: env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          echo "Enviando notificacion a Slack... (simulado)"
+          # En produccion:
+          # curl -X POST -H 'Content-type: application/json' \
+          #   --data "{
+          #     \"text\": \"CI fallo en PR #${{ github.event.pull_request.number }}\",
+          #     \"blocks\": [
+          #       {
+          #         \"type\": \"section\",
+          #         \"text\": {
+          #           \"type\": \"mrkdwn\",
+          #           \"text\": \"*CI fallo* en <${{ github.event.pull_request.html_url }}|PR #${{ github.event.pull_request.number }}>\\nAutor: ${{ github.event.pull_request.user.login }}\\nRama: ${{ github.head_ref }}\"
+          #         }
+          #       }
+          #     ]
+          #   }" \
+          #   "$SLACK_WEBHOOK_URL"
+
+      # ALTERNATIVA: usar una accion de Slack del marketplace
+      # - name: Notificar via accion de Slack
+      #   uses: slackapi/slack-github-action@v1
+      #   with:
+      #     payload: |
+      #       {
+      #         "text": "CI fallo en PR #${{ github.event.pull_request.number }}",
+      #         "channel": "#ci-notifications"
+      #       }
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+# =============================================================================
+# LA API DE GITHUB EN ACTIONS (github-script):
+#
+# actions/github-script te da acceso a "octokit" (el SDK oficial de GitHub)
+# directamente en un step, sin necesidad de instalar dependencias.
+#
+# OBJETOS DISPONIBLES EN EL SCRIPT:
+#   github   -> octokit autenticado (para llamar la API)
+#   context  -> informacion del evento (repo, PR, actor, SHA, etc.)
+#   core     -> @actions/core (setOutput, info, warning, setFailed, etc.)
+#   glob     -> @actions/glob (buscar archivos por patron)
+#   io       -> @actions/io (copiar, mover archivos)
+#
+# EJEMPLOS COMUNES:
+#   - Agregar labels:     github.rest.issues.addLabels(...)
+#   - Crear comentario:   github.rest.issues.createComment(...)
+#   - Agregar reviewer:   github.rest.pulls.requestReviewers(...)
+#   - Crear release:      github.rest.repos.createRelease(...)
+#   - Cerrar issue:       github.rest.issues.update(..., state: 'closed')
+#
+# DOCUMENTACION DE LA API:
+#   https://docs.github.com/en/rest
+#   https://octokit.github.io/rest.js/
+#
+# ALTERNATIVAS A github-script:
+#   - gh CLI: "run: gh pr comment ..." (mas simple para operaciones basicas)
+#   - Acciones especializadas: actions/labeler, peter-evans/create-or-update-comment
+#   - Webhook directo: curl a la API de GitHub
+# =============================================================================

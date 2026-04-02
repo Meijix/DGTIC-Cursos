@@ -1,0 +1,208 @@
+# =============================================================================
+# EVENTO: PULL REQUEST
+# =============================================================================
+#
+# Este workflow se activa cuando se crea o actualiza un Pull Request.
+# Es el patron mas comun para CI: verificar el codigo ANTES de hacer merge.
+#
+# COMO USARLO:
+# 1. Copia a .github/workflows/evento_pr.yml
+# 2. Crea una rama, haz cambios y abre un Pull Request
+# 3. Observa como el workflow se ejecuta automaticamente
+# 4. Los resultados aparecen como "checks" en el PR
+#
+# =============================================================================
+
+name: CI - Pull Request
+
+on:
+  pull_request:
+    # --- RAMA DESTINO ---
+    # Solo se activa en PRs dirigidos a estas ramas.
+    # Esto evita que se ejecute en PRs entre ramas de feature.
+    branches:
+      - main
+      - develop
+
+    # --- TIPOS DE ACTIVIDAD ---
+    # Por defecto, pull_request reacciona a: opened, synchronize, reopened.
+    # Puedes ser mas especifico con "types":
+    types:
+      - opened          # Se abrio un PR nuevo
+      - synchronize     # Se hicieron push de nuevos commits al PR
+      - reopened        # Se reabrio un PR previamente cerrado
+      # Otros tipos disponibles (descomentar si los necesitas):
+      # - edited        # Se edito el titulo o descripcion del PR
+      # - labeled       # Se agrego una etiqueta al PR
+      # - ready_for_review  # El PR paso de draft a listo para revision
+
+    # --- FILTRO POR RUTAS ---
+    # Solo ejecutar si los archivos modificados estan en estas rutas.
+    # Esto ahorra minutos de ejecucion.
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'package.json'
+
+# Permisos minimos necesarios para un workflow de CI en PRs
+permissions:
+  contents: read           # Leer el codigo
+  pull-requests: write     # Escribir comentarios en el PR (opcional)
+
+jobs:
+  # =========================================================================
+  # JOB 1: VERIFICACION DE CODIGO
+  # =========================================================================
+  verificacion:
+    name: "Verificar PR"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del codigo
+        uses: actions/checkout@v4
+        # NOTA IMPORTANTE para pull_request:
+        # Por defecto, checkout descarga el "merge commit" (la union
+        # simulada de tu rama con la rama destino). Esto es lo correcto
+        # para CI porque prueba el codigo tal como quedaria despues del merge.
+        #
+        # Si necesitas el codigo exacto del PR (sin merge):
+        # with:
+        #   ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Informacion del PR
+        run: |
+          echo "=== Informacion del Pull Request ==="
+          echo "PR #${{ github.event.pull_request.number }}"
+          echo "Titulo: ${{ github.event.pull_request.title }}"
+          echo "Autor: ${{ github.event.pull_request.user.login }}"
+          echo "Rama origen: ${{ github.head_ref }}"
+          echo "Rama destino: ${{ github.base_ref }}"
+          echo "Commits en el PR: ${{ github.event.pull_request.commits }}"
+          echo "Archivos cambiados: ${{ github.event.pull_request.changed_files }}"
+          echo "Es draft: ${{ github.event.pull_request.draft }}"
+
+      # No ejecutar CI completo si es un draft PR
+      - name: Verificar que no es draft
+        if: github.event.pull_request.draft == true
+        run: |
+          echo "Este PR es un borrador (draft). Saltando CI completo."
+          echo "Cambia el PR a 'Ready for review' para ejecutar todas las pruebas."
+          # Para detener el workflow en un draft, puedes usar:
+          # exit 1
+          # O mejor, poner el if a nivel de job:
+          # jobs:
+          #   ci:
+          #     if: github.event.pull_request.draft == false
+
+      - name: Instalar dependencias
+        run: |
+          echo "Instalando dependencias..."
+          # npm ci
+          # pip install -r requirements.txt
+
+      - name: Ejecutar linting
+        run: |
+          echo "Ejecutando linter..."
+          # npx eslint src/
+          # flake8 src/
+
+      - name: Ejecutar tests
+        run: |
+          echo "Ejecutando tests..."
+          # npm test
+          # pytest
+
+      # Comentar en el PR con el resultado
+      # Esto requiere el permiso pull-requests: write
+      - name: Comentar en el PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          # github-script permite ejecutar codigo JavaScript con la API de GitHub
+          script: |
+            const status = '${{ job.status }}';
+            const emoji = status === 'success' ? '✅' : '❌';
+            const mensaje = `${emoji} **CI completado**: ${status}
+
+            - Linting: ${status}
+            - Tests: ${status}
+            - Commit: \`${{ github.sha }}\``;
+
+            // Solo comentar si no es un draft
+            if (!context.payload.pull_request.draft) {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: mensaje
+              });
+            }
+
+  # =========================================================================
+  # JOB 2: ANALISIS DE TAMANIO
+  # =========================================================================
+  analisis-tamanio:
+    name: "Analisis de cambios"
+    runs-on: ubuntu-latest
+    # Solo ejecutar si no es draft
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Necesitamos el historial para comparar con la rama destino
+          fetch-depth: 0
+
+      - name: Analizar tamanio del PR
+        run: |
+          echo "=== Analisis del PR ==="
+
+          # Contar lineas agregadas y eliminadas
+          STATS=$(git diff --stat origin/${{ github.base_ref }}...HEAD)
+          echo "$STATS"
+
+          # Contar archivos cambiados
+          FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | wc -l)
+          echo ""
+          echo "Total de archivos cambiados: $FILES"
+
+          # Advertir si el PR es muy grande
+          if [ "$FILES" -gt 20 ]; then
+            echo ""
+            echo "ADVERTENCIA: Este PR modifica mas de 20 archivos."
+            echo "Considera dividirlo en PRs mas pequenos para facilitar la revision."
+          fi
+
+# =============================================================================
+# CONCEPTOS CLAVE DEL EVENTO pull_request:
+#
+# 1. SEGURIDAD EN FORKS:
+#    Los workflows activados por pull_request desde un fork tienen
+#    restricciones de seguridad:
+#    - No tienen acceso a secretos del repositorio
+#    - El GITHUB_TOKEN tiene permisos de solo lectura
+#    - Esto evita que alguien malicioso lea tus secretos
+#
+# 2. pull_request vs pull_request_target:
+#    - pull_request: se ejecuta en el contexto del PR (seguro para forks)
+#    - pull_request_target: se ejecuta en el contexto de la rama base
+#      CUIDADO: pull_request_target tiene acceso a secretos, usalo
+#      solo si sabes lo que haces
+#
+# 3. MERGE COMMIT:
+#    El checkout en un PR descarga un "merge commit" temporal que simula
+#    como quedaria el codigo al hacer merge. Esto es ideal para CI
+#    porque detecta conflictos con la rama destino.
+#
+# 4. STATUS CHECKS:
+#    Los resultados del workflow aparecen como "checks" en la pagina del PR.
+#    Puedes configurar "branch protection rules" para bloquear el merge
+#    si los checks no pasan (Settings > Branches > Add rule).
+#
+# ERRORES COMUNES:
+# - No filtrar la rama destino: sin "branches:", el CI se ejecuta en
+#   todos los PRs, incluyendo PRs entre ramas de feature.
+# - Usar pull_request_target sin entender los riesgos de seguridad.
+# - Olvidar que los PRs de forks no tienen acceso a secretos.
+# =============================================================================

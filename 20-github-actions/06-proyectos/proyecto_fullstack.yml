@@ -1,0 +1,245 @@
+# =============================================================================
+# PROYECTO FULLSTACK: CI/CD para aplicacion Node.js
+# =============================================================================
+#
+# Este workflow implementa un pipeline completo de CI/CD para una aplicacion
+# web Node.js (por ejemplo, con React, Next.js o Express).
+#
+# ESTRUCTURA DEL PIPELINE:
+#
+#   +-------+     +-----------------+     +-------+     +--------+
+#   | Lint  |---->| Test (matrix)   |---->| Build |---->| Deploy |
+#   +-------+     | Node 18, 20, 22|     +-------+     +--------+
+#                 +-----------------+         |              ^
+#                                             |  artifact    |
+#                                             +--------------+
+#
+# CONCEPTOS QUE INTEGRA:
+#   - Seccion 01: Triggers (push, pull_request)
+#   - Seccion 02: Jobs, steps, needs (dependencias entre jobs)
+#   - Seccion 03: Matrix strategy, testing con Jest
+#   - Seccion 04: Artifacts, deploy a GitHub Pages
+#   - Seccion 05: Concurrencia, permisos minimos
+#
+# COMO USARLO:
+# 1. Copia a .github/workflows/ci-cd.yml
+# 2. Reemplaza los comandos "echo simulado" con los reales de tu proyecto
+# 3. Configura GitHub Pages en Settings > Pages > Source: GitHub Actions
+#
+# =============================================================================
+
+name: CI/CD Fullstack
+
+# ---------------------------------------------------------------------------
+# TRIGGERS
+# ---------------------------------------------------------------------------
+# Se ejecuta en push a main y en PRs hacia main.
+# workflow_dispatch permite ejecucion manual (util para debugging).
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# ---------------------------------------------------------------------------
+# PERMISOS
+# ---------------------------------------------------------------------------
+# Permisos minimos: solo lo que necesitamos.
+# contents: read  -> checkout del codigo
+# pages: write    -> desplegar a GitHub Pages
+# id-token: write -> autenticacion con GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# ---------------------------------------------------------------------------
+# CONCURRENCIA
+# ---------------------------------------------------------------------------
+# Para PRs: cancelar ejecuciones anteriores (solo importa el ultimo commit).
+# Para push a main: no cancelar (cada push puede ser un deploy).
+concurrency:
+  group: fullstack-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # =========================================================================
+  # JOB 1: LINT
+  # =========================================================================
+  # Verifica que el codigo cumple con las reglas de estilo (ESLint).
+  # Es el primer job porque es rapido y detecta errores obvios.
+  lint:
+    name: "Lint"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          # cache: 'npm' cachea node_modules automaticamente basado en
+          # package-lock.json, acelerando las siguientes ejecuciones.
+
+      - name: Instalar dependencias
+        run: npm ci
+        # "npm ci" es preferible a "npm install" en CI porque:
+        # 1. Es mas rapido (no resuelve dependencias, usa el lockfile)
+        # 2. Es determinista (siempre instala las mismas versiones)
+        # 3. Falla si package-lock.json no coincide con package.json
+
+      - name: Ejecutar ESLint
+        run: echo "npx eslint src/ --max-warnings=0 (simulado)"
+        # --max-warnings=0: falla si hay CUALQUIER warning
+        # Esto fuerza al equipo a resolver todos los problemas de estilo
+
+  # =========================================================================
+  # JOB 2: TEST (con matrix strategy)
+  # =========================================================================
+  # Ejecuta los tests en multiples versiones de Node.js.
+  # "needs: lint" asegura que solo corre si el lint paso exitosamente.
+  test:
+    name: "Test (Node ${{ matrix.node-version }})"
+    runs-on: ubuntu-latest
+    needs: lint
+    # "needs" define una dependencia: este job espera a que "lint" termine.
+    # Si lint falla, test NO se ejecuta (ahorra tiempo y recursos).
+
+    # MATRIX STRATEGY: ejecutar el mismo job con diferentes configuraciones.
+    # Aqui probamos con Node 18 (LTS anterior), 20 (LTS actual), 22 (latest).
+    strategy:
+      matrix:
+        node-version: [18, 20, 22]
+      # fail-fast: true (default) -> si una version falla, cancela las demas.
+      # fail-fast: false -> ejecuta todas aunque alguna falle.
+      # fail-fast: true
+
+    steps:
+      - name: Checkout del codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Ejecutar tests con Jest
+        run: echo "npx jest --coverage --ci (simulado)"
+        # --coverage: genera reporte de cobertura
+        # --ci: modo CI (falla si hay snapshots desactualizados)
+
+      - name: Subir reporte de cobertura
+        if: matrix.node-version == 20
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          # Solo subimos el reporte de una version (Node 20) para no duplicar.
+          retention-days: 7
+
+  # =========================================================================
+  # JOB 3: BUILD
+  # =========================================================================
+  # Compila la aplicacion y sube los archivos como artifact.
+  # Depende de que los tests pasen.
+  build:
+    name: "Build"
+    runs-on: ubuntu-latest
+    needs: test
+    # needs: test -> espera a que TODAS las combinaciones de la matrix terminen
+
+    steps:
+      - name: Checkout del codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Compilar aplicacion
+        run: |
+          echo "npm run build (simulado)"
+          # En un proyecto real, esto genera los archivos estaticos en dist/ o build/
+          # Crear directorio simulado para el ejemplo
+          mkdir -p dist
+          echo "<html><body><h1>Mi App</h1></body></html>" > dist/index.html
+
+      # ARTIFACT: subir los archivos de build para que el job de deploy
+      # pueda descargarlos. Los artifacts son archivos temporales que
+      # persisten entre jobs del mismo workflow run.
+      - name: Subir artifact de build
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/
+          # upload-pages-artifact es especifico para GitHub Pages.
+          # Para otros destinos, usa actions/upload-artifact@v4.
+
+  # =========================================================================
+  # JOB 4: DEPLOY A GITHUB PAGES
+  # =========================================================================
+  # Despliega los archivos compilados a GitHub Pages.
+  # Solo se ejecuta en push a main (no en PRs).
+  deploy:
+    name: "Deploy a GitHub Pages"
+    runs-on: ubuntu-latest
+    needs: build
+    # needs: build -> el artifact de build debe existir antes de desplegar
+
+    # CONDICION: solo desplegar en push a main.
+    # En PRs solo queremos validar (lint, test, build), no desplegar.
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    # ENVIRONMENT: registra el deploy en la pestana "Environments" de GitHub.
+    # Puedes configurar protecciones (aprobacion manual, branch restrictions).
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    # Concurrencia a nivel de job: un solo deploy a la vez.
+    # cancel-in-progress: false -> no interrumpir un deploy en curso.
+    concurrency:
+      group: deploy-pages
+      cancel-in-progress: false
+
+    steps:
+      # No necesitamos checkout ni build: usamos el artifact del job anterior.
+      - name: Desplegar a GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
+        # Esta accion descarga automaticamente el artifact subido por
+        # upload-pages-artifact y lo despliega a GitHub Pages.
+
+# =============================================================================
+# RESUMEN DEL FLUJO:
+#
+#   Push a PR:    Lint -> Test (matrix) -> Build     (sin deploy)
+#   Push a main:  Lint -> Test (matrix) -> Build -> Deploy a Pages
+#
+# PARA ADAPTAR A TU PROYECTO:
+# 1. Reemplaza "echo simulado" con comandos reales (npm run lint, npm test, etc.)
+# 2. Ajusta las versiones de Node en la matrix
+# 3. Cambia "dist/" por la carpeta de output de tu framework (build/, out/, etc.)
+# 4. Configura GitHub Pages en Settings > Pages > Source: GitHub Actions
+# 5. Si no usas GitHub Pages, reemplaza deploy con tu destino (Vercel, Netlify, etc.)
+#
+# DEPENDENCIAS ENTRE JOBS (needs):
+#
+#   Lint  ───>  Test  ───>  Build  ───>  Deploy
+#         needs       needs        needs
+#
+# Si cualquier job falla, los siguientes NO se ejecutan.
+# Esto ahorra tiempo y evita deploys de codigo roto.
+# =============================================================================

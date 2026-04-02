@@ -1,0 +1,232 @@
+# =============================================================================
+# ACCION COMPUESTA (Composite Action)
+# =============================================================================
+#
+# Este archivo demuestra DOS cosas:
+# 1. Como CREAR una accion compuesta (action.yml)
+# 2. Como USAR una accion compuesta en un workflow
+#
+# Las acciones compuestas empaquetan multiples steps en una sola accion
+# reutilizable. Son la forma mas simple de crear acciones personalizadas.
+#
+# ESTRUCTURA DE ARCHIVOS:
+#   .github/
+#     actions/
+#       setup-proyecto/           <-- Tu accion compuesta
+#         action.yml              <-- Definicion de la accion
+#     workflows/
+#       accion_compuesta.yml      <-- Este workflow que la usa
+#
+# COMO USARLO:
+# 1. Crea la carpeta .github/actions/setup-proyecto/
+# 2. Crea action.yml dentro (ver seccion DEFINICION mas abajo)
+# 3. Copia este workflow a .github/workflows/accion_compuesta.yml
+# 4. Haz push y observa como se ejecuta
+#
+# =============================================================================
+
+# =============================================================================
+# PARTE 1: DEFINICION DE LA ACCION COMPUESTA
+# =============================================================================
+# Este bloque NO va en el workflow. Va en un archivo separado:
+# .github/actions/setup-proyecto/action.yml
+#
+# Lo incluimos aqui como referencia educativa.
+# ----------- INICIO de action.yml (copiar a su propio archivo) -----------
+#
+# name: 'Setup Proyecto'
+# description: 'Configura el entorno del proyecto: Node.js, cache, dependencias'
+# author: 'Tu Equipo'
+#
+# # --- INPUTS ---
+# # Los inputs son parametros que el usuario pasa al usar la accion.
+# inputs:
+#   node-version:
+#     description: 'Version de Node.js a instalar'
+#     required: false
+#     default: '20'
+#   install-dependencies:
+#     description: 'Si se deben instalar las dependencias (true/false)'
+#     required: false
+#     default: 'true'
+#   working-directory:
+#     description: 'Directorio de trabajo'
+#     required: false
+#     default: '.'
+#
+# # --- OUTPUTS ---
+# # Los outputs son valores que la accion devuelve al workflow.
+# outputs:
+#   node-version-actual:
+#     description: 'Version de Node.js realmente instalada'
+#     value: ${{ steps.node-info.outputs.version }}
+#   cache-hit:
+#     description: 'Si se uso el cache'
+#     value: ${{ steps.cache.outputs.cache-hit }}
+#
+# # --- RUNS ---
+# # "using: composite" indica que es una accion compuesta.
+# runs:
+#   using: 'composite'
+#   steps:
+#     # NOTA: En acciones compuestas, "shell" es OBLIGATORIO en cada
+#     # step de tipo "run". Esto es diferente de los workflows normales.
+#
+#     - name: Checkout (si no se hizo antes)
+#       uses: actions/checkout@v4
+#
+#     - name: Instalar Node.js
+#       uses: actions/setup-node@v4
+#       with:
+#         node-version: ${{ inputs.node-version }}
+#
+#     - name: Cache de dependencias
+#       id: cache
+#       uses: actions/cache@v4
+#       with:
+#         path: |
+#           ${{ inputs.working-directory }}/node_modules
+#           ~/.npm
+#         key: ${{ runner.os }}-node-${{ inputs.node-version }}-${{ hashFiles('**/package-lock.json') }}
+#         restore-keys: |
+#           ${{ runner.os }}-node-${{ inputs.node-version }}-
+#
+#     - name: Instalar dependencias
+#       if: inputs.install-dependencies == 'true'
+#       shell: bash
+#       working-directory: ${{ inputs.working-directory }}
+#       run: |
+#         if [ "${{ steps.cache.outputs.cache-hit }}" != "true" ]; then
+#           echo "Cache miss: instalando dependencias..."
+#           npm ci
+#         else
+#           echo "Cache hit: dependencias restauradas del cache"
+#         fi
+#
+#     - name: Info de Node.js
+#       id: node-info
+#       shell: bash
+#       run: |
+#         VERSION=$(node --version)
+#         echo "version=$VERSION" >> $GITHUB_OUTPUT
+#         echo "Node.js instalado: $VERSION"
+#
+# ----------- FIN de action.yml -----------
+
+# =============================================================================
+# PARTE 2: WORKFLOW QUE USA LA ACCION COMPUESTA
+# =============================================================================
+
+name: CI con Accion Compuesta
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  # =========================================================================
+  # JOB 1: USAR LA ACCION COMPUESTA
+  # =========================================================================
+  build-y-test:
+    name: "Build y Test"
+    runs-on: ubuntu-latest
+
+    steps:
+      # Usar nuestra accion compuesta personalizada
+      # La ruta es relativa a la raiz del repositorio
+      - name: Setup del proyecto
+        id: setup
+        uses: ./.github/actions/setup-proyecto
+        with:
+          node-version: '20'
+          install-dependencies: 'true'
+          working-directory: '.'
+
+      # Acceder a los outputs de la accion
+      - name: Mostrar info del setup
+        run: |
+          echo "Node.js: ${{ steps.setup.outputs.node-version-actual }}"
+          echo "Cache hit: ${{ steps.setup.outputs.cache-hit }}"
+
+      - name: Ejecutar tests
+        run: echo "npm test (simulado)"
+
+  # =========================================================================
+  # JOB 2: REUSAR CON DIFERENTES PARAMETROS
+  # =========================================================================
+  test-multi-version:
+    name: "Test con Node ${{ matrix.node }}"
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node: [18, 20, 22]
+
+    steps:
+      # La misma accion, pero con diferentes versiones
+      - name: Setup del proyecto
+        uses: ./.github/actions/setup-proyecto
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Ejecutar tests
+        run: echo "Tests con Node ${{ matrix.node }}"
+
+  # =========================================================================
+  # JOB 3: EJEMPLO SIN LA ACCION (para comparar)
+  # =========================================================================
+  sin-accion:
+    name: "Sin accion compuesta (comparar)"
+    runs-on: ubuntu-latest
+
+    steps:
+      # Sin la accion, tendrias que repetir todo esto en cada workflow:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-20-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      # Comparacion:
+      # - Con accion compuesta: 1 step (uses: ./.github/actions/setup-proyecto)
+      # - Sin accion: 4 steps que se repiten en cada workflow
+      - name: Tests
+        run: echo "npm test (simulado)"
+
+# =============================================================================
+# VENTAJAS DE ACCIONES COMPUESTAS:
+#
+# 1. REUTILIZACION: definir una vez, usar muchas veces
+# 2. MANTENIBILIDAD: cambiar en un lugar, afecta todos los workflows
+# 3. SIMPLICIDAD: los workflows que consumen la accion son mas limpios
+# 4. TESTABILIDAD: puedes probar la accion de forma aislada
+#
+# LIMITACIONES:
+# - No pueden usar "secrets" directamente (pasarlos como inputs)
+# - El "shell" es obligatorio en cada step "run"
+# - No soportan "services" (contenedores auxiliares)
+# - No pueden definir "strategy" ni "matrix" internamente
+#
+# PUBLICAR EN EL MARKETPLACE:
+# Si quieres que otros usen tu accion:
+# 1. Creala en su propio repositorio
+# 2. Agrega action.yml en la raiz
+# 3. Crea un release con un tag (v1, v1.0.0)
+# 4. Ve a "Publish this action to GitHub Marketplace"
+# =============================================================================

@@ -1,0 +1,241 @@
+# =============================================================================
+# PROYECTO MONOREPO: CI con path filters
+# =============================================================================
+#
+# Un monorepo contiene multiples proyectos en un solo repositorio.
+# Este workflow demuestra como ejecutar CI solo para los proyectos
+# que realmente cambiaron, usando path filters.
+#
+# ESTRUCTURA DEL MONOREPO:
+#
+#   mi-monorepo/
+#   |-- frontend/       (React - npm)
+#   |-- backend/        (Python - pip)
+#   +-- docs/           (MkDocs)
+#
+# COMPORTAMIENTO:
+#
+#   Archivos cambiados     Jobs que se ejecutan
+#   ==================     ====================
+#   frontend/src/App.js    Solo "ci-frontend"
+#   backend/app/main.py    Solo "ci-backend"
+#   frontend/ + backend/   Ambos: "ci-frontend" y "ci-backend"
+#   README.md              Ninguno (no coincide con ningun path)
+#
+# CONCEPTOS QUE INTEGRA:
+#   - Seccion 01: Path filters en triggers
+#   - Seccion 02: Jobs independientes y condicionales
+#   - Seccion 03: CI multi-lenguaje
+#   - Seccion 05: Concurrencia por sub-proyecto
+#
+# =============================================================================
+
+name: Monorepo CI
+
+on:
+  push:
+    branches: [main]
+    # ---------------------------------------------------------------------------
+    # PATH FILTERS
+    # ---------------------------------------------------------------------------
+    # Sin path filters, CUALQUIER push ejecuta el workflow completo.
+    # Con path filters, solo se ejecuta cuando cambian archivos relevantes.
+    #
+    # IMPORTANTE: los path filters aplican al WORKFLOW completo.
+    # Si necesitas filtros por JOB, usa dorny/paths-filter o logica condicional.
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - '.github/workflows/proyecto_monorepo.yml'
+      # Incluir el propio workflow para que cambios al CI tambien lo ejecuten
+
+  pull_request:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - '.github/workflows/proyecto_monorepo.yml'
+
+  workflow_dispatch:
+    # Ejecucion manual: util para forzar CI de todo el monorepo
+
+permissions:
+  contents: read
+
+jobs:
+  # =========================================================================
+  # JOB AUXILIAR: DETECTAR QUE CAMBIO
+  # =========================================================================
+  # Este job analiza que archivos cambiaron para decidir que jobs ejecutar.
+  # Es mas flexible que los path filters del trigger porque permite
+  # logica condicional por job.
+  detectar-cambios:
+    name: "Detectar cambios"
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filtro.outputs.frontend }}
+      backend: ${{ steps.filtro.outputs.backend }}
+
+    steps:
+      - name: Checkout del codigo
+        uses: actions/checkout@v4
+
+      # dorny/paths-filter analiza los archivos cambiados y genera
+      # outputs booleanos (true/false) para cada filtro definido.
+      - name: Detectar paths modificados
+        id: filtro
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+            backend:
+              - 'backend/**'
+          # Cada filtro produce un output: steps.filtro.outputs.frontend = 'true'/'false'
+
+  # =========================================================================
+  # JOB: CI FRONTEND (React / Node.js)
+  # =========================================================================
+  ci-frontend:
+    name: "CI Frontend"
+    runs-on: ubuntu-latest
+    needs: detectar-cambios
+    # Solo ejecutar si cambiaron archivos en frontend/
+    # O si fue ejecucion manual (workflow_dispatch ejecuta todo)
+    if: needs.detectar-cambios.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
+
+    # Concurrencia por sub-proyecto: un CI de frontend a la vez por rama
+    concurrency:
+      group: frontend-${{ github.ref }}
+      cancel-in-progress: true
+
+    defaults:
+      run:
+        working-directory: frontend
+        # working-directory aplica a TODOS los steps "run" de este job.
+        # Evita repetir "cd frontend" en cada step.
+
+    steps:
+      - name: Checkout del codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          # En un monorepo, especifica la ruta del lockfile para que
+          # el cache funcione correctamente.
+
+      - name: Instalar dependencias
+        run: echo "npm ci (simulado)"
+
+      - name: Lint
+        run: echo "npx eslint src/ (simulado)"
+
+      - name: Tests
+        run: echo "npx jest --ci (simulado)"
+
+      - name: Build
+        run: echo "npm run build (simulado)"
+
+  # =========================================================================
+  # JOB: CI BACKEND (Python / FastAPI)
+  # =========================================================================
+  ci-backend:
+    name: "CI Backend"
+    runs-on: ubuntu-latest
+    needs: detectar-cambios
+    if: needs.detectar-cambios.outputs.backend == 'true' || github.event_name == 'workflow_dispatch'
+
+    concurrency:
+      group: backend-${{ github.ref }}
+      cancel-in-progress: true
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout del codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          echo "pip install -r requirements.txt -r requirements-dev.txt (simulado)"
+
+      - name: Lint
+        run: |
+          echo "flake8 app/ tests/ (simulado)"
+          echo "mypy app/ (simulado)"
+
+      - name: Tests
+        run: echo "pytest tests/ -v --cov=app (simulado)"
+
+  # =========================================================================
+  # JOB: RESUMEN (opcional)
+  # =========================================================================
+  # Un job final que resume que se ejecuto. Util como "required check"
+  # en branch protection rules: en vez de requerir cada job individual
+  # (que puede no ejecutarse si no hay cambios), requieres este job.
+  resumen:
+    name: "CI Resumen"
+    runs-on: ubuntu-latest
+    needs: [detectar-cambios, ci-frontend, ci-backend]
+    # always() asegura que este job siempre se ejecute, incluso si
+    # ci-frontend o ci-backend se saltaron (skipped).
+    if: always()
+
+    steps:
+      - name: Verificar resultados
+        run: |
+          echo "=== Resumen del CI ==="
+          echo "Frontend cambio: ${{ needs.detectar-cambios.outputs.frontend }}"
+          echo "Backend cambio: ${{ needs.detectar-cambios.outputs.backend }}"
+          echo ""
+          echo "Frontend CI: ${{ needs.ci-frontend.result }}"
+          echo "Backend CI: ${{ needs.ci-backend.result }}"
+          echo ""
+
+          # Fallar si algun job que SI se ejecuto fallo
+          if [ "${{ needs.ci-frontend.result }}" == "failure" ] || \
+             [ "${{ needs.ci-backend.result }}" == "failure" ]; then
+            echo "FALLO: uno o mas jobs fallaron"
+            exit 1
+          fi
+          echo "EXITO: todos los jobs relevantes pasaron"
+
+# =============================================================================
+# ESTRATEGIAS DE MONOREPO:
+#
+# 1. PATH FILTERS (este ejemplo):
+#    Ventajas: simple, nativo de GitHub Actions
+#    Desventajas: no detecta dependencias cruzadas
+#
+# 2. CHANGED FILES ACTION (dorny/paths-filter):
+#    Ventajas: filtros por job (no solo por workflow), mas flexible
+#    Desventajas: un job extra para detectar cambios
+#
+# 3. HERRAMIENTAS DEDICADAS (Nx, Turborepo, Lerna):
+#    Ventajas: detectan dependencias entre proyectos, cache inteligente
+#    Desventajas: requieren configuracion y dependencia adicional
+#    Ejemplo con Nx:
+#      - run: npx nx affected --target=test --base=origin/main
+#      # Solo ejecuta tests de los proyectos AFECTADOS por los cambios
+#
+# TIPS PARA MONOREPOS:
+# - Usa "defaults.run.working-directory" para evitar repetir "cd ..."
+# - Especifica "cache-dependency-path" en setup-node/setup-python
+# - Crea un job "resumen" como required check en branch protection
+# - Considera usar workflow_dispatch para forzar CI completo
+# - Los path filters usan glob patterns: ** (recursivo), * (un nivel)
+# =============================================================================

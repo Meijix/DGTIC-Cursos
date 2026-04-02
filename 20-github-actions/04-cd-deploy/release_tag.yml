@@ -1,0 +1,259 @@
+# =============================================================================
+# RELEASE AUTOMATICO BASADO EN TAGS
+# =============================================================================
+#
+# Este workflow crea un release de GitHub automaticamente cuando se
+# hace push de un tag de version (v1.0.0, v2.3.1, etc.)
+#
+# FLUJO:
+# 1. Desarrollas en tu rama, haces merge a main
+# 2. Creas un tag: git tag v1.0.0
+# 3. Haces push del tag: git push origin v1.0.0
+# 4. Este workflow se activa automaticamente:
+#    - Ejecuta tests (por seguridad)
+#    - Construye el proyecto
+#    - Genera un changelog
+#    - Crea el release en GitHub con los artefactos
+#
+# COMO USARLO:
+# 1. Copia a .github/workflows/release_tag.yml
+# 2. Crea un tag siguiendo SemVer:
+#    git tag -a v1.0.0 -m "Release v1.0.0: primera version estable"
+#    git push origin v1.0.0
+# 3. Ve a la pestana "Actions" y despues a "Releases"
+#
+# =============================================================================
+
+name: Release
+
+on:
+  push:
+    # Solo se activa con tags que empiezan con "v"
+    tags:
+      - 'v*'         # v1.0.0, v2.3.1-beta, etc.
+
+# Permisos para crear releases
+permissions:
+  contents: write     # Necesario para crear el release y subir assets
+
+jobs:
+  # =========================================================================
+  # JOB 1: VALIDAR Y TESTEAR
+  # =========================================================================
+  validar:
+    name: "Validar release"
+    runs-on: ubuntu-latest
+
+    outputs:
+      version: ${{ steps.extraer-version.outputs.version }}
+      is-prerelease: ${{ steps.extraer-version.outputs.is_prerelease }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Necesitamos el historial completo para generar el changelog
+          fetch-depth: 0
+
+      - name: Extraer version del tag
+        id: extraer-version
+        run: |
+          # El tag esta en github.ref_name (ej: "v1.2.3")
+          TAG="${{ github.ref_name }}"
+          echo "Tag: $TAG"
+
+          # Remover la "v" del inicio para obtener solo la version
+          VERSION="${TAG#v}"
+          echo "Version: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          # Determinar si es un pre-release (contiene alpha, beta, rc)
+          if [[ "$VERSION" == *"-"* ]]; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+            echo "Tipo: Pre-release"
+          else
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+            echo "Tipo: Release estable"
+          fi
+
+      - name: Validar formato SemVer
+        run: |
+          VERSION="${{ steps.extraer-version.outputs.version }}"
+          # Validar formato: X.Y.Z o X.Y.Z-sufijo
+          if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "Version valida: $VERSION"
+          else
+            echo "ERROR: '$VERSION' no sigue el formato SemVer (X.Y.Z)"
+            exit 1
+          fi
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalar dependencias y testear
+        run: |
+          echo "npm ci && npm test (simulado)"
+          # npm ci
+          # npm test
+
+  # =========================================================================
+  # JOB 2: BUILD
+  # =========================================================================
+  build:
+    name: "Build"
+    runs-on: ubuntu-latest
+    needs: validar
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: |
+          echo "npm ci (simulado)"
+          # npm ci
+
+      - name: Build de produccion
+        run: |
+          echo "npm run build (simulado)"
+          # npm run build
+          # Crear directorio de ejemplo para el artefacto
+          mkdir -p dist
+          echo "Build v${{ needs.validar.outputs.version }}" > dist/build-info.txt
+
+      # Comprimir el build para adjuntarlo al release
+      - name: Comprimir build
+        run: |
+          tar -czf release-${{ needs.validar.outputs.version }}.tar.gz dist/
+          echo "Artefacto creado: release-${{ needs.validar.outputs.version }}.tar.gz"
+
+      - name: Subir artefacto de build
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-assets
+          path: release-${{ needs.validar.outputs.version }}.tar.gz
+
+  # =========================================================================
+  # JOB 3: CREAR RELEASE EN GITHUB
+  # =========================================================================
+  release:
+    name: "Crear Release"
+    runs-on: ubuntu-latest
+    needs: [validar, build]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0    # Historial completo para changelog
+
+      - name: Descargar artefacto de build
+        uses: actions/download-artifact@v4
+        with:
+          name: release-assets
+          path: ./assets/
+
+      # Generar un changelog basico a partir de los commits
+      # entre el tag anterior y el actual
+      - name: Generar changelog
+        id: changelog
+        run: |
+          # Encontrar el tag anterior
+          PREV_TAG=$(git tag --sort=-version:refname | head -2 | tail -1)
+
+          if [ -z "$PREV_TAG" ] || [ "$PREV_TAG" == "${{ github.ref_name }}" ]; then
+            # Si no hay tag anterior, usar todos los commits
+            PREV_TAG=$(git rev-list --max-parents=0 HEAD)
+            echo "Primer release: usando todos los commits"
+          fi
+
+          echo "Tag anterior: $PREV_TAG"
+          echo "Tag actual: ${{ github.ref_name }}"
+
+          # Generar changelog
+          {
+            echo "## Que hay de nuevo en ${{ github.ref_name }}"
+            echo ""
+            echo "### Cambios"
+            echo ""
+            git log ${PREV_TAG}..${{ github.ref_name }} \
+              --pretty=format:"- %s (%h)" \
+              --no-merges
+            echo ""
+            echo ""
+            echo "### Estadisticas"
+            echo ""
+            echo "- Commits: $(git log ${PREV_TAG}..${{ github.ref_name }} --oneline --no-merges | wc -l | tr -d ' ')"
+            echo "- Contribuidores: $(git log ${PREV_TAG}..${{ github.ref_name }} --format='%an' | sort -u | wc -l | tr -d ' ')"
+            echo ""
+            echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${{ github.ref_name }}"
+          } > CHANGELOG.md
+
+          echo "Changelog generado:"
+          cat CHANGELOG.md
+
+      # Crear el release en GitHub
+      # Usamos la CLI de GitHub (gh) que viene preinstalada en los runners
+      - name: Crear release en GitHub
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Construir el comando
+          ARGS=(
+            "${{ github.ref_name }}"                              # Tag
+            --title "Release ${{ github.ref_name }}"              # Titulo
+            --notes-file CHANGELOG.md                             # Notas del release
+          )
+
+          # Si es pre-release, marcarlo como tal
+          if [ "${{ needs.validar.outputs.is-prerelease }}" == "true" ]; then
+            ARGS+=(--prerelease)
+          fi
+
+          # Adjuntar artefactos
+          ARGS+=(./assets/*)
+
+          # Crear el release
+          gh release create "${ARGS[@]}"
+
+          echo ""
+          echo "=== Release creado ==="
+          echo "URL: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
+
+# =============================================================================
+# COMO CREAR UN TAG:
+#
+# Opcion 1: Tag anotado (recomendado)
+#   git tag -a v1.0.0 -m "Release v1.0.0: primera version estable"
+#   git push origin v1.0.0
+#
+# Opcion 2: Tag ligero
+#   git tag v1.0.0
+#   git push origin v1.0.0
+#
+# Opcion 3: Tag desde GitHub (UI)
+#   Releases > Draft a new release > Choose a tag > Crear nuevo tag
+#
+# VERSIONADO SEMANTICO:
+#   v1.0.0      -> Primera version estable
+#   v1.0.1      -> Correccion de bug (patch)
+#   v1.1.0      -> Nueva funcionalidad (minor)
+#   v2.0.0      -> Cambio incompatible (major)
+#   v2.0.0-beta -> Pre-release
+#   v2.0.0-rc.1 -> Release candidate
+#
+# ERRORES COMUNES:
+# - Olvidar hacer push del tag (git push NO sube tags automaticamente)
+# - No usar fetch-depth: 0 (sin historial, no se genera changelog)
+# - Tag sin la "v" inicial: el filtro 'v*' no lo detecta
+# - Crear el tag en una rama que no es main
+# =============================================================================

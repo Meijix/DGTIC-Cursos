@@ -1,0 +1,191 @@
+# =============================================================================
+# DEPLOY A GITHUB PAGES
+# =============================================================================
+#
+# Este workflow despliega un sitio estatico a GitHub Pages.
+# Puede usarse con cualquier framework que genere HTML estatico:
+# - React (create-react-app, Vite)
+# - Vue (Vite)
+# - Next.js (static export)
+# - Hugo, Jekyll, MkDocs, Sphinx
+# - HTML/CSS/JS puro
+#
+# CONFIGURACION PREVIA:
+# 1. Ve a Settings > Pages
+# 2. Source: selecciona "GitHub Actions"
+# 3. Copia este workflow a .github/workflows/deploy_pages.yml
+# 4. Haz push a main
+#
+# RESULTADO:
+# Tu sitio estara disponible en https://USUARIO.github.io/REPOSITORIO/
+#
+# =============================================================================
+
+name: Deploy a GitHub Pages
+
+on:
+  # Se activa en push a main (deploy automatico)
+  push:
+    branches: [main]
+
+  # Permite ejecucion manual desde la UI
+  workflow_dispatch:
+
+# --- PERMISOS ---
+# GitHub Pages requiere estos permisos especificos:
+# - contents: read -> para leer el codigo
+# - pages: write -> para publicar en Pages
+# - id-token: write -> para autenticacion con Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# --- CONCURRENCIA ---
+# Solo un deploy a Pages a la vez.
+# Si hay uno en progreso y llega otro, se cancela el anterior.
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  # =========================================================================
+  # JOB 1: BUILD
+  # =========================================================================
+  build:
+    name: "Build del sitio"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del codigo
+        uses: actions/checkout@v4
+
+      # ---------------------------------------------------------------
+      # OPCION A: Proyecto con Node.js (React, Vue, Next.js, etc.)
+      # ---------------------------------------------------------------
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Build del proyecto
+        run: npm run build
+        env:
+          # Variables de entorno comunes para el build:
+          # CI=true hace que warnings sean errores en React
+          CI: true
+          # Configurar la base URL si el repo no esta en la raiz
+          # Para Vite: base en vite.config.js
+          # Para CRA: homepage en package.json
+          # Para Next.js: basePath en next.config.js
+
+      # ---------------------------------------------------------------
+      # OPCION B: HTML puro (sin build necesario)
+      # Descomenta esto si tu sitio es HTML puro:
+      # ---------------------------------------------------------------
+      # - name: Copiar archivos
+      #   run: |
+      #     mkdir -p _site
+      #     cp -r *.html css/ js/ images/ _site/ 2>/dev/null || true
+
+      # ---------------------------------------------------------------
+      # OPCION C: MkDocs (documentacion)
+      # ---------------------------------------------------------------
+      # - name: Instalar Python y MkDocs
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: '3.12'
+      # - name: Instalar MkDocs
+      #   run: pip install mkdocs mkdocs-material
+      # - name: Build MkDocs
+      #   run: mkdocs build --site-dir _site
+
+      # ---------------------------------------------------------------
+      # CONFIGURAR GITHUB PAGES
+      # ---------------------------------------------------------------
+      # Esta action configura Pages y procesa el directorio de salida
+      - name: Configurar Pages
+        uses: actions/configure-pages@v5
+
+      # Subir el directorio de build como artefacto de Pages.
+      # La action upload-pages-artifact empaqueta los archivos
+      # para que el job de deploy los pueda usar.
+      - name: Subir artefacto de Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Directorio con los archivos del sitio.
+          # Ajusta segun tu framework:
+          #   React (CRA): build/
+          #   React (Vite): dist/
+          #   Vue (Vite): dist/
+          #   Next.js: out/
+          #   Hugo: public/
+          #   MkDocs: site/ o _site/
+          #   HTML puro: ./ o _site/
+          path: './dist'
+
+  # =========================================================================
+  # JOB 2: DEPLOY
+  # =========================================================================
+  deploy:
+    name: "Deploy a Pages"
+    runs-on: ubuntu-latest
+    needs: build
+
+    # Este job usa el environment "github-pages"
+    # GitHub crea este environment automaticamente cuando activas Pages.
+    # La URL del sitio aparecera en la pagina del workflow.
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      # Esta action toma el artefacto del build y lo despliega en Pages
+      - name: Desplegar a GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        # No necesita parametros: usa el artefacto subido por
+        # upload-pages-artifact automaticamente
+
+# =============================================================================
+# NOTAS IMPORTANTES:
+#
+# 1. CONFIGURACION DE BASE URL:
+#    Si tu repositorio se llama "mi-proyecto", el sitio se servira en
+#    https://usuario.github.io/mi-proyecto/
+#    Necesitas configurar la base URL en tu framework:
+#
+#    - Vite: en vite.config.js -> base: '/mi-proyecto/'
+#    - CRA: en package.json -> "homepage": "/mi-proyecto"
+#    - Next.js: en next.config.js -> basePath: '/mi-proyecto'
+#
+#    Si el repo se llama "usuario.github.io", la URL es la raiz:
+#    https://usuario.github.io/ (no necesitas base URL)
+#
+# 2. CUSTOM DOMAIN:
+#    Puedes usar un dominio personalizado:
+#    Settings > Pages > Custom domain > "mi-dominio.com"
+#    Tambien necesitas un archivo CNAME en la raiz del sitio.
+#
+# 3. LIMITES DE PAGES:
+#    - Repositorios publicos: sitios ilimitados, gratis
+#    - Repositorios privados: necesitas plan Pro o superior
+#    - Tamanio maximo del sitio: 1 GB
+#    - Ancho de banda: 100 GB/mes (soft limit)
+#    - Builds: 10 por hora
+#
+# 4. SPA (Single Page Application):
+#    Si tu app usa client-side routing (React Router, Vue Router),
+#    necesitas un archivo 404.html que redirija al index.html.
+#    Busca "SPA GitHub Pages redirect" para la solucion.
+#
+# ERRORES COMUNES:
+# - No configurar la base URL -> recursos (CSS/JS) no cargan
+# - No seleccionar "GitHub Actions" como source en Settings > Pages
+# - Olvidar permissions (pages: write, id-token: write)
+# - Directorio de build incorrecto (dist/ vs build/ vs out/)
+# =============================================================================

@@ -1,0 +1,222 @@
+# =============================================================================
+# SEGURIDAD EN GITHUB ACTIONS - Mejores Practicas
+# =============================================================================
+#
+# La seguridad en workflows de CI/CD es critica: un workflow comprometido puede
+# filtrar secretos, modificar codigo o desplegar software malicioso.
+#
+# CONCEPTOS CLAVE:
+# 1. Version pinning: fijar versiones de acciones con SHA (no tags)
+# 2. GITHUB_TOKEN: usar el token integrado en vez de PATs cuando sea posible
+# 3. Permisos minimos: declarar solo los permisos necesarios
+# 4. Escaneo de secretos: prevenir que credenciales se expongan en el codigo
+# 5. CODEOWNERS: controlar quien puede modificar archivos criticos
+#
+# COMO USARLO:
+# 1. Copia a .github/workflows/seguridad.yml
+# 2. Revisa cada seccion y adapta a tu proyecto
+# 3. Usa como checklist al crear nuevos workflows
+#
+# =============================================================================
+
+name: Ejemplo de Seguridad
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# ---------------------------------------------------------------------------
+# PERMISOS MINIMOS (Principio de minimo privilegio)
+# ---------------------------------------------------------------------------
+# SIEMPRE declara los permisos a nivel de workflow o job.
+# Sin esta clave, el GITHUB_TOKEN tiene permisos amplios por defecto.
+#
+# MALO:   permissions: write-all    (acceso total, innecesario)
+# BUENO:  declarar solo lo que necesitas
+#
+# Si solo necesitas leer codigo y escribir en PRs:
+permissions:
+  contents: read          # Leer el repositorio (checkout)
+  pull-requests: write    # Comentar en PRs (si lo necesitas)
+  # Otros permisos disponibles:
+  #   actions: read|write         - Gestionar workflows
+  #   checks: read|write          - Crear/actualizar checks
+  #   deployments: read|write     - Gestionar deployments
+  #   id-token: write             - Solicitar token OIDC
+  #   issues: read|write          - Gestionar issues
+  #   packages: read|write        - Publicar/leer packages
+  #   security-events: write      - Subir resultados de SARIF (code scanning)
+  #   statuses: read|write        - Actualizar commit statuses
+
+jobs:
+  # =========================================================================
+  # JOB 1: EJEMPLO CON VERSION PINNING (SHA)
+  # =========================================================================
+  analisis-seguro:
+    name: "Analisis con acciones fijadas por SHA"
+    runs-on: ubuntu-latest
+
+    steps:
+      # -----------------------------------------------------------------------
+      # VERSION PINNING: Fijar acciones con SHA en vez de tags
+      # -----------------------------------------------------------------------
+      # RIESGOSO - un tag puede ser movido a un commit malicioso:
+      #   uses: actions/checkout@v4
+      #
+      # SEGURO - el SHA es inmutable, siempre apunta al mismo codigo:
+      #   uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      #
+      # El comentario al final (# v4.1.1) es para saber que version es,
+      # pero GitHub usa el SHA, no el comentario.
+      #
+      # Herramienta para obtener SHAs:
+      #   gh api repos/actions/checkout/git/ref/tags/v4.1.1 --jq '.object.sha'
+      #
+      - name: Checkout (version fijada con SHA)
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      # -----------------------------------------------------------------------
+      # GITHUB_TOKEN vs PATs (Personal Access Tokens)
+      # -----------------------------------------------------------------------
+      # GITHUB_TOKEN:
+      #   - Se genera automaticamente para cada ejecucion del workflow
+      #   - Expira al terminar el workflow
+      #   - Permisos limitados al repositorio actual
+      #   - No necesitas crearlo ni rotarlo manualmente
+      #
+      # PAT (Personal Access Token):
+      #   - Creado manualmente por un usuario
+      #   - Tiene los permisos del usuario que lo creo
+      #   - Puede acceder a multiples repositorios
+      #   - Si se filtra, el atacante tiene acceso prolongado
+      #
+      # REGLA: Usa GITHUB_TOKEN siempre que sea posible.
+      #        Usa PATs solo cuando necesites acceso cross-repo.
+      - name: Ejemplo con GITHUB_TOKEN
+        env:
+          # ${{ secrets.GITHUB_TOKEN }} se inyecta automaticamente
+          # No necesitas configurarlo como secreto manual
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Usando GITHUB_TOKEN (seguro, temporal, limitado)"
+          echo "Este token expira cuando termina el workflow"
+          # Ejemplo: listar PRs usando el token integrado
+          # gh pr list --repo ${{ github.repository }}
+
+      # -----------------------------------------------------------------------
+      # ESCANEO DE SECRETOS
+      # -----------------------------------------------------------------------
+      # GitHub Secret Scanning detecta automaticamente credenciales en el codigo:
+      #   - Tokens de AWS, Azure, GCP
+      #   - Claves de API de Stripe, Twilio, etc.
+      #   - Tokens de GitHub, npm, PyPI
+      #
+      # Para activar:
+      #   Settings > Code security and analysis > Secret scanning > Enable
+      #
+      # "Push protection" bloquea pushes que contengan secretos ANTES de que
+      # lleguen al repositorio. Activar en:
+      #   Settings > Code security > Secret scanning > Push protection
+      #
+      # Tambien puedes agregar un paso de escaneo en tu CI:
+      - name: Verificar que no hay secretos hardcodeados
+        run: |
+          echo "Verificando que no hay secretos en el codigo..."
+          # Buscar patrones comunes de secretos (ejemplo basico)
+          # En produccion, usa herramientas como truffleHog, gitleaks o detect-secrets
+          if grep -rn "AKIA[0-9A-Z]\{16\}" --include="*.py" --include="*.js" --include="*.yml" . 2>/dev/null; then
+            echo "ALERTA: Posible clave de AWS encontrada!"
+            exit 1
+          fi
+          echo "No se encontraron secretos hardcodeados"
+
+      # -----------------------------------------------------------------------
+      # CODEOWNERS - Proteger archivos criticos
+      # -----------------------------------------------------------------------
+      # El archivo .github/CODEOWNERS define quien debe aprobar cambios
+      # en archivos o directorios especificos.
+      #
+      # Ejemplo de .github/CODEOWNERS:
+      #
+      #   # Cambios a workflows requieren aprobacion del equipo DevOps
+      #   .github/workflows/    @mi-org/equipo-devops
+      #
+      #   # Cambios a Dockerfile requieren aprobacion de infraestructura
+      #   Dockerfile            @mi-org/equipo-infra
+      #   docker-compose*.yml   @mi-org/equipo-infra
+      #
+      #   # CODEOWNERS mismo requiere aprobacion de seguridad
+      #   .github/CODEOWNERS    @mi-org/equipo-seguridad
+      #
+      #   # Archivos de configuracion de seguridad
+      #   .github/dependabot.yml  @mi-org/equipo-seguridad
+      #
+      # IMPORTANTE: Para que CODEOWNERS funcione, debes activar
+      # "Require review from Code Owners" en las Branch Protection Rules.
+      #
+      - name: Verificar que CODEOWNERS existe
+        run: |
+          if [ -f ".github/CODEOWNERS" ] || [ -f "CODEOWNERS" ] || [ -f "docs/CODEOWNERS" ]; then
+            echo "CODEOWNERS encontrado"
+          else
+            echo "ADVERTENCIA: No se encontro archivo CODEOWNERS"
+            echo "Considera crear .github/CODEOWNERS para proteger archivos criticos"
+          fi
+
+      # -----------------------------------------------------------------------
+      # BUENAS PRACTICAS ADICIONALES
+      # -----------------------------------------------------------------------
+      - name: Resumen de seguridad
+        run: |
+          echo "=== Checklist de seguridad para workflows ==="
+          echo ""
+          echo "1. [x] Permisos minimos con 'permissions:'"
+          echo "2. [x] Acciones fijadas con SHA (version pinning)"
+          echo "3. [x] Usar GITHUB_TOKEN en vez de PATs"
+          echo "4. [x] Secret scanning activado"
+          echo "5. [x] CODEOWNERS para archivos criticos"
+          echo "6. [ ] Dependabot para actualizar acciones"
+          echo "7. [ ] Branch protection en main"
+          echo "8. [ ] Nunca imprimir secretos en logs"
+          echo "9. [ ] Nunca usar self-hosted runners en repos publicos"
+          echo "10.[ ] Revisar acciones de terceros antes de usarlas"
+
+# =============================================================================
+# CHECKLIST DE SEGURIDAD PARA WORKFLOWS:
+#
+# PERMISOS:
+#   - Siempre usar "permissions:" para limitar el GITHUB_TOKEN
+#   - Preferir GITHUB_TOKEN sobre PATs
+#   - Si necesitas PAT, usa Fine-grained tokens (con permisos limitados)
+#
+# VERSION PINNING:
+#   - Fijar acciones con SHA: uses: action@SHA # vX.Y.Z
+#   - Usar Dependabot para recibir PRs de actualizacion automatica:
+#     # .github/dependabot.yml
+#     version: 2
+#     updates:
+#       - package-ecosystem: "github-actions"
+#         directory: "/"
+#         schedule:
+#           interval: "weekly"
+#
+# SECRETOS:
+#   - Nunca imprimir secretos: echo ${{ secrets.TOKEN }}
+#   - Nunca escribir secretos a archivos
+#   - Activar secret scanning y push protection
+#   - Rotar secretos periodicamente
+#
+# PROTECCION DE RAMAS:
+#   - Requerir PRs para merge a main
+#   - Requerir aprobacion de CODEOWNERS
+#   - Requerir que los checks pasen antes de merge
+#   - No permitir force push a main
+#
+# ACCIONES DE TERCEROS:
+#   - Revisar el codigo fuente antes de usar una accion nueva
+#   - Preferir acciones oficiales (actions/*, github/*)
+#   - Verificar que la accion tiene mantenimiento activo
+#   - Usar acciones del Marketplace verificadas cuando sea posible
+# =============================================================================

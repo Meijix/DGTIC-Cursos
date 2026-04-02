@@ -1,0 +1,194 @@
+# =============================================================================
+# CONTROL DE CONCURRENCIA
+# =============================================================================
+#
+# La concurrencia controla cuantas ejecuciones de un workflow (o grupo de
+# workflows) pueden correr al mismo tiempo.
+#
+# CASOS DE USO:
+# - No desplegar dos veces a produccion simultaneamente
+# - Cancelar CI anterior cuando hay un nuevo push al mismo PR
+# - Evitar conflictos en migraciones de base de datos
+# - Limitar llamadas a APIs con rate limiting
+#
+# COMO USARLO:
+# 1. Copia a .github/workflows/concurrencia.yml
+# 2. Haz multiples pushes rapidos y observa como se cancelan/esperan
+#
+# =============================================================================
+
+name: Patrones de Concurrencia
+
+on:
+  push:
+    branches: [main, develop, 'feature/**']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# ---------------------------------------------------------------------------
+# PATRON 1: CONCURRENCIA A NIVEL DE WORKFLOW
+# ---------------------------------------------------------------------------
+# Este es el patron mas comun para CI en PRs.
+# Si haces 3 pushes rapidos al mismo PR, solo el ultimo se ejecuta.
+# Los anteriores se cancelan automaticamente.
+concurrency:
+  # El "group" agrupa las ejecuciones. Solo una ejecucion por grupo
+  # puede estar activa a la vez.
+  #
+  # ${{ github.workflow }} = nombre del workflow (ej: "Patrones de Concurrencia")
+  # ${{ github.ref }} = ref del evento (ej: "refs/heads/main" o "refs/pull/42/merge")
+  #
+  # Esto crea un grupo unico por workflow + rama/PR.
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+  # cancel-in-progress: true = cancelar la ejecucion anterior cuando llega una nueva.
+  # cancel-in-progress: false = esperar a que termine la anterior.
+  #
+  # Para CI: true (solo importa el ultimo commit)
+  # Para deploy: false (no quieres interrumpir un deploy a la mitad)
+  cancel-in-progress: true
+
+jobs:
+  # =========================================================================
+  # JOB 1: CI (con cancelacion)
+  # =========================================================================
+  ci:
+    name: "CI - Cancelar anterior"
+    runs-on: ubuntu-latest
+    # Este job hereda la concurrencia del workflow (cancel-in-progress: true)
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Simulacion de CI
+        run: |
+          echo "Ejecutando CI para ref: ${{ github.ref }}"
+          echo "Run ID: ${{ github.run_id }}"
+          echo "Run number: ${{ github.run_number }}"
+          echo ""
+          echo "Si haces otro push a esta rama, esta ejecucion se cancelara"
+          echo "y una nueva tomara su lugar."
+          echo ""
+          # Simular trabajo que toma tiempo
+          echo "Trabajando..."
+          # sleep 30  # Descomentar para ver la cancelacion en accion
+
+  # =========================================================================
+  # JOB 2: DEPLOY CON CONCURRENCIA POR ENTORNO
+  # =========================================================================
+  deploy-staging:
+    name: "Deploy a Staging"
+    runs-on: ubuntu-latest
+    needs: ci
+    if: github.ref == 'refs/heads/main'
+
+    # Concurrencia A NIVEL DE JOB (sobreescribe la del workflow)
+    # Un solo deploy a staging a la vez, pero NO cancelar el anterior.
+    concurrency:
+      group: deploy-staging
+      cancel-in-progress: false
+      # false = si hay un deploy en curso, el nuevo ESPERA a que termine
+
+    steps:
+      - name: Deploy a staging
+        run: |
+          echo "=== Deploy a Staging ==="
+          echo "Si otro deploy a staging esta en curso, este espera"
+          echo "No se cancela el anterior (cancel-in-progress: false)"
+          echo ""
+          echo "Desplegando..."
+          # Simular deploy
+          # sleep 60
+
+  deploy-produccion:
+    name: "Deploy a Produccion"
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/main'
+
+    # Concurrencia separada para produccion
+    concurrency:
+      group: deploy-produccion
+      cancel-in-progress: false
+      # NUNCA uses cancel-in-progress: true para produccion!
+      # No quieres interrumpir un deploy a produccion a la mitad.
+
+    # Environment con protecciones
+    environment:
+      name: production
+      url: https://mi-app.ejemplo.com
+
+    steps:
+      - name: Deploy a produccion
+        run: |
+          echo "=== Deploy a Produccion ==="
+          echo "Un solo deploy a produccion a la vez"
+          echo "Si hay otro en cola, espera su turno"
+
+  # =========================================================================
+  # JOB 3: EJEMPLO DE CONCURRENCIA CONDICIONAL
+  # =========================================================================
+  ci-condicional:
+    name: "CI con concurrencia condicional"
+    runs-on: ubuntu-latest
+
+    # Patron avanzado: diferente comportamiento segun el evento
+    # - En PRs: cancelar ejecuciones anteriores (solo importa el ultimo commit)
+    # - En push a main: NO cancelar (cada push es importante)
+    concurrency:
+      group: ci-condicional-${{ github.ref }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+      # true solo en PRs, false en push a main
+
+    steps:
+      - name: Info
+        run: |
+          echo "Evento: ${{ github.event_name }}"
+          echo "Cancel in progress: ${{ github.event_name == 'pull_request' }}"
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "En PR: si hay un push nuevo, esta ejecucion se cancela"
+          else
+            echo "En push: esta ejecucion NO se cancela por nuevos pushes"
+          fi
+
+# =============================================================================
+# PATRONES DE CONCURRENCIA COMUNES:
+#
+# 1. CI en PRs (cancelar anteriores):
+#    concurrency:
+#      group: ci-${{ github.event.pull_request.number || github.ref }}
+#      cancel-in-progress: true
+#
+# 2. Deploy por entorno (no cancelar):
+#    concurrency:
+#      group: deploy-${{ inputs.entorno }}
+#      cancel-in-progress: false
+#
+# 3. Un workflow a la vez (global):
+#    concurrency:
+#      group: unico
+#      cancel-in-progress: false
+#
+# 4. Por PR pero diferente de main:
+#    concurrency:
+#      group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+#      cancel-in-progress: true
+#    NOTA: github.head_ref existe en PRs, github.run_id es unico siempre
+#
+# VISUALIZACION:
+#
+#   cancel-in-progress: true         cancel-in-progress: false
+#
+#   Push 1: ====X (cancelado)        Push 1: ============
+#   Push 2:     ====X (cancelado)    Push 2:             ============
+#   Push 3:         ============     Push 3:                         ============
+#                                    (cada uno espera al anterior)
+#
+# ERRORES COMUNES:
+# - Usar cancel-in-progress: true en deploys -> deploy interrumpido a la mitad
+# - Group demasiado amplio -> workflows no relacionados se cancelan entre si
+# - Group demasiado especifico -> no hay control de concurrencia real
+# - Olvidar que la concurrencia del job sobreescribe la del workflow
+# =============================================================================

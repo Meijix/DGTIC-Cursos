@@ -1,0 +1,240 @@
+# =============================================================================
+# CI PARA PHP - PHPUnit + PHPStan + PHP_CodeSniffer
+# =============================================================================
+#
+# Pipeline completo de CI para un proyecto PHP.
+# Incluye:
+# - Instalacion de PHP con extensiones
+# - Instalacion de dependencias con Composer + cache
+# - Analisis estatico con PHPStan
+# - Linting con PHP_CodeSniffer (estandar PSR-12)
+# - Tests con PHPUnit y cobertura
+#
+# REQUISITOS DEL PROYECTO:
+# - composer.json y composer.lock
+# - phpunit.xml o phpunit.xml.dist
+# - tests/ directorio con archivos *Test.php
+#
+# COMO USARLO:
+# 1. Copia a .github/workflows/ci_php.yml
+# 2. Ajusta la version de PHP y las extensiones segun tu proyecto
+# 3. Haz push y observa el pipeline
+#
+# =============================================================================
+
+name: CI - PHP
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - '**.php'
+      - 'composer.json'
+      - 'composer.lock'
+      - 'phpunit.xml*'
+      - '.github/workflows/ci_php.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - '**.php'
+      - 'composer.json'
+      - 'composer.lock'
+      - 'phpunit.xml*'
+
+concurrency:
+  group: ci-php-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # =========================================================================
+  # JOB 1: ANALISIS ESTATICO Y LINTING
+  # =========================================================================
+  lint:
+    name: "Analisis estatico"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # shivammathur/setup-php es la action mas popular para instalar PHP.
+      # Soporta muchas versiones y extensiones.
+      - name: Instalar PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          # Extensiones necesarias para tu proyecto
+          extensions: mbstring, xml, curl, mysql, pdo_mysql, zip
+          # Herramientas adicionales de desarrollo
+          tools: composer, phpstan, phpcs
+          # Cobertura con Xdebug (necesario para --coverage)
+          coverage: xdebug
+
+      # Cache de dependencias de Composer
+      - name: Obtener directorio de cache de Composer
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache de Composer
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Instalar dependencias
+        run: |
+          # --no-interaction: sin prompts interactivos
+          # --prefer-dist: descargar paquetes precompilados (mas rapido)
+          # --optimize-autoloader: optimiza el autoloader (buena practica para CI)
+          composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      # --- PHP_CodeSniffer ---
+      # Verifica que el codigo sigue el estandar PSR-12
+      - name: PHP_CodeSniffer (PSR-12)
+        run: |
+          # --standard=PSR12: usa el estandar PSR-12
+          # -n: no mostrar warnings, solo errores
+          # --colors: salida con colores
+          vendor/bin/phpcs --standard=PSR12 -n --colors src/ || echo "Errores de estilo encontrados"
+
+      # --- PHPStan ---
+      # Analisis estatico: detecta errores sin ejecutar el codigo
+      - name: PHPStan (analisis estatico)
+        run: |
+          # --level=5: nivel de rigurosidad (0-9, 5 es un buen balance)
+          # --no-progress: no mostrar barra de progreso (mas limpio en CI)
+          vendor/bin/phpstan analyse src/ --level=5 --no-progress || echo "Errores de PHPStan encontrados"
+
+  # =========================================================================
+  # JOB 2: TESTS CON PHPUNIT
+  # =========================================================================
+  test:
+    name: "Tests (PHP ${{ matrix.php-version }})"
+    runs-on: ubuntu-latest
+    needs: lint
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.1', '8.2', '8.3']
+
+    # --- SERVICIOS ---
+    # Si tus tests necesitan una base de datos, puedes levantar servicios
+    # como contenedores Docker que se ejecutan junto con tu job.
+    services:
+      # Base de datos MySQL para tests de integracion
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: testing
+        ports:
+          - 3306:3306
+        # Opciones de salud: esperar a que MySQL este listo
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, xml, curl, mysql, pdo_mysql
+          tools: composer
+          coverage: xdebug
+
+      - name: Cache de Composer
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-php-${{ matrix.php-version }}-
+
+      - name: Instalar dependencias
+        run: composer install --no-interaction --prefer-dist
+
+      # --- PHPUnit ---
+      - name: Ejecutar PHPUnit
+        run: |
+          # --coverage-text: muestra cobertura en la terminal
+          # --coverage-clover: genera reporte XML (para herramientas externas)
+          # --testdox: muestra los tests de forma legible
+          vendor/bin/phpunit \
+            --coverage-text \
+            --coverage-clover=coverage.xml \
+            --testdox \
+            --colors=always || echo "Tests completados"
+        env:
+          # Variables para la conexion a MySQL del servicio
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: testing
+          DB_USERNAME: root
+          DB_PASSWORD: password
+
+      - name: Subir cobertura
+        if: always() && matrix.php-version == '8.3'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-php
+          path: coverage.xml
+          retention-days: 7
+
+# =============================================================================
+# EJEMPLO DE phpunit.xml:
+#
+# <?xml version="1.0" encoding="UTF-8"?>
+# <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+#          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
+#          bootstrap="vendor/autoload.php"
+#          colors="true">
+#     <testsuites>
+#         <testsuite name="Unit">
+#             <directory>tests/Unit</directory>
+#         </testsuite>
+#         <testsuite name="Feature">
+#             <directory>tests/Feature</directory>
+#         </testsuite>
+#     </testsuites>
+#     <source>
+#         <include>
+#             <directory>src</directory>
+#         </include>
+#     </source>
+# </phpunit>
+#
+# EJEMPLO DE TEST:
+#
+# // tests/Unit/CalculadoraTest.php
+# <?php
+# use PHPUnit\Framework\TestCase;
+#
+# class CalculadoraTest extends TestCase
+# {
+#     public function testSumar(): void
+#     {
+#         $calc = new Calculadora();
+#         $this->assertEquals(5, $calc->sumar(2, 3));
+#     }
+#
+#     public function testDividirEntreCero(): void
+#     {
+#         $this->expectException(\DivisionByZeroError::class);
+#         $calc = new Calculadora();
+#         $calc->dividir(10, 0);
+#     }
+# }
+#
+# NOTA SOBRE SERVICIOS:
+# Los servicios (services) son contenedores Docker que se levantan antes
+# de que el job empiece. Solo estan disponibles en runners Linux.
+# El servicio MySQL de este ejemplo esta disponible en 127.0.0.1:3306.
+# =============================================================================

@@ -1,0 +1,247 @@
+# =============================================================================
+# PROYECTO PYTHON PACKAGE: CI/CD con publicacion a PyPI
+# =============================================================================
+#
+# Este workflow implementa el ciclo completo de un paquete Python:
+# testing multi-version, build del paquete y publicacion a PyPI.
+#
+# ESTRUCTURA DEL PIPELINE:
+#
+#   Tag push (v*)
+#       |
+#       v
+#   +-----------------------+     +-------------+     +----------------+
+#   | Test (matrix)         |---->| Build wheel |---->| Publish PyPI   |
+#   | Python 3.9/3.10/3.11 |     +-------------+     | (OIDC trusted) |
+#   +-----------------------+           |             +----------------+
+#                                       |
+#                                  artifact (dist/)
+#
+# CONCEPTOS QUE INTEGRA:
+#   - Seccion 01: Trigger por tags (push tags: v*)
+#   - Seccion 03: Matrix strategy (multi-version Python)
+#   - Seccion 04: Build, empaquetado y publicacion
+#   - Seccion 05: OIDC Trusted Publishing, permisos minimos
+#
+# COMO USARLO:
+# 1. Copia a .github/workflows/publish.yml
+# 2. Configura Trusted Publishing en PyPI (ver instrucciones abajo)
+# 3. Crea un tag: git tag v1.0.0 && git push origin v1.0.0
+#
+# =============================================================================
+
+name: Python Package CI/CD
+
+# ---------------------------------------------------------------------------
+# TRIGGERS
+# ---------------------------------------------------------------------------
+on:
+  # Push a main o tags v*: ejecutar CI (y CD si es tag)
+  # Ejemplo de tag: git tag v1.0.0 && git push origin v1.0.0
+  push:
+    branches: [main]
+    tags:
+      - 'v*'
+    # NOTA: branches y tags se combinan en un solo bloque "push".
+    # No se puede repetir la clave "push" en YAML (se sobreescribiria).
+    # Push a main -> solo CI (test + build)
+    # Push de tag v* -> CI + CD (test + build + publish)
+
+  # PRs a main: solo CI
+  pull_request:
+    branches: [main]
+
+# ---------------------------------------------------------------------------
+# PERMISOS
+# ---------------------------------------------------------------------------
+# id-token: write es necesario para OIDC Trusted Publishing con PyPI
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  # =========================================================================
+  # JOB 1: TEST (Matrix multi-version)
+  # =========================================================================
+  test:
+    name: "Test (Python ${{ matrix.python-version }})"
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11']
+        # Probamos en 3 versiones para asegurar compatibilidad.
+        # Las versiones deben ser strings ('3.10', no 3.10) porque
+        # YAML interpreta 3.10 como el numero 3.1 (pierde el cero).
+      fail-fast: false
+      # fail-fast: false -> ejecutar TODAS las versiones aunque una falle.
+      # Queremos saber exactamente que versiones funcionan y cuales no.
+
+    steps:
+      - name: Checkout del codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          # cache: 'pip' cachea los paquetes descargados por pip,
+          # acelerando instalaciones futuras.
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          echo "pip install -e '.[dev]' (simulado)"
+          # -e '.[dev]' instala el paquete en modo editable con dependencias
+          # de desarrollo (pytest, flake8, mypy, etc.)
+
+      - name: Ejecutar linter
+        run: |
+          echo "flake8 src/ tests/ (simulado)"
+          echo "mypy src/ (simulado)"
+          # flake8: verifica estilo PEP 8
+          # mypy: verifica tipos (type hints)
+
+      - name: Ejecutar tests con pytest
+        run: |
+          echo "pytest tests/ --cov=src --cov-report=xml -v (simulado)"
+          # --cov=src: medir cobertura del directorio src/
+          # --cov-report=xml: generar reporte para herramientas como Codecov
+          # -v: output detallado (muestra cada test individual)
+
+  # =========================================================================
+  # JOB 2: BUILD (construir el paquete)
+  # =========================================================================
+  build:
+    name: "Build package"
+    runs-on: ubuntu-latest
+    needs: test
+    # Solo construir si todos los tests pasaron
+
+    steps:
+      - name: Checkout del codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar herramientas de build
+        run: python -m pip install --upgrade pip build
+
+      - name: Construir paquete (wheel y sdist)
+        run: |
+          echo "python -m build (simulado)"
+          # "python -m build" genera dos archivos en dist/:
+          #   - dist/mi_paquete-1.0.0.tar.gz     (sdist - source distribution)
+          #   - dist/mi_paquete-1.0.0-py3-none-any.whl  (wheel - distribucion binaria)
+          #
+          # El wheel es el formato preferido para instalacion (mas rapido).
+          # El sdist es el respaldo para plataformas sin wheel precompilado.
+          mkdir -p dist
+          echo "paquete simulado" > dist/mi_paquete-1.0.0-py3-none-any.whl
+          echo "paquete simulado" > dist/mi_paquete-1.0.0.tar.gz
+
+      # Subir los archivos de build como artifact para el job de publish
+      - name: Subir artifact de distribucion
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-dist
+          path: dist/
+          retention-days: 5
+
+  # =========================================================================
+  # JOB 3: PUBLICAR A TEST PyPI (opcional, para validar)
+  # =========================================================================
+  publish-test:
+    name: "Publish to Test PyPI"
+    runs-on: ubuntu-latest
+    needs: build
+    # Solo publicar cuando se hace push de un tag v*
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    # Environment: registra el deploy y permite agregar protecciones
+    environment:
+      name: test-pypi
+      url: https://test.pypi.org/project/mi-paquete/
+
+    steps:
+      - name: Descargar artifact de distribucion
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-dist
+          path: dist/
+
+      # TRUSTED PUBLISHING (OIDC):
+      # En vez de usar un token API de PyPI (que puede filtrarse),
+      # usamos OIDC para que PyPI confie en este workflow directamente.
+      #
+      # CONFIGURACION EN PyPI (una sola vez):
+      # 1. Ve a https://test.pypi.org/manage/project/mi-paquete/settings/publishing/
+      # 2. Agrega un "Trusted Publisher":
+      #    - Owner: tu-usuario-github
+      #    - Repository: tu-repositorio
+      #    - Workflow: publish.yml
+      #    - Environment: test-pypi
+      # 3. Listo! No necesitas crear tokens.
+      - name: Publicar a Test PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          # No necesitamos "password:" porque usamos Trusted Publishing.
+          # La accion solicita un token OIDC automaticamente.
+          skip-existing: true
+          # skip-existing: true -> no falla si la version ya existe
+
+  # =========================================================================
+  # JOB 4: PUBLICAR A PyPI (produccion)
+  # =========================================================================
+  publish-prod:
+    name: "Publish to PyPI"
+    runs-on: ubuntu-latest
+    needs: publish-test
+    # Solo despues de que Test PyPI funcione
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    environment:
+      name: pypi
+      url: https://pypi.org/project/mi-paquete/
+
+    steps:
+      - name: Descargar artifact de distribucion
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-dist
+          path: dist/
+
+      - name: Publicar a PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        # Sin repository-url -> publica a PyPI de produccion por defecto.
+        # Requiere configurar Trusted Publishing en pypi.org (no test.pypi.org).
+
+# =============================================================================
+# FLUJO COMPLETO:
+#
+#   Push a main/PR:    Test (matrix) -> Build          (solo CI)
+#   Push de tag v*:    Test (matrix) -> Build -> Test PyPI -> PyPI (CD)
+#
+# TRUSTED PUBLISHING vs TOKENS API:
+#
+#   Con Token API:                    Con Trusted Publishing (OIDC):
+#   ==============                    ==============================
+#   1. Crear token en PyPI            1. Configurar trust en PyPI
+#   2. Guardar en GitHub Secrets      2. (no hay token que guardar)
+#   3. Si se filtra -> acceso total   3. (no hay token que filtrar)
+#   4. Rotar periodicamente           4. (no hay token que rotar)
+#   5. password: ${{ secrets.PYPI }}  5. (la accion gestiona todo)
+#
+# PARA ADAPTAR:
+# 1. Cambia "mi-paquete" por el nombre real de tu paquete
+# 2. Ajusta las versiones de Python en la matrix
+# 3. Configura Trusted Publishing en PyPI y Test PyPI
+# 4. Reemplaza los comandos simulados con los reales
+# 5. Considera agregar un paso de "check" antes de publish:
+#    python -m twine check dist/*
+# =============================================================================

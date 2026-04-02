@@ -1,0 +1,220 @@
+# =============================================================================
+# DEPLOY A VERCEL
+# =============================================================================
+#
+# Este workflow despliega una aplicacion a Vercel usando GitHub Actions.
+# Vercel tiene integracion nativa con GitHub, pero usar Actions te da
+# mas control sobre el proceso (ejecutar tests primero, etc.)
+#
+# CONFIGURACION PREVIA:
+# 1. Crea una cuenta en Vercel (vercel.com)
+# 2. Vincula tu proyecto (vercel link en la CLI)
+# 3. Obtiene estos valores y guardalos como secretos en GitHub:
+#    - VERCEL_TOKEN: Settings > Tokens > Create
+#    - VERCEL_ORG_ID: en .vercel/project.json
+#    - VERCEL_PROJECT_ID: en .vercel/project.json
+#
+# COMO USARLO:
+# 1. Configura los secretos mencionados arriba
+# 2. Copia a .github/workflows/deploy_vercel.yml
+# 3. Haz push a main para deploy a produccion
+# 4. Abre un PR para obtener un preview URL
+#
+# =============================================================================
+
+name: Deploy a Vercel
+
+on:
+  push:
+    branches: [main]       # Deploy a produccion en push a main
+  pull_request:
+    branches: [main]       # Preview deploy en PRs
+
+# Permisos para comentar en PRs (con la preview URL)
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: vercel-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  # =========================================================================
+  # JOB 1: CI (Tests antes de desplegar)
+  # =========================================================================
+  ci:
+    name: "CI - Tests"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Lint
+        run: echo "npm run lint (simulado)"
+
+      - name: Tests
+        run: echo "npm test (simulado)"
+
+  # =========================================================================
+  # JOB 2: DEPLOY PREVIEW (en PRs)
+  # =========================================================================
+  deploy-preview:
+    name: "Deploy Preview"
+    runs-on: ubuntu-latest
+    needs: ci
+    # Solo ejecutar en pull requests
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Instalar la CLI de Vercel
+      - name: Instalar Vercel CLI
+        run: npm install --global vercel@latest
+
+      # Pull: obtiene la configuracion del proyecto desde Vercel
+      - name: Obtener configuracion de Vercel
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      # Build: construye el proyecto localmente
+      - name: Build del proyecto
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      # Deploy preview: despliega sin promover a produccion
+      - name: Deploy Preview
+        id: deploy
+        run: |
+          # --prebuilt: usa el build local (no rebuilda en Vercel)
+          URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "preview_url=$URL" >> $GITHUB_OUTPUT
+          echo "Preview URL: $URL"
+
+      # Comentar en el PR con la URL del preview
+      - name: Comentar preview URL en el PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = '${{ steps.deploy.outputs.preview_url }}';
+            const body = `## Preview Deploy
+
+            La preview de este PR esta disponible en:
+            ${url}
+
+            Commit: \`${{ github.event.pull_request.head.sha }}\``;
+
+            // Buscar si ya existe un comentario del bot
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('Preview Deploy')
+            );
+
+            if (botComment) {
+              // Actualizar comentario existente
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body,
+              });
+            } else {
+              // Crear nuevo comentario
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body,
+              });
+            }
+
+  # =========================================================================
+  # JOB 3: DEPLOY PRODUCCION (en push a main)
+  # =========================================================================
+  deploy-production:
+    name: "Deploy Produccion"
+    runs-on: ubuntu-latest
+    needs: ci
+    # Solo ejecutar en push a main (no en PRs)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    # Environment de produccion (puede tener reglas de proteccion)
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.production_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Obtener configuracion de Vercel
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build de produccion
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy a produccion
+        id: deploy
+        run: |
+          # --prod: promover a produccion
+          # --prebuilt: usar el build local
+          URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "production_url=$URL" >> $GITHUB_OUTPUT
+          echo "Production URL: $URL"
+
+# =============================================================================
+# ALTERNATIVA: NETLIFY
+#
+# Si prefieres Netlify, el patron es similar:
+#
+#   - name: Deploy a Netlify
+#     uses: nwtgck/actions-netlify@v3
+#     with:
+#       publish-dir: './dist'
+#       production-branch: main
+#       github-token: ${{ secrets.GITHUB_TOKEN }}
+#       deploy-message: "Deploy from GitHub Actions"
+#     env:
+#       NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+#       NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+#
+# ALTERNATIVA: AWS S3
+#
+#   - name: Configurar AWS
+#     uses: aws-actions/configure-aws-credentials@v4
+#     with:
+#       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#       aws-region: us-east-1
+#
+#   - name: Sync a S3
+#     run: aws s3 sync ./dist s3://mi-bucket --delete
+#
+#   - name: Invalidar CloudFront
+#     run: |
+#       aws cloudfront create-invalidation \
+#         --distribution-id ${{ secrets.CF_DISTRIBUTION_ID }} \
+#         --paths "/*"
+# =============================================================================

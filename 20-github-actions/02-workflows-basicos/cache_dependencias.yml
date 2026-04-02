@@ -1,0 +1,276 @@
+# =============================================================================
+# CACHE DE DEPENDENCIAS
+# =============================================================================
+#
+# El cache permite reusar archivos descargados entre ejecuciones del workflow.
+# Esto reduce drasticamente el tiempo de ejecucion porque no necesitas
+# descargar todas las dependencias cada vez.
+#
+# EJEMPLO DE IMPACTO:
+#   Sin cache:  npm ci -> 2 minutos (descarga todo de internet)
+#   Con cache:  npm ci -> 15 segundos (usa archivos locales)
+#
+# COMO USARLO:
+# 1. Copia a .github/workflows/cache_dependencias.yml
+# 2. Haz push y observa el tiempo de la primera ejecucion
+# 3. Haz otro push y observa como la segunda es mucho mas rapida
+#
+# =============================================================================
+
+name: CI - Cache de Dependencias
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  # =========================================================================
+  # JOB 1: CACHE INTEGRADO EN SETUP-NODE (Recomendado para Node.js)
+  # =========================================================================
+  cache-node-integrado:
+    name: "Node.js (cache integrado)"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # La forma MAS SIMPLE de cachear en Node.js:
+      # Solo agrega "cache: 'npm'" a setup-node y listo.
+      - name: Instalar Node.js con cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          # "cache" habilita el cache automatico para el gestor de paquetes.
+          # Opciones: 'npm', 'yarn', 'pnpm'
+          # Internamente, usa actions/cache con la configuracion correcta.
+          cache: 'npm'
+
+      # npm ci (clean install) es preferible a npm install en CI porque:
+      # - Es mas rapido (no resuelve dependencias, usa package-lock.json)
+      # - Es determinista (siempre instala las mismas versiones)
+      # - Borra node_modules antes de instalar (estado limpio)
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Tests
+        run: echo "npm test (simulado)"
+
+  # =========================================================================
+  # JOB 2: CACHE INTEGRADO EN SETUP-PYTHON (Recomendado para Python)
+  # =========================================================================
+  cache-python-integrado:
+    name: "Python (cache integrado)"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Python con cache
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          # Opciones: 'pip', 'pipenv', 'poetry'
+          cache: 'pip'
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          # pip install -r requirements.txt
+          echo "pip install (simulado)"
+
+      - name: Tests
+        run: echo "pytest (simulado)"
+
+  # =========================================================================
+  # JOB 3: CACHE MANUAL CON actions/cache (Control total)
+  # =========================================================================
+  cache-manual:
+    name: "Cache manual (actions/cache)"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Cache manual: mas control, mas configuracion
+      - name: Cache de node_modules
+        uses: actions/cache@v4
+        # "id" permite verificar si el cache fue encontrado
+        id: cache-npm
+        with:
+          # --- path ---
+          # Que directorio(s) cachear. Puede ser:
+          # - Una sola ruta: path: ~/.npm
+          # - Multiples rutas (con |):
+          #   path: |
+          #     ~/.npm
+          #     node_modules
+          path: ~/.npm
+
+          # --- key ---
+          # Clave unica del cache. Si la clave coincide, se restaura.
+          # Si no coincide, se crea uno nuevo.
+          #
+          # hashFiles() genera un hash del contenido del archivo.
+          # Si package-lock.json cambia, el hash cambia, y se regenera el cache.
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+
+          # --- restore-keys ---
+          # Claves alternativas si la clave exacta no se encuentra.
+          # GitHub busca en orden y usa la primera que coincida parcialmente.
+          # Esto es un "fallback" que permite usar un cache antiguo.
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      # Verificar si el cache fue encontrado
+      - name: Verificar estado del cache
+        run: |
+          if [ "${{ steps.cache-npm.outputs.cache-hit }}" == "true" ]; then
+            echo "Cache ENCONTRADO - las dependencias se restauraron"
+          else
+            echo "Cache NO encontrado - se descargaran las dependencias"
+          fi
+
+      - name: Instalar dependencias
+        # Solo instalar si el cache no fue encontrado
+        # (optimizacion: si el cache tiene todo, npm ci es casi instantaneo)
+        run: |
+          echo "npm ci"
+          echo "(En un proyecto real, esto seria muy rapido con cache)"
+
+  # =========================================================================
+  # JOB 4: CACHE PARA COMPOSER (PHP)
+  # =========================================================================
+  cache-php:
+    name: "PHP Composer (cache manual)"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          # extensions: mbstring, xml, curl
+          tools: composer
+
+      # Obtener el directorio de cache de Composer dinamicamente
+      - name: Obtener directorio de cache de Composer
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache de dependencias Composer
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Instalar dependencias
+        run: |
+          echo "composer install --no-interaction --prefer-dist"
+          echo "(simulado)"
+
+  # =========================================================================
+  # JOB 5: CACHE MULTI-RUTA
+  # =========================================================================
+  cache-multi:
+    name: "Cache de multiples directorios"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Puedes cachear multiples directorios en un solo cache
+      - name: Cache de multiples cosas
+        uses: actions/cache@v4
+        with:
+          # Multiples rutas separadas por saltos de linea
+          path: |
+            ~/.npm
+            ~/.cache/pip
+            ~/.local/share/virtualenvs
+            node_modules
+          # La clave combina multiples archivos de lock
+          key: ${{ runner.os }}-multi-${{ hashFiles('**/package-lock.json', '**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-multi-
+
+      - name: Instalar todo
+        run: |
+          echo "Instalando dependencias de Node y Python..."
+          echo "(ambas usan el cache compartido)"
+
+  # =========================================================================
+  # JOB 6: CACHE CON MATRIX
+  # =========================================================================
+  cache-matrix:
+    name: "Cache + Matrix: Node ${{ matrix.node }}"
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node: [18, 20, 22]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'npm'
+          # Cada version de Node tiene su propio cache porque
+          # node_modules puede ser diferente entre versiones.
+          # setup-node maneja esto automaticamente.
+
+      - name: Instalar y testear
+        run: |
+          echo "npm ci && npm test con Node ${{ matrix.node }}"
+          echo "El cache es independiente para cada version"
+
+# =============================================================================
+# COMO FUNCIONA EL CACHE INTERNAMENTE:
+#
+#   1. BUSCAR: Al inicio del step, busca un cache con la clave exacta.
+#      Si no lo encuentra, busca con restore-keys.
+#
+#   2. RESTAURAR: Si encuentra cache, descarga y descomprime los archivos
+#      en las rutas especificadas.
+#
+#   3. EJECUTAR: El job continua. Los archivos cacheados estan disponibles.
+#
+#   4. GUARDAR: Al final del job, si la clave exacta NO existia, guarda
+#      los archivos como un nuevo cache. Si ya existia, no hace nada.
+#
+# LIMITES DEL CACHE:
+# - Tamanio maximo por cache: 10 GB
+# - Total de caches por repositorio: 10 GB
+# - Retencion: 7 dias sin uso -> se elimina automaticamente
+# - Los caches mas antiguos se eliminan cuando se alcanza el limite
+# - Los caches son especificos de la rama, pero las ramas hijas
+#   pueden acceder al cache de la rama padre
+#
+# BUENAS PRACTICAS:
+# - Siempre incluye runner.os en la key (diferentes OS = diferentes binarios)
+# - Usa hashFiles() para invalidar el cache cuando cambian las dependencias
+# - Usa restore-keys como fallback para no empezar de cero
+# - Prefiere el cache integrado de setup-* actions (mas simple)
+# - No cachees node_modules directamente, cachea ~/.npm (mas portable)
+#
+# ERRORES COMUNES:
+# - No incluir runner.os en la key -> caches de Linux usados en Windows
+# - Cachear node_modules en vez de ~/.npm -> problemas con diferentes OS
+# - Key demasiado especifica -> el cache casi nunca se reutiliza
+# - Key demasiado generica -> el cache nunca se invalida
+# =============================================================================

@@ -1,0 +1,257 @@
+# =============================================================================
+# WORKFLOWS REUTILIZABLES (Reusable Workflows)
+# =============================================================================
+#
+# Los workflows reutilizables permiten definir un workflow completo que
+# otros workflows pueden LLAMAR, como si fuera una funcion.
+#
+# DIFERENCIA CON ACCIONES COMPUESTAS:
+# - Accion compuesta = se usa en un STEP (granular)
+# - Workflow reutilizable = se usa como un JOB COMPLETO (amplio)
+#
+# ESTE ARCHIVO CONTIENE DOS WORKFLOWS (educativos):
+# 1. El workflow REUTILIZABLE (el que define la logica)
+# 2. El workflow LLAMADOR (el que invoca al reutilizable)
+#
+# En la practica, cada uno iria en su propio archivo.
+#
+# COMO USARLO:
+# 1. Crea .github/workflows/reusable-ci.yml con el workflow reutilizable
+# 2. Crea .github/workflows/main-ci.yml con el workflow llamador
+# 3. Haz push y observa como el llamador invoca al reutilizable
+#
+# =============================================================================
+
+# =============================================================================
+# WORKFLOW REUTILIZABLE
+# =============================================================================
+# Este workflow se invoca desde otros workflows.
+# Copia este bloque a .github/workflows/reusable-ci.yml
+
+name: Workflow Reutilizable - CI
+
+# --- TRIGGER: workflow_call ---
+# Este es el trigger que hace al workflow "reutilizable".
+# Solo workflows con "on: workflow_call" pueden ser invocados por otros.
+on:
+  workflow_call:
+    # --- INPUTS ---
+    # Parametros que el llamador pasa.
+    # Similar a los parametros de una funcion.
+    inputs:
+      lenguaje:
+        description: 'Lenguaje del proyecto (node, python, php)'
+        required: true
+        type: string
+      version:
+        description: 'Version del lenguaje'
+        required: true
+        type: string
+      directorio-trabajo:
+        description: 'Directorio donde esta el codigo'
+        required: false
+        type: string
+        default: '.'
+      ejecutar-lint:
+        description: 'Si se debe ejecutar el linter'
+        required: false
+        type: boolean
+        default: true
+      # Tipos soportados: string, number, boolean
+      # No hay tipo "choice" en workflow_call (solo en workflow_dispatch)
+
+    # --- SECRETS ---
+    # Secretos que el llamador pasa.
+    # Los workflows reutilizables NO heredan secretos automaticamente.
+    secrets:
+      deploy-token:
+        description: 'Token para despliegue'
+        required: false
+      # ALTERNATIVA: usar "secrets: inherit" en el llamador
+      # para pasar todos los secretos automaticamente
+
+    # --- OUTPUTS ---
+    # Valores que el workflow reutilizable devuelve al llamador.
+    outputs:
+      resultado-tests:
+        description: 'Resultado de los tests (pass/fail)'
+        value: ${{ jobs.test.outputs.resultado }}
+      cobertura:
+        description: 'Porcentaje de cobertura'
+        value: ${{ jobs.test.outputs.cobertura }}
+
+jobs:
+  # =========================================================================
+  # JOB: LINT (condicional)
+  # =========================================================================
+  lint:
+    name: "Lint (${{ inputs.lenguaje }})"
+    runs-on: ubuntu-latest
+    # Solo ejecutar si el llamador lo pidio
+    if: inputs.ejecutar-lint == true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        if: inputs.lenguaje == 'node'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.version }}
+          cache: 'npm'
+
+      - name: Setup Python
+        if: inputs.lenguaje == 'python'
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.version }}
+          cache: 'pip'
+
+      - name: Ejecutar linter
+        working-directory: ${{ inputs.directorio-trabajo }}
+        run: |
+          echo "Ejecutando linter para ${{ inputs.lenguaje }}..."
+          case "${{ inputs.lenguaje }}" in
+            node)
+              echo "npx eslint src/ (simulado)"
+              ;;
+            python)
+              echo "flake8 src/ (simulado)"
+              ;;
+            php)
+              echo "vendor/bin/phpcs (simulado)"
+              ;;
+            *)
+              echo "Lenguaje no soportado: ${{ inputs.lenguaje }}"
+              exit 1
+              ;;
+          esac
+
+  # =========================================================================
+  # JOB: TEST
+  # =========================================================================
+  test:
+    name: "Test (${{ inputs.lenguaje }} ${{ inputs.version }})"
+    runs-on: ubuntu-latest
+    needs: lint
+    # Ejecutar aunque lint se salte (if: false no cuenta como fallo)
+    if: always() && (needs.lint.result == 'success' || needs.lint.result == 'skipped')
+
+    # Outputs del job (se exponen como outputs del workflow)
+    outputs:
+      resultado: ${{ steps.ejecutar-tests.outputs.resultado }}
+      cobertura: ${{ steps.ejecutar-tests.outputs.cobertura }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup lenguaje
+        run: echo "Configurando ${{ inputs.lenguaje }} ${{ inputs.version }}"
+
+      - name: Instalar dependencias
+        working-directory: ${{ inputs.directorio-trabajo }}
+        run: |
+          case "${{ inputs.lenguaje }}" in
+            node)   echo "npm ci (simulado)" ;;
+            python) echo "pip install -r requirements.txt (simulado)" ;;
+            php)    echo "composer install (simulado)" ;;
+          esac
+
+      - name: Ejecutar tests
+        id: ejecutar-tests
+        working-directory: ${{ inputs.directorio-trabajo }}
+        run: |
+          echo "Ejecutando tests para ${{ inputs.lenguaje }}..."
+          case "${{ inputs.lenguaje }}" in
+            node)   echo "npm test (simulado)" ;;
+            python) echo "pytest (simulado)" ;;
+            php)    echo "vendor/bin/phpunit (simulado)" ;;
+          esac
+
+          # Simular resultado
+          echo "resultado=pass" >> $GITHUB_OUTPUT
+          echo "cobertura=85" >> $GITHUB_OUTPUT
+
+# =============================================================================
+# WORKFLOW LLAMADOR (ejemplo de como invocar el reutilizable)
+# =============================================================================
+# En la practica, este iria en un archivo separado, por ejemplo:
+# .github/workflows/main-ci.yml
+#
+# name: CI Principal
+#
+# on:
+#   push:
+#     branches: [main]
+#   pull_request:
+#     branches: [main]
+#
+# jobs:
+#   # --- Llamar al workflow reutilizable para Node.js ---
+#   ci-node:
+#     # "uses" con ruta relativa al mismo repositorio
+#     uses: ./.github/workflows/reusable-ci.yml
+#     with:
+#       lenguaje: node
+#       version: '20'
+#       ejecutar-lint: true
+#     secrets:
+#       deploy-token: ${{ secrets.DEPLOY_TOKEN }}
+#     # O para heredar todos los secretos:
+#     # secrets: inherit
+#
+#   # --- Llamar al mismo reutilizable para Python ---
+#   ci-python:
+#     uses: ./.github/workflows/reusable-ci.yml
+#     with:
+#       lenguaje: python
+#       version: '3.12'
+#       directorio-trabajo: './backend'
+#     secrets: inherit
+#
+#   # --- Llamar a un reutilizable de OTRO repositorio ---
+#   ci-externo:
+#     uses: organizacion/repo-compartido/.github/workflows/ci.yml@v1
+#     with:
+#       lenguaje: node
+#       version: '20'
+#
+#   # --- Job que depende del resultado del reutilizable ---
+#   deploy:
+#     runs-on: ubuntu-latest
+#     needs: [ci-node, ci-python]
+#     steps:
+#       - name: Verificar resultados
+#         run: |
+#           echo "Node tests: ${{ needs.ci-node.outputs.resultado-tests }}"
+#           echo "Node coverage: ${{ needs.ci-node.outputs.cobertura }}%"
+#           echo "Python tests: ${{ needs.ci-python.outputs.resultado-tests }}"
+
+# =============================================================================
+# REGLAS Y LIMITACIONES DE WORKFLOWS REUTILIZABLES:
+#
+# 1. LIMITE DE ANIDAMIENTO: Maximo 4 niveles de profundidad
+#    (A llama a B, B llama a C, C llama a D -> OK)
+#    (A -> B -> C -> D -> E -> FALLO)
+#
+# 2. LIMITE DE LLAMADAS: Un workflow puede llamar maximo 20 reutilizables
+#
+# 3. VARIABLES DE ENTORNO: No se heredan del llamador al reutilizable.
+#    Debes pasarlas como inputs.
+#
+# 4. SECRETOS: No se heredan automaticamente. Usa:
+#    secrets: inherit  (pasa todos)
+#    O pasa secretos especificos como inputs.
+#
+# 5. CONCURRENCIA: Se puede definir en el llamador, en el reutilizable, o ambos.
+#
+# 6. TRIGGER: El reutilizable DEBE tener "on: workflow_call" como trigger.
+#    Puede tener otros triggers adicionales (push, etc.) para testing.
+#
+# 7. REFERENCIA:
+#    Mismo repo: uses: ./.github/workflows/reusable.yml
+#    Otro repo:  uses: org/repo/.github/workflows/reusable.yml@ref
+#    (ref puede ser: branch, tag, SHA)
+# =============================================================================

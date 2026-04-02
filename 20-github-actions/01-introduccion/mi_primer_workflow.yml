@@ -1,0 +1,102 @@
+# =============================================================================
+# MI PRIMER WORKFLOW - Hola Mundo con GitHub Actions
+# =============================================================================
+#
+# Este es el workflow mas basico posible. Imprime "Hola Mundo" cada vez que
+# alguien hace push al repositorio.
+#
+# COMO USARLO:
+# 1. Copia este archivo a .github/workflows/mi_primer_workflow.yml
+# 2. Haz commit y push
+# 3. Ve a la pestana "Actions" de tu repositorio en GitHub
+# 4. Veras la ejecucion del workflow con su resultado
+#
+# =============================================================================
+
+# --- NOMBRE DEL WORKFLOW ---
+# El nombre aparece en la pestana "Actions" de GitHub.
+# Si no lo pones, GitHub usa el nombre del archivo como titulo.
+# Consejo: usa un nombre descriptivo que explique que hace el workflow.
+name: Mi Primer Workflow
+
+# --- EVENTO DISPARADOR ---
+# "on" define CUANDO se ejecuta este workflow.
+# En este caso, se ejecuta en cada push a CUALQUIER rama.
+#
+# Alternativas:
+#   on: push                          -> Cualquier push
+#   on: [push, pull_request]          -> Push O pull request
+#   on: workflow_dispatch             -> Solo ejecucion manual
+#
+# NOTA: "on" es una palabra reservada en YAML (significa true/false).
+# GitHub Actions la maneja correctamente, pero si usas un validador YAML
+# generico, podria dar advertencia. Esto es normal.
+on: push
+
+# --- DEFINICION DE JOBS ---
+# Un workflow tiene uno o mas jobs. Cada job se ejecuta en un runner
+# (maquina virtual) independiente.
+#
+# Aqui definimos un solo job llamado "saludo".
+# El nombre "saludo" es un identificador que tu eliges (sin espacios ni
+# caracteres especiales, usa guiones o guiones bajos).
+jobs:
+  saludo:
+    # --- RUNNER ---
+    # "runs-on" indica EN QUE MAQUINA se ejecuta este job.
+    # Opciones principales:
+    #   ubuntu-latest   -> Linux (el mas barato y rapido)
+    #   windows-latest  -> Windows
+    #   macos-latest    -> macOS (el mas caro en repos privados)
+    #
+    # Para la mayoria de tareas, ubuntu-latest es la mejor opcion.
+    runs-on: ubuntu-latest
+
+    # --- STEPS (PASOS) ---
+    # Cada step es una tarea individual. Se ejecutan en SECUENCIA
+    # (uno despues del otro, en orden).
+    steps:
+      # PASO 1: Imprimir un saludo
+      # "name" es opcional pero muy recomendable. Aparece en los logs
+      # de GitHub Actions y te ayuda a identificar que hace cada paso.
+      - name: Imprimir Hola Mundo
+        # "run" ejecuta un comando en la terminal del runner.
+        # En ubuntu-latest, el shell por defecto es bash.
+        run: echo "Hola Mundo desde GitHub Actions!"
+
+      # PASO 2: Mostrar informacion del entorno
+      # Puedes ejecutar multiples comandos en un solo step usando "|"
+      # (pipe de YAML para texto multilinea).
+      - name: Mostrar informacion del sistema
+        run: |
+          echo "Sistema operativo: $(uname -s)"
+          echo "Fecha y hora: $(date)"
+          echo "Usuario: $(whoami)"
+          echo "Directorio actual: $(pwd)"
+
+      # PASO 3: Usar una variable de contexto de GitHub
+      # GitHub proporciona variables automaticas con informacion del
+      # evento que disparo el workflow.
+      # ${{ ... }} es la sintaxis de expresiones de GitHub Actions.
+      - name: Mostrar informacion del evento
+        run: |
+          echo "Repositorio: ${{ github.repository }}"
+          echo "Rama: ${{ github.ref }}"
+          echo "Autor del commit: ${{ github.actor }}"
+          echo "SHA del commit: ${{ github.sha }}"
+          echo "Evento: ${{ github.event_name }}"
+
+# =============================================================================
+# QUE ESPERAR AL EJECUTAR ESTE WORKFLOW:
+#
+# 1. En la pestana "Actions" veras una ejecucion con el nombre
+#    "Mi Primer Workflow"
+# 2. Al hacer clic, veras el job "saludo"
+# 3. Al expandir el job, veras los 3 steps con sus logs
+# 4. Cada step muestra la salida de sus comandos
+#
+# EJERCICIO PROPUESTO:
+# - Agrega un cuarto step que imprima "Workflow completado con exito!"
+# - Cambia el evento a "workflow_dispatch" para ejecutarlo manualmente
+# - Agrega un segundo job llamado "despedida"
+# =============================================================================

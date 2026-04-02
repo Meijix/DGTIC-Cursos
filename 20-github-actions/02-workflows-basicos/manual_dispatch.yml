@@ -1,0 +1,240 @@
+# =============================================================================
+# EVENTO: WORKFLOW_DISPATCH (Ejecucion Manual)
+# =============================================================================
+#
+# Este workflow se ejecuta SOLO cuando el usuario lo activa manualmente
+# desde la interfaz de GitHub o via la API/CLI.
+#
+# CASOS DE USO:
+# - Despliegues manuales a produccion
+# - Ejecutar migraciones de base de datos
+# - Generar reportes bajo demanda
+# - Tareas administrativas que no se deben automatizar completamente
+#
+# COMO USARLO:
+# 1. Copia a .github/workflows/manual_dispatch.yml
+# 2. Ve a la pestana "Actions" en GitHub
+# 3. Selecciona el workflow en la barra lateral
+# 4. Clic en "Run workflow"
+# 5. Llena los parametros y ejecuta
+#
+# =============================================================================
+
+name: Ejecucion Manual
+
+on:
+  workflow_dispatch:
+    # --- INPUTS ---
+    # Los inputs son parametros que el usuario llena al ejecutar el workflow.
+    # Aparecen como campos de formulario en la interfaz de GitHub.
+    inputs:
+
+      # Input tipo "choice" (desplegable con opciones)
+      entorno:
+        description: 'Entorno de despliegue'
+        required: true
+        type: choice
+        options:
+          - desarrollo
+          - staging
+          - produccion
+        # El valor por defecto es el primero de la lista si no se especifica
+
+      # Input tipo "string" (texto libre)
+      version:
+        description: 'Version a desplegar (ej: 1.2.3)'
+        required: true
+        type: string
+        default: 'latest'
+
+      # Input tipo "boolean" (checkbox)
+      ejecutar_migraciones:
+        description: 'Ejecutar migraciones de base de datos'
+        required: false
+        type: boolean
+        default: false
+
+      # Input tipo "string" con valor por defecto
+      mensaje:
+        description: 'Mensaje o nota para el despliegue'
+        required: false
+        type: string
+        default: 'Despliegue de rutina'
+
+      # Input tipo "environment" (selecciona un environment de GitHub)
+      # Nota: este tipo requiere que tengas environments configurados
+      # en Settings > Environments
+      # target_environment:
+      #   description: 'Target environment'
+      #   type: environment
+      #   required: true
+
+jobs:
+  # =========================================================================
+  # JOB 1: VALIDAR PARAMETROS
+  # =========================================================================
+  validar:
+    name: "Validar parametros"
+    runs-on: ubuntu-latest
+
+    # Outputs para compartir con otros jobs
+    outputs:
+      es-produccion: ${{ steps.verificar.outputs.es_produccion }}
+
+    steps:
+      - name: Mostrar parametros recibidos
+        run: |
+          echo "=== Parametros del Dispatch ==="
+          echo "Entorno: ${{ inputs.entorno }}"
+          echo "Version: ${{ inputs.version }}"
+          echo "Migraciones: ${{ inputs.ejecutar_migraciones }}"
+          echo "Mensaje: ${{ inputs.mensaje }}"
+          echo "Ejecutado por: ${{ github.actor }}"
+          echo "Fecha: $(date -u)"
+
+      - name: Verificar entorno
+        id: verificar
+        run: |
+          # Determinar si es produccion
+          if [ "${{ inputs.entorno }}" == "produccion" ]; then
+            echo "es_produccion=true" >> $GITHUB_OUTPUT
+            echo ""
+            echo "================================================"
+            echo "  ATENCION: DESPLIEGUE A PRODUCCION"
+            echo "  Version: ${{ inputs.version }}"
+            echo "  Ejecutado por: ${{ github.actor }}"
+            echo "================================================"
+          else
+            echo "es_produccion=false" >> $GITHUB_OUTPUT
+            echo "Entorno: ${{ inputs.entorno }} (no produccion)"
+          fi
+
+      - name: Validar formato de version
+        run: |
+          VERSION="${{ inputs.version }}"
+
+          # Permitir "latest" como version valida
+          if [ "$VERSION" == "latest" ]; then
+            echo "Version: latest (se usara la ultima version)"
+            exit 0
+          fi
+
+          # Validar formato semver (X.Y.Z)
+          if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Version valida: $VERSION"
+          else
+            echo "ERROR: Formato de version invalido: $VERSION"
+            echo "Formato esperado: X.Y.Z (ejemplo: 1.2.3)"
+            exit 1
+          fi
+
+  # =========================================================================
+  # JOB 2: DESPLEGAR
+  # =========================================================================
+  desplegar:
+    name: "Desplegar a ${{ inputs.entorno }}"
+    runs-on: ubuntu-latest
+    needs: validar
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Paso condicional: solo si se marcaron migraciones
+      - name: Ejecutar migraciones
+        if: inputs.ejecutar_migraciones == true
+        run: |
+          echo "=== Ejecutando migraciones de BD ==="
+          echo "Entorno: ${{ inputs.entorno }}"
+          # Comandos reales:
+          # npx prisma migrate deploy
+          # python manage.py migrate
+          # php artisan migrate --force
+          echo "Migraciones completadas"
+
+      - name: Desplegar aplicacion
+        run: |
+          echo "=== Desplegando ==="
+          echo "Entorno: ${{ inputs.entorno }}"
+          echo "Version: ${{ inputs.version }}"
+          echo ""
+          # Aqui irian los comandos de despliegue reales segun el entorno:
+          # if [ "${{ inputs.entorno }}" == "produccion" ]; then
+          #   kubectl set image deployment/app app=miapp:${{ inputs.version }}
+          # elif [ "${{ inputs.entorno }}" == "staging" ]; then
+          #   ssh staging "cd /app && git pull && npm run build"
+          # fi
+          echo "Despliegue exitoso a ${{ inputs.entorno }}"
+
+  # =========================================================================
+  # JOB 3: CONFIRMACION PARA PRODUCCION
+  # =========================================================================
+  confirmar-produccion:
+    name: "Confirmar despliegue a produccion"
+    runs-on: ubuntu-latest
+    needs: desplegar
+    # Solo se ejecuta si el entorno es produccion
+    if: needs.validar.outputs.es-produccion == 'true'
+
+    steps:
+      - name: Registrar despliegue a produccion
+        run: |
+          echo "=== REGISTRO DE DESPLIEGUE A PRODUCCION ==="
+          echo "Fecha: $(date -u)"
+          echo "Version: ${{ inputs.version }}"
+          echo "Ejecutado por: ${{ github.actor }}"
+          echo "Mensaje: ${{ inputs.mensaje }}"
+          echo "Migraciones: ${{ inputs.ejecutar_migraciones }}"
+          echo ""
+          echo "Este registro se deberia enviar a un sistema de logging"
+          echo "o canal de Slack para trazabilidad."
+
+  # =========================================================================
+  # JOB 4: NOTIFICAR
+  # =========================================================================
+  notificar:
+    name: "Notificar resultado"
+    runs-on: ubuntu-latest
+    needs: [validar, desplegar]
+    # Ejecutar siempre, incluso si algun job fallo
+    if: always()
+
+    steps:
+      - name: Enviar notificacion
+        run: |
+          echo "=== Notificacion ==="
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Entorno: ${{ inputs.entorno }}"
+          echo "Version: ${{ inputs.version }}"
+          echo "Estado del despliegue: ${{ needs.desplegar.result }}"
+          echo ""
+          # En un caso real, enviarias una notificacion:
+          # curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
+          #   -H 'Content-type: application/json' \
+          #   -d '{"text": "Deploy ${{ inputs.version }} a ${{ inputs.entorno }}: ${{ needs.desplegar.result }}"}'
+
+# =============================================================================
+# COMO EJECUTAR DESDE LA CLI:
+#
+# Tambien puedes ejecutar un workflow_dispatch desde la linea de comandos
+# usando la CLI de GitHub (gh):
+#
+#   gh workflow run "Ejecucion Manual" \
+#     -f entorno=staging \
+#     -f version=1.2.3 \
+#     -f ejecutar_migraciones=true \
+#     -f mensaje="Hotfix critico"
+#
+# O usando la API de GitHub:
+#
+#   curl -X POST \
+#     -H "Authorization: token TU_TOKEN" \
+#     -H "Accept: application/vnd.github.v3+json" \
+#     https://api.github.com/repos/OWNER/REPO/actions/workflows/manual_dispatch.yml/dispatches \
+#     -d '{"ref":"main","inputs":{"entorno":"staging","version":"1.2.3"}}'
+#
+# NOTAS:
+# - Solo los usuarios con permisos de escritura pueden ejecutar dispatches
+# - Los inputs tipo boolean se envian como string "true" o "false" en la API
+# - El workflow debe estar en la rama que especificas en "ref"
+# =============================================================================

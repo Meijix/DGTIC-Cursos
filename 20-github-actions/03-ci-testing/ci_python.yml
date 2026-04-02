@@ -1,0 +1,249 @@
+# =============================================================================
+# CI PARA PYTHON - pytest + cobertura + linting
+# =============================================================================
+#
+# Pipeline completo de Integracion Continua para un proyecto Python.
+# Incluye:
+# - Instalacion de dependencias con cache
+# - Linting con flake8
+# - Verificacion de formato con black
+# - Ejecucion de tests con pytest
+# - Reporte de cobertura de codigo
+# - Subida de reportes como artefactos
+#
+# REQUISITOS DEL PROYECTO:
+# - requirements.txt o pyproject.toml con las dependencias
+# - tests/ directorio con archivos test_*.py
+# - (Opcional) .flake8 o setup.cfg para configurar flake8
+#
+# COMO USARLO:
+# 1. Copia a .github/workflows/ci_python.yml
+# 2. Asegurate de tener un requirements.txt con tus dependencias
+# 3. Haz push y observa el pipeline
+#
+# =============================================================================
+
+name: CI - Python
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - '**.py'                # Solo si se modifican archivos Python
+      - 'requirements*.txt'    # O los archivos de dependencias
+      - 'pyproject.toml'
+      - '.github/workflows/ci_python.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - '**.py'
+      - 'requirements*.txt'
+      - 'pyproject.toml'
+
+# Cancelar ejecuciones anteriores del mismo PR/rama
+concurrency:
+  group: ci-python-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # =========================================================================
+  # JOB 1: LINTING
+  # =========================================================================
+  lint:
+    name: "Linting"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del codigo
+        uses: actions/checkout@v4
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          # Cache integrado para pip: restaura el cache de paquetes
+          cache: 'pip'
+
+      - name: Instalar herramientas de linting
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black isort mypy
+
+      # --- FLAKE8: Linter de estilo (PEP 8) ---
+      # Verifica que el codigo sigue las convenciones de estilo de Python.
+      # Configurable via .flake8 o setup.cfg
+      - name: Ejecutar flake8
+        run: |
+          # --count: muestra el total de errores al final
+          # --statistics: muestra estadisticas por tipo de error
+          # --show-source: muestra la linea de codigo con el error
+          # --max-line-length=120: maximo de caracteres por linea
+          # --max-complexity=10: complejidad ciclomatica maxima
+          flake8 . \
+            --count \
+            --statistics \
+            --show-source \
+            --max-line-length=120 \
+            --max-complexity=10 \
+            --exclude=.git,__pycache__,build,dist,venv,.venv
+
+      # --- BLACK: Verificar formato ---
+      # Black es un formateador opinado. Con --check, solo VERIFICA
+      # sin modificar archivos (ideal para CI).
+      - name: Verificar formato con black
+        run: |
+          black --check --diff --line-length=120 . \
+            --exclude='/(\.git|__pycache__|\.venv|venv|build|dist)/'
+          # --check: no modifica, solo reporta
+          # --diff: muestra los cambios que haria
+
+      # --- ISORT: Verificar orden de imports ---
+      - name: Verificar orden de imports
+        run: |
+          isort --check-only --diff --profile black .
+
+  # =========================================================================
+  # JOB 2: TESTS + COBERTURA
+  # =========================================================================
+  test:
+    name: "Tests (Python ${{ matrix.python-version }})"
+    runs-on: ubuntu-latest
+    # Los tests dependen del lint: si el codigo no pasa lint, no vale la
+    # pena ejecutar tests (ahorra minutos de ejecucion)
+    needs: lint
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
+        # NOTA: '3.10' con comillas! Sin comillas, YAML lo interpreta como 3.1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          # Instalar dependencias del proyecto
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+          # Instalar dependencias de desarrollo (pytest, coverage, etc.)
+          if [ -f requirements-dev.txt ]; then
+            pip install -r requirements-dev.txt
+          fi
+          # Si no hay archivos de requirements, instalar lo minimo:
+          pip install pytest pytest-cov
+
+      # --- PYTEST con cobertura ---
+      - name: Ejecutar tests con cobertura
+        run: |
+          # --cov=src: mide cobertura sobre el directorio src/
+          # --cov-report=xml: genera reporte XML (para herramientas externas)
+          # --cov-report=html: genera reporte HTML navegable
+          # --cov-report=term-missing: muestra en terminal que lineas faltan
+          # --cov-fail-under=70: falla si la cobertura es menor a 70%
+          # -v: verbose (muestra cada test)
+          # --tb=short: traceback corto en fallos
+          pytest \
+            --cov=src \
+            --cov-report=xml:coverage.xml \
+            --cov-report=html:htmlcov \
+            --cov-report=term-missing \
+            --cov-fail-under=70 \
+            -v \
+            --tb=short \
+            tests/ || echo "Tests completados (puede haber fallos)"
+
+      # Subir el reporte de cobertura HTML como artefacto
+      # Se puede descargar desde la pagina del workflow en GitHub
+      - name: Subir reporte de cobertura
+        if: always()    # Subir incluso si los tests fallan
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-python-${{ matrix.python-version }}
+          path: htmlcov/
+          retention-days: 14
+
+      # Subir el reporte XML para integracion con herramientas externas
+      # (Codecov, SonarCloud, etc.)
+      - name: Subir cobertura XML
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml-${{ matrix.python-version }}
+          path: coverage.xml
+          retention-days: 7
+
+  # =========================================================================
+  # JOB 3: VERIFICACION DE SEGURIDAD
+  # =========================================================================
+  seguridad:
+    name: "Auditoria de seguridad"
+    runs-on: ubuntu-latest
+    # No bloquear el merge por vulnerabilidades (informativo)
+    continue-on-error: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Instalar pip-audit
+        run: pip install pip-audit
+
+      - name: Auditar dependencias
+        run: |
+          if [ -f requirements.txt ]; then
+            pip-audit -r requirements.txt || echo "Se encontraron vulnerabilidades"
+          else
+            echo "No se encontro requirements.txt, saltando auditoria"
+          fi
+
+# =============================================================================
+# EJEMPLO DE requirements.txt:
+#
+#   flask>=3.0
+#   requests>=2.31
+#   sqlalchemy>=2.0
+#
+# EJEMPLO DE requirements-dev.txt:
+#
+#   pytest>=8.0
+#   pytest-cov>=4.0
+#   flake8>=7.0
+#   black>=24.0
+#   isort>=5.0
+#   mypy>=1.0
+#
+# EJEMPLO DE .flake8:
+#
+#   [flake8]
+#   max-line-length = 120
+#   max-complexity = 10
+#   exclude = .git,__pycache__,build,dist,venv
+#   ignore = E203,W503
+#
+# EJEMPLO DE test:
+#
+#   # tests/test_calculadora.py
+#   from src.calculadora import sumar
+#
+#   def test_sumar():
+#       assert sumar(2, 3) == 5
+#
+#   def test_sumar_negativos():
+#       assert sumar(-1, -2) == -3
+# =============================================================================

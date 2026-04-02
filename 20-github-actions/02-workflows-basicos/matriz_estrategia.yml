@@ -1,0 +1,255 @@
+# =============================================================================
+# ESTRATEGIA DE MATRICES (strategy.matrix)
+# =============================================================================
+#
+# Las matrices permiten ejecutar el mismo job con diferentes combinaciones
+# de variables. Es ideal para:
+# - Probar en multiples versiones de un lenguaje (Node 18, 20, 22)
+# - Probar en multiples sistemas operativos (Linux, Windows, macOS)
+# - Probar con diferentes bases de datos (MySQL, PostgreSQL)
+# - Cualquier combinacion de las anteriores
+#
+# COMO USARLO:
+# 1. Copia a .github/workflows/matriz_estrategia.yml
+# 2. Haz push y observa como se crean multiples jobs
+#
+# =============================================================================
+
+name: CI - Matriz Multi-Version
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  # =========================================================================
+  # JOB 1: MATRIX SIMPLE (una dimension)
+  # =========================================================================
+  matrix-simple:
+    name: "Node ${{ matrix.node-version }}"
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        # Una sola variable con 3 valores = 3 jobs
+        node-version: [18, 20, 22]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Verificar version
+        run: |
+          echo "Node.js version: $(node --version)"
+          echo "npm version: $(npm --version)"
+
+      - name: Ejecutar tests
+        run: |
+          echo "Ejecutando tests con Node.js ${{ matrix.node-version }}..."
+          # npm ci
+          # npm test
+
+  # =========================================================================
+  # JOB 2: MATRIX MULTI-DIMENSIONAL (dos dimensiones)
+  # =========================================================================
+  matrix-multi:
+    name: "${{ matrix.os }} / Node ${{ matrix.node }}"
+    # El runner cambia segun la variable de la matrix
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      # fail-fast: si un job falla, NO cancelar los demas.
+      # Asi puedes ver cuales combinaciones pasan y cuales no.
+      fail-fast: false
+
+      matrix:
+        # 3 sistemas operativos x 3 versiones = 9 jobs
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node: [18, 20, 22]
+
+        # --- EXCLUDE ---
+        # Eliminar combinaciones que no necesitas o no soportas.
+        # Esto reduce el numero de jobs y ahorra minutos de ejecucion.
+        exclude:
+          # No probar Node 18 en macOS (para ahorrar minutos, macOS es 10x)
+          - os: macos-latest
+            node: 18
+          # No probar Node 18 en Windows (no lo soportamos)
+          - os: windows-latest
+            node: 18
+        # Sin exclude: 9 jobs. Con exclude: 7 jobs.
+
+        # --- INCLUDE ---
+        # Agregar combinaciones extras o variables adicionales a
+        # combinaciones existentes.
+        include:
+          # Agregar una variable "experimental" a Node 22 en Ubuntu
+          - os: ubuntu-latest
+            node: 22
+            experimental: true
+            # La variable "experimental" solo existe en esta combinacion
+
+          # Agregar una combinacion completamente nueva
+          - os: ubuntu-latest
+            node: 21
+            experimental: true
+
+    # continue-on-error permite que el job "falle" sin fallar el workflow.
+    # Aqui usamos la variable "experimental" para permitir fallos en
+    # combinaciones experimentales.
+    continue-on-error: ${{ matrix.experimental || false }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Info del entorno
+        run: |
+          echo "OS: ${{ matrix.os }}"
+          echo "Node: ${{ matrix.node }}"
+          echo "Experimental: ${{ matrix.experimental || 'false' }}"
+          node --version
+
+      - name: Tests
+        run: echo "Tests pasaron en ${{ matrix.os }} con Node ${{ matrix.node }}"
+
+  # =========================================================================
+  # JOB 3: MATRIX CON MULTIPLES LENGUAJES
+  # =========================================================================
+  matrix-lenguajes:
+    name: "Python ${{ matrix.python }} en ${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.10', '3.11', '3.12']
+        # NOTA: las versiones van entre comillas porque YAML interpreta
+        # 3.10 como el numero 3.1 (elimina el cero final).
+        # '3.10' es el string "3.10" que es lo que queremos.
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Python ${{ matrix.python }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Verificar version
+        run: |
+          python --version
+          pip --version
+
+      - name: Tests
+        run: |
+          echo "Tests con Python ${{ matrix.python }} en ${{ matrix.os }}"
+          # pip install -r requirements.txt
+          # pytest
+
+  # =========================================================================
+  # JOB 4: MATRIX DINAMICA (generada en un job previo)
+  # =========================================================================
+  generar-matrix:
+    name: "Generar matrix dinamica"
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+    steps:
+      - name: Determinar que versiones probar
+        id: set-matrix
+        run: |
+          # Puedes generar la matrix dinamicamente basandote en
+          # archivos del repo, APIs externas, etc.
+          #
+          # El output debe ser un JSON valido.
+          if [ "${{ github.event_name }}" == "push" ]; then
+            # En push a main: probar todas las versiones
+            echo 'matrix={"node": [18, 20, 22], "os": ["ubuntu-latest"]}' >> $GITHUB_OUTPUT
+          else
+            # En otros eventos: solo la version principal
+            echo 'matrix={"node": [20], "os": ["ubuntu-latest"]}' >> $GITHUB_OUTPUT
+          fi
+
+  usar-matrix-dinamica:
+    name: "Dinamica: Node ${{ matrix.node }} / ${{ matrix.os }}"
+    needs: generar-matrix
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix: ${{ fromJSON(needs.generar-matrix.outputs.matrix) }}
+
+    steps:
+      - name: Info
+        run: |
+          echo "Esta matrix fue generada dinamicamente"
+          echo "Node: ${{ matrix.node }}"
+          echo "OS: ${{ matrix.os }}"
+
+  # =========================================================================
+  # JOB 5: MAX-PARALLEL (limitar concurrencia)
+  # =========================================================================
+  matrix-limitada:
+    name: "Limitada: Version ${{ matrix.version }}"
+    runs-on: ubuntu-latest
+
+    strategy:
+      # max-parallel limita cuantos jobs de la matrix se ejecutan a la vez.
+      # Util cuando los jobs consumen muchos recursos o llaman a una API
+      # con limite de peticiones.
+      max-parallel: 2
+      matrix:
+        version: [1, 2, 3, 4, 5]
+    # Sin max-parallel: los 5 jobs corren a la vez.
+    # Con max-parallel: 2: primero corren 2, y cuando termina uno
+    # empieza el siguiente, siempre manteniendo maximo 2 activos.
+
+    steps:
+      - name: Simular trabajo
+        run: |
+          echo "Job ${{ matrix.version }} iniciando..."
+          echo "Solo 2 jobs de esta matrix se ejecutan a la vez"
+          # sleep 10  # Descomentar para ver el efecto de max-parallel
+          echo "Job ${{ matrix.version }} completado"
+
+# =============================================================================
+# RESUMEN DE LA MATRIX:
+#
+#   strategy:
+#     fail-fast: true/false     # Cancelar otros jobs si uno falla
+#     max-parallel: N           # Limitar jobs concurrentes
+#     matrix:
+#       var1: [a, b]            # Primera dimension
+#       var2: [x, y, z]         # Segunda dimension
+#                               # Total: 2 x 3 = 6 combinaciones
+#       exclude:                # Eliminar combinaciones
+#         - var1: a
+#           var2: z
+#       include:                # Agregar combinaciones o variables
+#         - var1: a
+#           var2: x
+#           extra: true         # Variable adicional
+#
+# ERRORES COMUNES:
+# - Versiones numericas sin comillas: python: [3.10] -> YAML lee 3.1
+#   Solucion: python: ['3.10'] (con comillas)
+# - Demasiadas combinaciones: 5 OS x 5 versiones x 3 BD = 75 jobs
+#   Esto consume muchos minutos y tarda mucho.
+# - Olvidar fail-fast: false y que un fallo cancele todo
+# =============================================================================

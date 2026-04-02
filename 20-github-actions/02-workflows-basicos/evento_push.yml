@@ -1,0 +1,131 @@
+# =============================================================================
+# EVENTO: PUSH
+# =============================================================================
+#
+# Este workflow se activa cuando se hace push a ciertas ramas.
+# Demuestra como filtrar por rama, por ruta de archivos y por tags.
+#
+# COMO USARLO:
+# 1. Copia a .github/workflows/evento_push.yml
+# 2. Haz push a la rama main o develop
+# 3. Observa en la pestana "Actions" como se activa
+#
+# =============================================================================
+
+name: CI - Push Events
+
+# --- CONFIGURACION DEL EVENTO PUSH ---
+on:
+  push:
+    # --- FILTRO POR RAMAS ---
+    # Solo se activa en push a estas ramas.
+    # Si no especificas branches, se activa en TODAS las ramas.
+    branches:
+      - main              # Rama principal
+      - develop           # Rama de desarrollo
+      - 'feature/**'      # Cualquier rama feature/* (glob pattern)
+                          # Ejemplo: feature/login, feature/api/v2
+
+    # --- FILTRO POR RUTAS ---
+    # Solo se activa si se modificaron archivos en estas rutas.
+    # Es perfecto para monorepos o para evitar ejecuciones innecesarias.
+    #
+    # Por ejemplo, no tiene sentido ejecutar tests si solo cambio el README.
+    paths:
+      - 'src/**'          # Archivos dentro de src/
+      - 'tests/**'        # Archivos de pruebas
+      - 'package.json'    # Archivo de dependencias
+      - 'package-lock.json'
+      - '.github/workflows/evento_push.yml'  # El propio workflow
+
+    # ALTERNATIVA: paths-ignore (ejecutar en todo EXCEPTO estas rutas)
+    # No puedes usar paths y paths-ignore a la vez.
+    # paths-ignore:
+    #   - 'docs/**'
+    #   - '*.md'
+    #   - 'LICENSE'
+
+# Variable global: la usan todos los jobs
+env:
+  NODE_ENV: test
+
+jobs:
+  # =========================================================================
+  # JOB: VERIFICAR CODIGO
+  # =========================================================================
+  verificar:
+    name: "Verificar codigo"
+    runs-on: ubuntu-latest
+
+    steps:
+      # Paso 1: Descargar el codigo al runner
+      # Sin esto, el runner no tiene acceso a tu repositorio.
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      # Paso 2: Mostrar que rama y commit activaron el workflow
+      # Estas variables las proporciona GitHub automaticamente.
+      - name: Informacion del push
+        run: |
+          echo "=== Informacion del Push ==="
+          echo "Rama: ${{ github.ref_name }}"
+          echo "SHA completo: ${{ github.sha }}"
+          echo "SHA corto: ${GITHUB_SHA::7}"
+          echo "Autor: ${{ github.actor }}"
+          echo "Mensaje del commit: ${{ github.event.head_commit.message }}"
+          echo "Repositorio: ${{ github.repository }}"
+
+      # Paso 3: Ver que archivos cambiaron
+      # git diff compara el commit actual con el anterior
+      - name: Archivos modificados
+        run: |
+          echo "=== Archivos modificados en este push ==="
+          git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "Primer commit o historial insuficiente"
+
+      # Paso 4: Simulacion de build
+      - name: Build del proyecto
+        run: |
+          echo "Construyendo proyecto..."
+          echo "NODE_ENV=$NODE_ENV"
+          # Aqui irian los comandos reales:
+          # npm ci
+          # npm run build
+
+      # Paso 5: Simulacion de tests
+      - name: Ejecutar tests
+        run: |
+          echo "Ejecutando tests..."
+          # npm test
+
+      # Paso 6: Mostrar resultado
+      - name: Resumen
+        run: |
+          echo "=== Verificacion completada ==="
+          echo "Rama: ${{ github.ref_name }}"
+          echo "Estado: Exitoso"
+
+# =============================================================================
+# NOTAS SOBRE EL EVENTO PUSH:
+#
+# 1. Un "push" puede contener multiples commits. El workflow se ejecuta
+#    UNA sola vez por push, sin importar cuantos commits tenga.
+#
+# 2. El filtro "paths" usa patron glob:
+#    - *   = cualquier archivo en el directorio actual
+#    - **  = cualquier archivo en cualquier subdirectorio
+#    - *.js = archivos .js en el directorio actual
+#    - **/*.js = archivos .js en cualquier subdirectorio
+#
+# 3. Cuando usas branches Y paths, ambos deben cumplirse (AND logico).
+#    El push debe ser a una rama listada Y modificar archivos en paths.
+#
+# 4. El filtro "branches" tambien acepta patrones de exclusion:
+#    branches:
+#      - '**'               # Todas las ramas...
+#      - '!experimental'    # ...excepto "experimental"
+#
+# ERRORES COMUNES:
+# - Olvidar que paths filtra: si solo cambias un README y tienes
+#   paths: ['src/**'], el workflow NO se ejecuta.
+# - Confundir paths con paths-ignore: no se pueden usar a la vez.
+# =============================================================================
