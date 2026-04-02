@@ -1,6 +1,6 @@
-# DGTIC - Curso de HTML y CSS
+# DGTIC - Cursos de Desarrollo Web y Programación
 
-Ejercicios y proyectos del curso de HTML y CSS impartido por la DGTIC (UNAM), complementados con proyectos propios para reforzar los conceptos aprendidos.
+Ejercicios y proyectos de los cursos impartidos por la DGTIC (UNAM): desarrollo web (HTML, CSS, JavaScript), introducción a la programación (Python) y fundamentos de PHP.
 
 **Autora:** Natalia Edith Mejia Bautista
 
@@ -11,6 +11,8 @@ Ejercicios y proyectos del curso de HTML y CSS impartido por la DGTIC (UNAM), co
 ## Contenido del curso
 
 El repositorio esta organizado en modulos progresivos, desde los fundamentos hasta proyectos completos:
+
+### Bloque 1 — HTML y CSS (Desarrollo Web)
 
 | # | Modulo | Temas principales | Archivo principal |
 |---|--------|-------------------|-------------------|
@@ -25,41 +27,72 @@ El repositorio esta organizado en modulos progresivos, desde los fundamentos has
 | 09 | [Portfolio profesional](09-portfolio-profesional/) | Portfolio completo con animaciones scroll, navegacion suave, JavaScript | `portfolioYo.html` |
 | 10 | [Landing personal](10-landing-personal/) | Landing page con hero, about, proyectos y contacto. Mobile-first, IntersectionObserver | `index.html` |
 
+### Bloque 2 — Programación
+
+| # | Modulo | Temas principales | Contenido |
+|---|--------|-------------------|-----------|
+| 11 | [Python - Programación](11-python-programacion/) | Condicionales, ciclos, funciones, validacion, logica de juegos | 15 ejercicios `.py` con enunciados `.md` |
+| 12 | [JavaScript - Fundamentos](12-javascript-fundamentos/) | Variables, ciclos, funciones, POO, eventos DOM, consumo de API | Scripts progresivos + proyecto final (TMDB API) |
+| 13 | [PHP - Fundamentos](13-php-fundamentos/) | Funciones, regex, sesiones, formularios, gestion de usuarios | Ejercicios + proyecto con autenticacion |
+
 ---
 
 ## Material de aprendizaje
 
-Cada modulo incluye material educativo ademas del codigo:
+Los modulos 01-10 incluyen material educativo adicional:
 
 - **Comentarios en el codigo:** cada archivo HTML y CSS contiene explicaciones detalladas sobre como, por que, y que alternativas se consideraron para cada decision.
-- **`CONCEPTOS.md`:** cada carpeta contiene una guia en Markdown con teoria profunda, diagramas ASCII, tablas de referencia, errores comunes y ejercicios de practica.
+- **`CONCEPTOS.md`:** cada carpeta (01-10) contiene una guia en Markdown con teoria profunda, diagramas ASCII, tablas de referencia, errores comunes y ejercicios de practica.
 - **[`GUIA_DEL_CURSO.md`](GUIA_DEL_CURSO.md):** guia general del curso con mapa de aprendizaje, glosario de terminos y recursos adicionales.
+
+Los modulos 11-13 incluyen sus propios enunciados y documentacion dentro de cada ejercicio.
 
 ### Mapa de progresion
 
 ```
-01 HTML ──► 02 CSS ──► 03 Multi-pagina
-                            │
-                            ▼
-06 Responsive ◄── 05 Componentes ◄── 04 Flexbox
-     │
-     ▼
-07 CSS Grid ──► 08 Integracion ──► 09 Portfolio ──► 10 Landing
+                    BLOQUE 1: Desarrollo Web
+┌─────────────────────────────────────────────────────────┐
+│                                                         │
+│  01 HTML ──► 02 CSS ──► 03 Multi-pagina                 │
+│                              │                          │
+│                              ▼                          │
+│  06 Responsive ◄── 05 Componentes ◄── 04 Flexbox       │
+│       │                                                 │
+│       ▼                                                 │
+│  07 CSS Grid ──► 08 Integracion ──► 09 Portfolio        │
+│                                         │               │
+│                                         ▼               │
+│                                    10 Landing           │
+└─────────────────────────────────────────────────────────┘
+                         │
+                         ▼
+                 BLOQUE 2: Programación
+┌─────────────────────────────────────────────────────────┐
+│                                                         │
+│  11 Python (logica) ──► 12 JavaScript (DOM + API)       │
+│                              │                          │
+│                              ▼                          │
+│                         13 PHP (backend)                │
+└─────────────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## Tecnologias
 
-- HTML5 (estructura semantica, formularios, accesibilidad)
-- CSS3 (Flexbox, Grid, variables, media queries, gradientes, transiciones)
-- JavaScript (IntersectionObserver, scroll animations, navegacion interactiva)
+- **HTML5** — estructura semantica, formularios, accesibilidad
+- **CSS3** — Flexbox, Grid, variables, media queries, gradientes, transiciones
+- **JavaScript** — DOM, eventos, clases, fetch/API, IntersectionObserver
+- **Python** — logica de programacion, funciones, manejo de errores
+- **PHP** — funciones, regex, sesiones, formularios server-side
 
 ## Como usar
 
 1. Abre [`index.html`](index.html) en tu navegador para ver la tabla de contenidos.
 2. Cada carpeta es un modulo independiente — puedes abrir el archivo principal directamente.
-3. Lee el `CONCEPTOS.md` de cada modulo para entender la teoria antes o despues de revisar el codigo.
+3. Lee el `CONCEPTOS.md` de cada modulo (01-10) para entender la teoria.
+4. Los ejercicios de Python (11) se ejecutan con `python3 ejercicioNN.py`.
+5. Los archivos PHP (13) requieren un servidor local (`php -S localhost:8000`).
 
 ```bash
 # Abrir la tabla de contenidos
@@ -68,6 +101,9 @@ open index.html
 # Abrir un modulo especifico
 open 04-flexbox-dados/dados.html
 
-# Leer la guia de un modulo
-cat 04-flexbox-dados/CONCEPTOS.md
+# Ejecutar un ejercicio de Python
+python3 11-python-programacion/Ejercicio-01_Numeros_pares/ejercicio01.py
+
+# Levantar servidor PHP local
+cd 13-php-fundamentos/TareaFormulario_NEMB && php -S localhost:8000
 ```

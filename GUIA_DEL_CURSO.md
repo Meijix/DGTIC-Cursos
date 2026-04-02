@@ -1,9 +1,9 @@
-# Guia del Curso: Desarrollo Web — DGTIC UNAM
+# Guia del Curso: Desarrollo Web y Programación — DGTIC UNAM
 
-> **Curso:** Desarrollo de Páginas Web con HTML y CSS
+> **Cursos:** Desarrollo de Páginas Web (HTML/CSS/JS), Introducción a la Programación (Python), Fundamentos de PHP
 > **Institución:** Dirección General de Cómputo y de Tecnologías de Información y
 > Comunicación (DGTIC), UNAM
-> **Formato:** 10 módulos progresivos, del fundamento a la práctica profesional
+> **Formato:** 13 módulos progresivos en 2 bloques: desarrollo web (01-10) y programación (11-13)
 
 ---
 
@@ -30,6 +30,9 @@ Al completar este curso serás capaz de:
 - Aplicar buenas prácticas de rendimiento, accesibilidad y SEO.
 - Construir un portfolio profesional y una landing page como proyectos finales.
 - Entender la interactividad básica con JavaScript (DOM, eventos, IntersectionObserver).
+- Programar lógica básica con Python (condicionales, ciclos, funciones).
+- Manejar JavaScript a nivel intermedio (POO, eventos, consumo de APIs).
+- Desarrollar aplicaciones web server-side con PHP (sesiones, formularios, regex).
 
 ### Prerequisitos
 
@@ -54,6 +57,10 @@ DGTIC-Cursos/
 ├── 08-proyecto-web-servicios/
 ├── 09-portfolio-profesional/
 ├── 10-landing-personal/
+│
+├── 11-python-programacion/     ← 15 ejercicios de Python
+├── 12-javascript-fundamentos/  ← Scripts JS + proyecto final con API
+├── 13-php-fundamentos/         ← Ejercicios PHP + proyecto con sesiones
 │
 ├── index.html                  ← Página principal del repositorio
 ├── GUIA_DEL_CURSO.md           ← Este archivo (guía general)
@@ -163,6 +170,33 @@ DGTIC-Cursos/
                                │  Arquitectura CSS, │
                                │  clamp(), a11y,    │
                                │  SEO, performance  │
+                               └────────┬──────────┘
+                                        │
+                                        ▼
+  FASE 6: PROGRAMACIÓN        ┌───────────────────┐
+  ────────────────────        │  11                │
+                               │  Python            │
+                               │                    │
+                               │  Condicionales,    │
+                               │  ciclos, funciones │
+                               └────────┬──────────┘
+                                        │
+                                        ▼
+                               ┌───────────────────┐
+                               │  12                │
+                               │  JavaScript        │
+                               │                    │
+                               │  POO, DOM,         │
+                               │  eventos, APIs     │
+                               └────────┬──────────┘
+                                        │
+                                        ▼
+  FASE 7: BACKEND             ┌───────────────────┐
+  ───────────────             │  13                │
+                               │  PHP               │
+                               │                    │
+                               │  Sesiones, regex,  │
+                               │  formularios       │
                                └───────────────────┘
 ```
 
@@ -174,6 +208,10 @@ DGTIC-Cursos/
          ┌────────────────────────────────────────────────────┘
          ▼
 06 Responsive ──► 07 CSS Grid ──► 08 Integración ──► 09 Portfolio ──► 10 Landing
+                                                                          │
+         ┌────────────────────────────────────────────────────────────────┘
+         ▼
+11 Python ──► 12 JavaScript ──► 13 PHP
 ```
 
 ### Qué construye cada módulo
@@ -191,6 +229,9 @@ Módulo  Qué construyes                         Habilidad principal
   08    Sitio web de servicios completo         Integración de todo
   09    Portfolio profesional de una página     Position, JS, animaciones
   10    Landing page con efectos modernos       Arquitectura, a11y, SEO
+  11    15 ejercicios de Python                Lógica de programación
+  12    Scripts JS + proyecto con API          JavaScript, DOM, fetch
+  13    Ejercicios PHP + app de usuarios       Backend, sesiones, regex
 ```
 
 ---
@@ -209,6 +250,9 @@ Módulo  Qué construyes                         Habilidad principal
 | **08** Proyecto Web | Integración de Flexbox + Grid, secciones hero, servicios, testimonios, footer complejo, Variables CSS (`--custom-property`) | Sitio completo | 01–07 |
 | **09** Portfolio | `position` (relative, absolute, fixed, sticky), `z-index`, transiciones CSS, JavaScript DOM, `classList`, `addEventListener`, IntersectionObserver, scroll animations | `index.html`, `style.css`, `script.js` | 01–08 |
 | **10** Landing Page | Arquitectura CSS (ITCSS), design systems, `clamp()`, `backdrop-filter`, `::before`/`::after`, performance (CLS, lazy loading, preload), SEO (meta tags, Open Graph), accesibilidad (ARIA, skip links, WCAG) | `index.html`, `style.css`, `script.js` | 01–09 |
+| **11** Python | Variables, condicionales (`if`/`elif`/`else`), ciclos (`for`/`while`), funciones, `input()`, `try`/`except`, `random`, lógica de juegos | 15 carpetas con `.py` + `.md` | — |
+| **12** JavaScript | Variables, ciclos, funciones (arrow, anonymous), clases, herencia, DOM (`getElementById`, `querySelector`), eventos (`onclick`, `DOMContentLoaded`), `fetch()` + API REST | `script00-02.js`, `Eventos1/`, `PracticaFinalNat/` | 09, 10 |
+| **13** PHP | Variables, funciones, ciclos, `str_repeat()`, expresiones regulares (`preg_match`), sesiones (`$_SESSION`), formularios (`$_POST`), autenticación, `htmlspecialchars()` | `.php` files, `TareaFormulario_NEMB/` | 12 |
 
 ---
 
