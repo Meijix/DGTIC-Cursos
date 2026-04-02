@@ -1,3 +1,78 @@
+<!--
+=============================================================================
+MODULO 12 - PRACTICA FINAL: PAGINA DE FORMULARIO DE REGISTRO
+=============================================================================
+
+NIVEL: Avanzado
+TEMA: Formularios HTML, validacion con jQuery Form Validator, tipos de input
+
+CONCEPTOS CLAVE DE ESTE ARCHIVO:
+---------------------------------
+
+1. FORMULARIOS HTML (<form>):
+   Los formularios son la forma principal de recopilar datos del usuario.
+   Atributos importantes:
+   - action="": URL donde se enviaran los datos (vacio = misma pagina).
+   - method="POST": Metodo HTTP para enviar datos.
+     GET: Datos en la URL (visible, limitado) -> Para busquedas.
+     POST: Datos en el cuerpo de la peticion (oculto, sin limite) -> Para registro.
+   - id="form-registro": Para que JavaScript pueda acceder al formulario.
+
+2. TIPOS DE INPUT:
+   - type="text": Texto libre. Para nombre, direccion, etc.
+   - type="email": Valida formato de email (tiene @ y dominio).
+   - type="password": Oculta los caracteres escritos con puntos.
+   - <select>: Lista desplegable con opciones predefinidas.
+   - <textarea>: Area de texto grande para comentarios.
+
+   Cada tipo tiene validacion nativa del navegador (HTML5):
+   - email verifica que tenga @ y dominio
+   - required impide enviar si esta vacio
+
+3. VALIDACION CON jQuery Form Validator:
+   Es una libreria externa que agrega validacion avanzada a los formularios.
+   Se configura con atributos HTML (data-validation):
+
+   - data-validation="required": Campo obligatorio
+   - data-validation="email": Debe ser email valido
+   - data-validation="alphanumeric": Solo letras y numeros
+   - data-validation="length" data-validation-length="min8": Minimo 8 caracteres
+   - data-validation="confirmation": Debe coincidir con otro campo (password)
+   - data-validation-allowing=" ": Permite espacios en alfanumerico
+   - data-validation-optional="true": El campo es opcional
+
+   VENTAJA: La validacion se define en el HTML, sin escribir JavaScript manual.
+   DESVENTAJA: Dependencia externa; si la CDN falla, no hay validacion.
+
+4. CONFIRMACION DE CONTRASENA:
+   Se usan dos campos: password_confirmation y password.
+   data-validation="confirmation" en el segundo campo verifica que
+   ambos valores sean identicos. Los atributos 'name' son cruciales:
+   - name="password_confirmation" en el primer campo
+   - name="password" en el segundo campo
+   jQuery Form Validator usa los names para encontrar el campo a comparar.
+
+5. ACCESIBILIDAD (a11y):
+   - <label for="nombre">: Asocia la etiqueta con el input (id="nombre").
+     Al hacer click en el label, se enfoca el input. Esencial para lectores
+     de pantalla.
+   - <small>: Texto de ayuda para el usuario.
+
+   NOTA: Hay un bug: <small id="email"> duplica el ID "email" que ya usa
+   el input. Los IDs DEBEN ser unicos. Esto puede causar comportamiento
+   impredecible en JavaScript y validadores HTML.
+
+6. CONTADOR DE CARACTERES:
+   <span id="maxlength">50</span> muestra los caracteres restantes.
+   formulario.js usa .restrictLength() para actualizar este numero
+   en tiempo real mientras el usuario escribe.
+
+7. CSS PARA VALIDACION:
+   jquery-form-validator tiene su propio CSS (theme-default.min.css)
+   que muestra mensajes de error en rojo debajo de cada campo invalido.
+   Se carga desde CDN.
+=============================================================================
+-->
             </p>
             </p>
 <!doctype html>
@@ -13,6 +88,13 @@
 
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <!--
+    CSS DE JQUERY FORM VALIDATOR:
+    Proporciona estilos predeterminados para los mensajes de validacion:
+    - Borde rojo en campos invalidos
+    - Mensajes de error debajo de cada campo
+    - Iconos de validacion (check verde, X roja)
+    -->
     <link href="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.3.26/theme-default.min.css"
     rel="stylesheet" type="text/css" />
     <!-- Custom styles for this template -->
@@ -54,24 +136,70 @@
       </div>
       <div class="my-3 p-3 bg-light rounded shadow-sm">
         <div class="container col-md-10">
+          <!--
+          FORMULARIO DE REGISTRO:
+          - action="": Sin URL de destino (se podria procesar con JS o un backend).
+          - method="POST": Los datos se envian en el cuerpo de la peticion HTTP.
+          - id="form-registro": Usado por formulario.js para inicializar la validacion.
+
+          NOTA: Sin un backend que reciba los datos, al hacer submit la pagina
+          simplemente se recarga. En un proyecto real, se necesitaria:
+          - Un backend (Node.js, Python/Django, PHP) que procese los datos
+          - O JavaScript que intercepte el submit y envie los datos con AJAX
+          -->
           <form action="" id="form-registro" method="POST">
+            <!--
+            CAMPO NOMBRE:
+            - data-validation="required alphanumeric": Obligatorio, solo alfanumerico.
+            - data-validation-allowing=" ": Permite espacios (los nombres tienen espacios).
+            -->
             <div class="form-group">
               <label for="nombre">Nombre</label>
               <input type="text" class="form-control" id="nombre" placeholder="Escriba su nombre" data-validation="required alphanumeric" data-validation-allowing=" ">
-            </div>  
+            </div>
+            <!--
+            CAMPO EMAIL:
+            - type="email": Validacion HTML5 nativa (requiere @ y dominio).
+            - data-validation="email": Validacion adicional del plugin.
+
+            BUG: El <small> tiene id="email" que duplica el ID del input.
+            Los IDs deben ser UNICOS. Esto deberia ser id="emailHelp" o similar.
+            -->
             <div class="form-group">
               <label for="email">Email</label>
               <input type="email" class="form-control" id="email" placeholder="Escriba su correo electrónico" data-validation="email">
               <small id="email" class="form-text text-muted">No compartiremos su correo con nadie.</small>
             </div>
+            <!--
+            CAMPO CONTRASENA:
+            - type="password": Oculta los caracteres con puntos/asteriscos.
+            - name="password_confirmation": Nombre usado para la confirmacion.
+            - data-validation="length" con min8: Minimo 8 caracteres.
+
+            SEGURIDAD: La contrasena viaja al servidor. SIEMPRE usar HTTPS.
+            Nunca almacenar contrasenas en texto plano; usar hashing (bcrypt, etc.).
+            -->
             <div class="form-group">
               <label for="password_confirmation">Contraseña</label>
               <input type="password" class="form-control" name="password_confirmation" id="password_confirmation" placeholder="Escriba su contraseña" data-validation="length" data-validation-length="min8">
-            </div>  
+            </div>
+            <!--
+            CAMPO CONFIRMACION DE CONTRASENA:
+            - data-validation="confirmation": Verifica que sea igual al campo con
+              name="password_confirmation". El plugin busca automaticamente el campo
+              cuyo name sea el valor de este campo + "_confirmation".
+            -->
             <div class="form-group">
               <label for="password">Confirmación</label>
               <input type="password" class="form-control" id="password" name="password" placeholder="Confirma tu contraseña" data-validation="confirmation">
             </div>
+            <!--
+            CAMPO SELECT (GENERO FAVORITO):
+            - <select>: Lista desplegable. Cada <option> es una opcion.
+            - La primera opcion value="" sirve como placeholder ("Seleccione").
+            - data-validation="required": Obliga a seleccionar una opcion.
+            - Si value="" queda seleccionado, la validacion falla.
+            -->
             <div class="form-group">
               <label for="genero">¿Cuál es tu género favorito?</label>
               <select class="form-control" id="genero" data-validation="required">
@@ -83,14 +211,28 @@
                 <option value="anime">Anime</option>
               </select>
             </div>
+            <!--
+            CAMPO TEXTAREA (COMENTARIO):
+            - rows="3": Altura inicial de 3 filas de texto.
+            - data-validation="alphanumeric": Solo alfanumerico.
+            - data-validation-optional="true": Este campo NO es obligatorio.
+            - restrictLength (en JS) limita los caracteres y muestra cuantos restan.
+            -->
             <div class="form-group">
               <label for="comentario">Comentario</label>
               <textarea class="form-control" id="comentario" rows="3" data-validation="alphanumeric" data-validation-allowing=" " data-validation-optional="true"></textarea>
               restan <span id="maxlength">50</span> caracteres<br />
             </div>
+            <!--
+            BOTON SUBMIT:
+            type="submit" hace que al clickear se envie el formulario.
+            jQuery Form Validator intercepta el submit y valida primero.
+            Si la validacion falla, NO se envia el formulario y se muestran
+            los mensajes de error. Si pasa, se envia normalmente.
+            -->
             <button type="submit" class="btn btn-primary">Submit</button>
           </form>
-        </div>        
+        </div>
       </div>
       <div id="modals"></div>
     </main>
@@ -99,6 +241,12 @@
     <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <!--
+    JQUERY FORM VALIDATOR:
+    Libreria de validacion que se carga desde CDN.
+    Proporciona validaciones listas para usar: email, length, confirmation, etc.
+    Se configura en formulario.js con $.validate().
+    -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.3.26/jquery.form-validator.min.js"></script>
     <script src="js/offcanvas.js"></script>
     <script src="js/formulario.js"></script>

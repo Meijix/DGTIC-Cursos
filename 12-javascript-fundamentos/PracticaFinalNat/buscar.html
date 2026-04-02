@@ -1,3 +1,45 @@
+<!--
+=============================================================================
+MODULO 12 - PRACTICA FINAL: PAGINA DE BUSQUEDA
+=============================================================================
+
+NIVEL: Avanzado
+TEMA: Interfaz de busqueda con input, boton y resultados dinamicos
+
+CONCEPTOS CLAVE DE ESTE ARCHIVO:
+---------------------------------
+
+1. FORMULARIO DE BUSQUEDA (sin <form>):
+   Este buscador usa un <input> y un <button> FUERA de un formulario.
+   Esto significa que el boton no envia datos al servidor (no hace submit).
+   En su lugar, JavaScript captura el click del boton y hace una peticion AJAX.
+
+   Ventajas: La pagina NO se recarga al buscar (experiencia tipo SPA).
+   Desventajas: Si JavaScript esta deshabilitado, la busqueda no funciona.
+
+2. ELEMENTOS CLAVE PARA JAVASCRIPT:
+   - input#busqueda: Donde el usuario escribe la palabra a buscar.
+     JavaScript lee su valor con: $('#busqueda').val() o
+     document.getElementById('busqueda').value
+
+   - button#btn-buscar: Dispara la busqueda al hacer click.
+     JavaScript le asigna un evento click en buscar.js.
+
+   - ul#miLista: Contenedor donde se mostraran los resultados.
+     Inicialmente contiene "No hay coincidencias" como placeholder.
+     JavaScript vaciara esta lista y la llenara con resultados.
+
+3. CONTENEDOR DE RESULTADOS:
+   Los resultados se muestran en una lista <ul>.
+   El archivo buscar.js reemplazara su contenido con elementos <li>
+   generados dinamicamente a partir de los datos de la API.
+
+4. PATRON DE BUSQUEDA EN APLICACIONES WEB:
+   Input del usuario -> Evento click -> Leer valor del input ->
+   Peticion a API con la busqueda -> Parsear respuesta ->
+   Limpiar resultados anteriores -> Mostrar nuevos resultados
+=============================================================================
+-->
 <!doctype html>
 <html lang="en">
   <head>
@@ -31,10 +73,10 @@
           </li>
           <li class="nav-item active">
             <a class="nav-link" href="catalogo.html">Nuestro catálogo</a>
-          </li>                 
+          </li>
           <li class="nav-item active">
             <a class="nav-link" href="buscar.html">Buscar</a>
-          </li>          
+          </li>
         </ul>
       </div>
     </nav>
@@ -49,16 +91,34 @@
         </div>
       </div>
       <div class="my-3 p-3 bg-light">
+      	<!--
+        BUSCADOR:
+        form-inline: Los elementos se colocan en linea (input + boton al lado).
+        El input tiene:
+        - type="text": Entrada de texto libre.
+        - placeholder: Texto gris que aparece cuando el input esta vacio.
+        - id="busqueda": Para que JavaScript pueda leer su valor.
+
+        El boton tiene:
+        - btn-outline-info: Boton con borde azul (estilo de Bootstrap).
+        - id="btn-buscar": Para que JavaScript le asigne un evento click.
+        -->
       	<div class="form-group form-inline my-2 my-lg-0">
       		<input class="form-control" type="text" value="" placeholder="Escribe palabra a buscar" id="busqueda"/>
       		<button class="btn btn-outline-info" id="btn-buscar">Buscar</button>
-      	</div>      
-      </div>      
+      	</div>
+      </div>
+      <!--
+      LISTA DE RESULTADOS:
+      #miLista es donde se inyectaran los resultados de la busqueda.
+      Inicialmente tiene un solo <li> como placeholder.
+      buscar.js vaciara esta lista ($.empty()) y la llenara con los resultados.
+      -->
       <div class="my-3 p-3 bg-light rounded shadow-sm" id="content-lista">
         <ul id="miLista">
         	<li>No hay coincidencias</li>
-        	
-        </ul>      	
+
+        </ul>
       </div>
 
     </main>
@@ -68,6 +128,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
     <script src="js/offcanvas.js"></script>
+    <!-- buscar.js contiene la logica de busqueda con AJAX -->
     <script src="js/buscar.js"></script>
   </body>
 </html>

@@ -1,40 +1,122 @@
+/*
+=============================================================================
+HOJA DE ESTILOS CSS PARA EL PROYECTO DE FORMULARIOS PHP
+=============================================================================
 
+CONCEPTOS CLAVE EN ESTE ARCHIVO:
+---------------------------------
 
+1. VARIABLES CSS (Custom Properties):
+   Se definen en :root (el elemento raiz del documento, <html>).
+   Sintaxis: --nombre-variable: valor;
+   Uso:      var(--nombre-variable)
+
+   VENTAJAS:
+   - Cambiar un color en UN solo lugar actualiza TODA la pagina
+   - Facilita mantener la coherencia visual
+   - Similar a las variables en lenguajes de programacion
+
+2. SELECTORES CSS:
+   - Elemento:  body { }         -> Aplica a TODAS las etiquetas <body>
+   - Clase:     .contenedor { }  -> Aplica a elementos con class="contenedor"
+   - Pseudo:    a:hover { }      -> Aplica cuando el raton esta sobre un <a>
+   - Multiple:  h1, h2, h3 { }  -> Aplica a h1, h2 Y h3
+
+3. FLEXBOX:
+   Sistema de layout CSS para organizar elementos en una direccion.
+   display: flex;              -> Activa flexbox en el contenedor
+   flex-direction: column;     -> Los hijos se apilan VERTICALMENTE
+   align-items: center;        -> Centra los hijos HORIZONTALMENTE
+   justify-content: center;    -> Centra los hijos VERTICALMENTE
+
+4. BOX MODEL:
+   Cada elemento HTML es una "caja" con:
+   - content (contenido)  -> El texto o imagen
+   - padding (relleno)    -> Espacio DENTRO del borde
+   - border (borde)       -> La linea del borde
+   - margin (margen)      -> Espacio FUERA del borde
+
+   Visualizacion:
+   +------ margin ------+
+   |+---- border ------+|
+   ||+--- padding ----+||
+   |||   CONTENIDO    |||
+   ||+-----------------+||
+   |+-------------------+|
+   +---------------------+
+
+5. BOX-SHADOW:
+   Agrega una sombra al elemento para dar efecto de profundidad.
+   box-shadow: desplX desplY difusion color;
+   Ejemplo: 0 2px 10px rgba(0,0,0,0.1) -> sombra suave hacia abajo
+
+6. UNIDADES CSS:
+   - px:  Pixeles (unidad fija)
+   - %:   Porcentaje del elemento padre
+   - em:  Relativo al tamano de fuente del elemento
+   - rem: Relativo al tamano de fuente raiz (root)
+*/
+
+/* =========================================================================
+   VARIABLES GLOBALES (Custom Properties)
+   =========================================================================
+   :root es el elemento raiz del documento. Las variables definidas aqui
+   estan disponibles en TODO el CSS del documento.
+*/
 :root{
     --colorFondo: #b4b9f6;
     --colorBorde: rgb(77, 2, 117);
     --colorBoton: #1f6f2b;
-    --colorBoton: rgb(77, 2, 117);
+    --colorBoton: rgb(77, 2, 117);  /* Esta linea SOBREESCRIBE la anterior */
     --colorHover: rgb(229, 182, 255);
-    -colorAlternativo: #ffd6f2;
+    -colorAlternativo: #ffd6f2;     /* NOTA: Falta un guion, deberia ser --colorAlternativo */
     --normal: 14px
 }
 
+/* =========================================================================
+   ESTILOS GENERALES DEL BODY
+   =========================================================================
+   Se aplican a toda la pagina. font-family define las fuentes de respaldo:
+   si Verdana no esta disponible, usa Geneva, luego Tahoma, etc.
+*/
 body{
     margin: 20;
     padding: 10;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
-    font-size: var(--normal);
+    font-size: var(--normal);  /* Usa la variable CSS definida en :root */
     background-color: rgb(190, 225, 240);
 }
 
+/* =========================================================================
+   CONTENEDOR PRINCIPAL
+   =========================================================================
+   Usa Flexbox en direccion columna para apilar los elementos verticalmente
+   y centrarlos. El borde superior de color da un acento visual.
+*/
 .contenedor{
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;   /* Los hijos van de arriba a abajo */
+    align-items: center;      /* Centra horizontalmente */
+    justify-content: center;  /* Centra verticalmente */
     background-color: var(--colorFondo);
-    padding: 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    border-top: var(--colorBorde) 5px solid;
-    
+    padding: 20px;            /* Espacio interno alrededor del contenido */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);  /* Sombra suave */
+    border-radius: 10px;      /* Esquinas redondeadas */
+    border-top: var(--colorBorde) 5px solid;  /* Linea decorativa superior */
+
 }
 
+/* Todos los encabezados usan el color del borde como color de texto */
 h1, h2, h3, h4, h5, h6{
     color: var(--colorBorde);
 }
 
+/* =========================================================================
+   ESTILOS DEL FORMULARIO
+   =========================================================================
+   El formulario usa Flexbox en columna para apilar los campos uno debajo
+   del otro. max-width limita el ancho para que no se estire demasiado.
+*/
 form{
     display: flex;
     flex-direction: column;
@@ -42,29 +124,42 @@ form{
     max-width: 400px;
 }
 
+/* =========================================================================
+   BOTON DE ENVIO
+   =========================================================================
+   Estilo del boton principal "Registrarme" / "Ingresar".
+   border: none elimina el borde por defecto del navegador.
+*/
 .btn-ingresar{
     background-color: var(--colorBoton);
     color: white;
-    text-transform: capitalize;
-    font-weight: 900;
+    text-transform: capitalize;  /* Primera letra de cada palabra en mayuscula */
+    font-weight: 900;            /* Texto en negrita (maximo) */
     width: 100%+30px;
     height: 30px;
-    margin: 10px 0px;
-    border-radius: 15px;
+    margin: 10px 0px;            /* 10px arriba/abajo, 0 izquierda/derecha */
+    border-radius: 15px;         /* Bordes muy redondeados (aspecto de capsula) */
     font-size: var(--normal);
     border: none;
 }
 
+/* Pseudo-clase :hover -> Se activa cuando el cursor esta SOBRE el boton */
 .btn-ingresar:hover{
     background-color:white ;
-    color: var(--colorBoton);
+    color: var(--colorBoton);   /* Los colores se INVIERTEN al pasar el raton */
 }
 
+/* Estilo para las cajas de texto del formulario de login */
 .caja{
     margin: 10px 0;
     width: 100%;
 }
 
+/* =========================================================================
+   ESTILOS DE ENLACES
+   =========================================================================
+   text-decoration: none elimina el subrayado por defecto de los enlaces.
+*/
 a{
     text-decoration: none;
     font-weight: 700;
@@ -74,12 +169,19 @@ a{
     padding: 5px;
 }
 
+/* Al pasar el raton sobre un enlace, se convierte en un "boton" */
 a:hover{
     background-color: var(--colorBorde);
     color: white;
     border-radius: 10px;
 }
 
+/* =========================================================================
+   ESTILOS DE INPUTS Y SELECTS
+   =========================================================================
+   Se aplican a todos los <input>, <select> y <option> del documento.
+   border-radius da esquinas redondeadas a los campos de formulario.
+*/
 input, select, option{
     height: 18px;
     width: 100%;
@@ -103,59 +205,85 @@ select{
 
 
 
+/* =========================================================================
+   TABLA DE USUARIOS REGISTRADOS
+   =========================================================================
+   border-collapse: collapse hace que los bordes de las celdas se fusionen
+   en uno solo (sin espacio entre celdas).
+*/
 /* Tabla de usuarios */
 .tabla_usuarios {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: collapse;   /* Bordes de celdas se fusionan */
     margin: 20px 0;
     background-color: var(--colorFondo);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     border-top: var(--colorBorde) 5px solid;
-    overflow: hidden;
+    overflow: hidden;            /* Oculta contenido que se desborde */
 }
 
+/* Celdas de encabezado y datos: padding para dar espacio interno */
 .tabla_usuarios th, .tabla_usuarios td {
     padding: 12px 15px;
     text-align: left;
 }
 
+/* Encabezados de la tabla: fondo oscuro con texto blanco */
 .tabla_usuarios th {
-    background-color: var(--colorPrimario);
+    background-color: var(--colorPrimario);  /* NOTA: esta variable no esta definida */
     color: #ffffff;
     font-weight: bold;
-    text-transform: uppercase;
-    background-color: var(--colorBorde);
+    text-transform: uppercase;  /* Texto en MAYUSCULAS */
+    background-color: var(--colorBorde);  /* Esta linea sobreescribe la anterior */
 }
 
+/* Efecto hover en las filas: cambia el color de fondo al pasar el raton */
 .tabla_usuarios tr:hover {
     background-color: var(--colorHover);
 }
 
+/* Borde inferior en cada celda de datos para separar visualmente las filas */
 .tabla_usuarios td {
     border-bottom: 2px solid #dddddd;
 }
 
+/* =========================================================================
+   FOOTER (PIE DE PAGINA)
+   =========================================================================
+*/
 footer{
     text-align: center;
     margin: 20px 0;
     font-size: 12px;
 }
 
+/* =========================================================================
+   IMAGENES
+   =========================================================================
+   border-radius: 50% convierte cualquier imagen cuadrada en un CIRCULO.
+*/
 img{
     width: 70%;
-    height: auto;
-    border-radius: 50%;
+    height: auto;            /* Mantiene la proporcion de la imagen */
+    border-radius: 50%;      /* Imagen circular */
     margin: 10px;
 }
 
+/* =========================================================================
+   MENSAJES DE ERROR Y EXITO
+   =========================================================================
+   Clases para mostrar retroalimentacion al usuario despues de enviar
+   un formulario. Se usan con echo en PHP:
+   echo "<div class='error'>Mensaje</div>";
+*/
 .error {
     color: red;
     font-weight: bold;
     margin: 10px 0;
     padding: 10px;
     border: 2px solid red;
-    background-color: #ffe6e6;
+    background-color: #ffe6e6;  /* Rojo muy claro */
     border-radius: 5px;
 }
 
@@ -165,10 +293,11 @@ img{
     margin: 10px 0;
     padding: 10px;
     border: 2px solid green;
-    background-color: #e6ffe6;
+    background-color: #e6ffe6;  /* Verde muy claro */
     border-radius: 5px;
 }
 
+/* Foto de perfil con tamano fijo y forma circular */
 .foto_perfil{
     width: 200px;
     height: auto;
@@ -176,8 +305,9 @@ img{
     margin: 10px;
 }
 
+/* Contenedor para cada campo de input del formulario */
 .contenedor-input{
     display: flex;
-    flex-direction: column;
+    flex-direction: column;  /* Label arriba, input abajo */
     margin-bottom: 10px;
 }

@@ -1,3 +1,35 @@
+<!--
+=============================================================================
+MODULO 12 - PRACTICA FINAL: PAGINA DE CATALOGO
+=============================================================================
+
+NIVEL: Avanzado
+TEMA: Pagina que carga un catalogo de peliculas bajo demanda (al hacer click)
+
+CONCEPTOS CLAVE DE ESTE ARCHIVO:
+---------------------------------
+
+1. CARGA BAJO DEMANDA (Lazy Loading):
+   A diferencia de index.html que carga peliculas automaticamente,
+   esta pagina espera a que el usuario haga click en "Mostrar catalogo".
+   Esto reduce el consumo de datos y las peticiones innecesarias a la API.
+
+2. CONTENEDORES PARA CONTENIDO DINAMICO:
+   - div#lista-pelis: Donde se mostraran las peliculas del catalogo.
+   - div#modals: Donde se insertaran los modales de Bootstrap.
+     Los modales son ventanas emergentes que muestran la sinopsis
+     completa de cada pelicula al hacer click en su titulo.
+
+3. BOTON DE ACCION:
+   button#boton-obtener: Dispara la carga del catalogo.
+   En catalogo.js se le asigna un evento click que ejecuta la peticion AJAX.
+
+4. MODAL DE BOOTSTRAP:
+   Un modal es un dialogo superpuesto a la pagina.
+   Se activa con atributos data-toggle="modal" y data-target="#modalId".
+   catalogo.js genera los modales dinamicamente (uno por pelicula).
+=============================================================================
+-->
 <!doctype html>
 <html lang="en">
   <head>
@@ -34,7 +66,7 @@
           </li>
           <li class="nav-item active">
             <a class="nav-link" href="buscar.html">Buscar</a>
-          </li> 
+          </li>
         </ul>
       </div>
     </nav>
@@ -49,11 +81,30 @@
         </div>
       </div>
 
+      <!--
+      CONTENEDOR DE PELICULAS:
+      div#lista-pelis esta vacio inicialmente.
+      catalogo.js lo llenara con peliculas cuando el usuario haga click
+      en el boton "Mostrar catalogo".
+      -->
       <div class="my-3 p-3 bg-light rounded shadow-sm" id="lista-pelis"></div>
+
+      <!--
+      CONTENEDOR DE MODALES:
+      div#modals recibira los modales generados dinamicamente por catalogo.js.
+      Cada pelicula tendra su propio modal con la sinopsis completa.
+      Se genera con la funcion crearModal() en catalogo.js.
+      -->
       <div id="modals"></div>
+
+      <!--
+      BOTON PARA CARGAR EL CATALOGO:
+      Al hacer click, catalogo.js ejecuta la funcion obtenerCatalogo()
+      que hace la peticion AJAX a la API de TMDB.
+      -->
       <small class="d-block text-right mt-3">
         <button type="button" class="btn btn-info" id="boton-obtener">Mostrar catálogo</button>
-      </small>      
+      </small>
     </main>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -61,6 +112,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
     <script src="js/offcanvas.js"></script>
+    <!-- catalogo.js contiene la logica de carga del catalogo y creacion de modales -->
     <script src="js/catalogo.js"></script>
   </body>
 </html>

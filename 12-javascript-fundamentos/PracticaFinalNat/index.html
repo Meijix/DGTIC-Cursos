@@ -1,3 +1,68 @@
+<!--
+=============================================================================
+MODULO 12 - PRACTICA FINAL: PAGINA PRINCIPAL - PELICULAS PROXIMAMENTE
+=============================================================================
+
+NIVEL: Avanzado
+TEMA: Pagina principal que consume la API de TMDB para mostrar peliculas proximas
+
+CONCEPTOS CLAVE DE ESTE ARCHIVO:
+---------------------------------
+
+1. ESTRUCTURA DE UNA APLICACION WEB REAL:
+   Esta practica integra TODO lo visto en el modulo:
+   - HTML para estructura
+   - CSS (Bootstrap + custom) para estilos
+   - JavaScript/jQuery para interactividad y consumo de APIs
+   - Una API externa (TMDB) como fuente de datos
+
+2. BOOTSTRAP 4:
+   Es un framework CSS que proporciona componentes prediseñados:
+   - navbar: Barra de navegacion responsiva
+   - container: Contenedor centrado con ancho maximo
+   - row/col: Sistema de grillas de 12 columnas
+   - shadow-sm: Sombra sutil para dar profundidad
+   - bg-dark, bg-light, bg-info: Colores de fondo
+
+   Bootstrap se carga desde un CDN (Content Delivery Network):
+   Un CDN es un servidor externo que distribuye archivos de forma rapida.
+   Ventajas: cache compartido, carga rapida, sin descarga local.
+   Desventaja: requiere conexion a internet.
+
+3. NAVEGACION (nav):
+   La barra de navegacion (navbar) contiene enlaces a las 4 secciones:
+   - index.html: Pagina principal (esta pagina)
+   - formulario.html: Registro de usuario
+   - catalogo.html: Catalogo de peliculas
+   - buscar.html: Buscador de peliculas
+   La clase "active" indica la pagina actual al usuario.
+
+4. CONTENEDOR DINAMICO (id="peliculas"):
+   El div#peliculas esta VACIO en el HTML. Su contenido se genera
+   DINAMICAMENTE con JavaScript (js/index.js) al cargar la pagina.
+   Este patron se llama "renderizado del lado del cliente" (Client-Side Rendering).
+   El HTML solo proporciona el "esqueleto"; JS llena el contenido.
+
+5. ORDEN DE CARGA DE SCRIPTS:
+   Los scripts se cargan en orden al final del body:
+   a) jQuery -> Libreria base (requerida por Bootstrap y el JS custom)
+   b) Popper.js -> Requerido por Bootstrap para tooltips y dropdowns
+   c) Bootstrap JS -> Funcionalidad interactiva de Bootstrap
+   d) offcanvas.js -> Menu lateral para moviles
+   e) index.js -> Logica propia de esta pagina (carga peliculas)
+
+   IMPORTANTE: El orden importa. index.js usa jQuery ($), asi que jQuery
+   debe cargarse ANTES. Si inviertes el orden, obtendras:
+   ReferenceError: $ is not defined
+
+6. JQUERY ($):
+   jQuery es una libreria que simplifica la manipulacion del DOM.
+   Antes era imprescindible; hoy es opcional gracias a APIs modernas.
+   - $("selector") es equivalente a document.querySelector("selector")
+   - $.ajax() es equivalente a fetch() (API nativa moderna)
+   Este proyecto usa jQuery por razones didacticas y de compatibilidad.
+=============================================================================
+-->
 <!doctype html>
 <html lang="en">
   <head>
@@ -9,9 +74,21 @@
 
     <title>Peliculas</title>
 
+    <!--
+    BOOTSTRAP CSS desde CDN:
+    El atributo 'integrity' es un hash de verificacion (SRI - Subresource Integrity).
+    Garantiza que el archivo no fue modificado maliciosamente en el CDN.
+    'crossorigin="anonymous"' indica que no se envian credenciales al CDN.
+    -->
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 
+    <!--
+    CSS PERSONALIZADOS:
+    offcanvas.css: Estilos para el menu lateral en moviles.
+    estilo.css: Estilos propios del proyecto (cards de peliculas, etc.).
+    Se cargan DESPUES de Bootstrap para poder sobreescribir sus estilos.
+    -->
     <!-- Custom styles for this template -->
     <link href="css/offcanvas.css" rel="stylesheet">
     <link href="css/estilo.css" rel="stylesheet">
@@ -19,6 +96,12 @@
 
   <body class="bg-light">
 
+    <!--
+    NAVBAR: Barra de navegacion fija (fixed-top queda arriba al hacer scroll).
+    navbar-dark bg-dark: Texto claro sobre fondo oscuro.
+    navbar-expand-lg: En pantallas grandes muestra todos los enlaces;
+    en pantallas chicas se colapsa en un boton "hamburguesa".
+    -->
     <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark">
       <a class="navbar-brand mr-auto mr-lg-0" href="index.html">Peliculas Naty</a>
       <button class="navbar-toggler p-0 border-0" type="button" data-toggle="offcanvas">
@@ -42,6 +125,12 @@
 
 
     <main role="main" class="container">
+      <!--
+      HEADER DE SECCION:
+      Usa flexbox (d-flex) para alinear la imagen y el texto horizontalmente.
+      bg-info: Color azul informativo de Bootstrap.
+      rounded shadow-sm: Bordes redondeados y sombra sutil.
+      -->
       <div class="d-flex align-items-center p-3 my-3 text-white-50 bg-info rounded shadow-sm">
         <img class="mr-3" src="images/boton-de-reproduccion.png" alt="" width="48" height="48">
         <div class="lh-100">
@@ -53,6 +142,21 @@
         <h3 class="border-bottom border-gray">Próximamente</h3>
         <div class="container">
           <!-- CARDS -->
+          <!--
+          DIV#peliculas: CONTENEDOR DINAMICO
+          Este div esta VACIO. El archivo js/index.js lo llenara con tarjetas
+          de peliculas obtenidas de la API de TMDB.
+
+          Flujo:
+          1. La pagina carga -> se ejecuta index.js
+          2. index.js hace una peticion AJAX a la API de TMDB
+          3. La API retorna un JSON con peliculas proximas
+          4. JavaScript genera el HTML de cada tarjeta (card)
+          5. Se inserta ese HTML dentro de este div
+
+          flex-column-reverse flex-md-row: En movil las cards van en columna
+          invertida; en pantallas medianas van en fila.
+          -->
           <div class="row flex-column-reverse flex-md-row" id="peliculas">
             <!-- AQUI SE MOSTRARÁ LA LISTA DE PELICULAS QUE REGRESE LA API -->
           </div>
@@ -60,6 +164,16 @@
         </div>
       </div>
     </main>
+    <!--
+    SCRIPTS AL FINAL DEL BODY:
+    Se cargan aqui (y no en el head) por dos razones:
+    1. El HTML ya esta disponible en el DOM cuando los scripts se ejecutan.
+    2. La pagina se muestra mas rapido: el HTML se renderiza primero,
+       luego se descargan y ejecutan los scripts.
+
+    ORDEN OBLIGATORIO:
+    jQuery -> Popper -> Bootstrap -> Scripts propios
+    -->
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.1.0.js"></script>

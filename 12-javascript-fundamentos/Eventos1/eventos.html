@@ -1,19 +1,136 @@
 <!-- Natalia Edith Mejia Bautista -->
+<!--
+=============================================================================
+MODULO 12 - JAVASCRIPT FUNDAMENTOS: EVENTOS DEL DOM (HTML)
+=============================================================================
+
+NIVEL: Intermedio
+TEMA: Estructura HTML para demostracion de eventos JavaScript
+
+CONCEPTOS CLAVE DE ESTE ARCHIVO:
+---------------------------------
+
+1. EL DOM (Document Object Model):
+   El DOM es la representacion en memoria de la pagina HTML como un arbol
+   de objetos. Cada etiqueta HTML se convierte en un "nodo" del arbol.
+   JavaScript puede acceder y modificar este arbol para cambiar la pagina
+   EN TIEMPO REAL, sin recargarla.
+
+   Arbol DOM de esta pagina:
+   document
+   └── html
+       ├── head
+       │   ├── meta (charset)
+       │   ├── meta (viewport)
+       │   └── title
+       └── body
+           ├── script (eventos.js)
+           ├── h1
+           ├── p (descripcion)
+           ├── p (autora)
+           ├── button#boton
+           ├── br (x2)
+           └── img#imagen
+
+2. ATRIBUTO id="...":
+   Cada elemento puede tener un ID unico en toda la pagina.
+   Esto permite que JavaScript lo encuentre con:
+     document.getElementById("boton")  -> Retorna el elemento con id="boton"
+
+   REGLA IMPORTANTE: Los IDs deben ser UNICOS en toda la pagina.
+   Si hay dos elementos con el mismo ID, getElementById retorna solo el primero.
+
+3. DONDE COLOCAR EL <script>:
+   NOTA IMPORTANTE: En este archivo, el <script> esta al INICIO del <body>,
+   ANTES de los elementos HTML. Esto normalmente causaria un problema:
+   cuando el script se ejecuta, los elementos (boton, imagen) aun NO existen
+   en el DOM.
+
+   SOLUCION: El archivo eventos.js usa DOMContentLoaded para esperar a que
+   todo el HTML se haya cargado antes de buscar los elementos.
+
+   ALTERNATIVAS para evitar este problema:
+   a) Poner el <script> al FINAL del body (antes de </body>) -> Recomendado
+   b) Usar el atributo defer: <script src="eventos.js" defer></script>
+   c) Usar DOMContentLoaded (como hace eventos.js)
+
+4. CODIGO COMENTADO (<!-- ... -->):
+   Al final hay un bloque de codigo JavaScript comentado en HTML.
+   Es una alternativa: en vez de un archivo .js separado, se puede
+   escribir JavaScript directamente en el HTML dentro de <script>...</script>.
+
+   Usar archivos .js separados es la MEJOR PRACTICA porque:
+   - Separa la estructura (HTML) del comportamiento (JS)
+   - Permite reutilizar el JS en varias paginas
+   - Es mas facil de mantener y depurar
+   - El navegador puede cachear archivos .js separados
+
+5. ETIQUETAS HTML USADAS:
+   - <button>: Crea un boton clickeable. Es el elemento ideal para acciones.
+   - <img>: Muestra una imagen. Los atributos importantes son:
+     * src: URL de la imagen
+     * style: estilos en linea (aqui max-width limita el ancho)
+     * id: identificador para JavaScript
+   - <br>: Salto de linea. Es un elemento "vacio" (no tiene etiqueta de cierre).
+=============================================================================
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <!--
+    META VIEWPORT: Hace que la pagina se adapte al ancho del dispositivo.
+    Es ESENCIAL para que la pagina se vea bien en moviles.
+    Sin esto, el movil mostraria la pagina como si fuera un monitor de escritorio.
+    -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ejercicio: Eventos 1</title>
 </head>
 <body> <script src="eventos.js"></script>
+    <!--
+    NOTA: El script esta ANTES de los elementos del DOM.
+    Esto significa que cuando eventos.js se ejecute, el <button> y la <img>
+    todavia NO existen. Por eso eventos.js usa DOMContentLoaded para esperar.
+
+    MEJOR PRACTICA: Mover el <script> al final del body, justo antes de </body>.
+    -->
     <h1>Eventos 1</h1>
     <p>Este es un ejercicio de eventos en JavaScript</p>
     <p>Realizado por: Natalia Edith Mejia Bautista</p>
+
+    <!--
+    BOTON CON id="boton":
+    Este ID es usado en eventos.js para asignarle un evento de click.
+    document.getElementById("boton") retorna una referencia a ESTE elemento.
+    -->
     <button id="boton">Haz click aqui</button><br>
     <br>
+
+    <!--
+    IMAGEN CON id="imagen":
+    Este ID es usado en eventos.js para asignarle un evento de mouseover.
+    El atributo style="max-width:200px" limita el ancho maximo de la imagen.
+    MEJOR PRACTICA: Usar CSS externo en vez de estilos en linea.
+    -->
     <img style="max-width:200px" src="https://www.visibilidadweb.unam.mx/sites/default/files/inline-images/536.jpg" id="imagen">
 </body>
+
+<!--
+CODIGO ALTERNATIVO COMENTADO:
+Esta es otra forma de asignar eventos: JavaScript directamente en el HTML.
+Usa addEventListener() que es la forma MODERNA y RECOMENDADA de asignar eventos.
+
+DIFERENCIA entre addEventListener y onclick:
+- addEventListener: Permite agregar MULTIPLES handlers al mismo evento.
+- onclick: Solo permite UN handler. Si asignas otro, reemplaza al anterior.
+
+Ejemplo:
+  boton.addEventListener("click", handler1);  // Se ejecuta
+  boton.addEventListener("click", handler2);  // TAMBIEN se ejecuta
+
+  boton.onclick = handler1;  // Se ejecuta
+  boton.onclick = handler2;  // Reemplaza a handler1!
+-->
 <!-- <script>
     document.getElementById("boton").addEventListener("click", function(){
         alert("Hola, has dado click");
