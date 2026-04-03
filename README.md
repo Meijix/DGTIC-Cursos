@@ -48,6 +48,13 @@ El repositorio esta organizado en modulos progresivos, desde los fundamentos has
 | 19 | [Node.js - Challenge API](19-nodejs-challenge-api/) | CLI + Express, consumo de API OpenAI, async/await | Mini-proyecto de integracion |
 | 20 | [GitHub Actions](20-github-actions/) | CI/CD, workflows, testing, deploy, acciones personalizadas, seguridad | 6 secciones con 34 archivos |
 
+### Bloque 4 — Ciencias de la Computacion
+
+| # | Modulo | Temas principales | Contenido |
+|---|--------|-------------------|-----------|
+| 21 | [Estructuras de Datos](21-estructuras-de-datos/) | Arrays, listas enlazadas, pilas, colas, tablas hash, arboles, heaps, grafos | 8 secciones con diagramas y ejemplos Python |
+| 22 | [Algoritmos de Ordenacion](22-algoritmos-ordenacion/) | Bubble, Selection, Insertion, Merge, Quick, Counting, Radix Sort | 7 secciones con visualizaciones y analisis Big O |
+
 ---
 
 ## Material de aprendizaje
@@ -101,6 +108,14 @@ Los modulos 11-13 incluyen sus propios enunciados y documentacion dentro de cada
 │                                                         │
 │  20 GitHub Actions (CI/CD)                              │
 └─────────────────────────────────────────────────────────┘
+                         │
+                         ▼
+          BLOQUE 4: Ciencias de la Computación
+┌───────��─────────────────────────────────────────────────┐
+│                                                         │
+│  21 Estructuras de Datos ──► 22 Algoritmos Ordenacion   │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -115,6 +130,8 @@ Los modulos 11-13 incluyen sus propios enunciados y documentacion dentro de cada
 - **Laravel** — MVC, Eloquent ORM, Blade, Livewire, validacion, email
 - **Node.js** — Express, async/await, AWS (DynamoDB, Lambda), OpenAI API
 - **GitHub Actions** — CI/CD, workflows, testing automatizado, deploy, seguridad
+- **Estructuras de datos** — arrays, listas enlazadas, pilas, colas, tablas hash, arboles, heaps, grafos
+- **Algoritmos de ordenacion** — bubble, selection, insertion, merge, quick, counting, radix sort
 
 ## Como usar
 
