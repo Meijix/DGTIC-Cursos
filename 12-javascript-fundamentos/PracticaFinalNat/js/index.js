@@ -101,7 +101,7 @@ $(document).ready(function(){
 		// SEGURIDAD: En un proyecto real, la API key NO debe estar en el
 		// codigo del frontend (es visible para cualquiera). Se deberia
 		// usar un backend como intermediario (proxy) que guarde la key.
-		url: "https://api.themoviedb.org/3/movie/upcoming?api_key=3356865d41894a2fa9bfa84b2b5f59bb&language=es",
+		url: "https://api.themoviedb.org/3/movie/upcoming?api_key=TU_API_KEY_AQUI&language=es",
 
 		// CALLBACK success: Se ejecuta cuando la API responde exitosamente (HTTP 200).
 		// El parametro 'respuesta' contiene el JSON ya parseado automaticamente

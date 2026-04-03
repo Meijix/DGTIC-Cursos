@@ -100,7 +100,7 @@ $(document).ready(function(){
 			// En una aplicacion real, el usuario podria seleccionar el rango de fechas.
 
 			//url: "https://randomuser.me/api/?results=8&nat=au,fr,es&inc=gender,name,picture,email,nat",
-			url: "http://api.themoviedb.org/3/discover/movie?certification_country=MX&primary_release_date.gte=2018-08-01&primary_release_date.lte=2018-09-20&language=es&total_results=3&api_key=3356865d41894a2fa9bfa84b2b5f59bb",
+			url: "http://api.themoviedb.org/3/discover/movie?certification_country=MX&primary_release_date.gte=2018-08-01&primary_release_date.lte=2018-09-20&language=es&total_results=3&api_key=TU_API_KEY_AQUI",
 
 			// CALLBACK success:
 			// 'respuesta' es el JSON parseado de la API.

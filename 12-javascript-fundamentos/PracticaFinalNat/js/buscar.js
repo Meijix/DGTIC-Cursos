@@ -137,7 +137,7 @@ $(document).ready(function(){
 				//   "Iron Man"  -> "Iron%20Man"
 				//   "avión"     -> "avi%C3%B3n"
 				// Sin encodeURIComponent, caracteres como & o ? romperian la URL.
-				url: `https://api.themoviedb.org/3/search/movie?certification_country=MX&language=es&api_key=3356865d41894a2fa9bfa84b2b5f59bb&query=${encodeURIComponent(palabra)}`,
+				url: `https://api.themoviedb.org/3/search/movie?certification_country=MX&language=es&api_key=TU_API_KEY_AQUI&query=${encodeURIComponent(palabra)}`,
 				dataType: "json",
 
 				// SUCCESS: Se ejecuta cuando la API responde correctamente.
