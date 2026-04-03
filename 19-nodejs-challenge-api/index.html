@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Node.js — Challenge API</title>
+
+  <!--
+  ╔══════════════════════════════════════════════════════════════════════════════╗
+  ║  INDEX.HTML — NODE.JS CHALLENGE API                                       ║
+  ║                                                                            ║
+  ║  Landing page para el proyecto CLI + Express API de Node.js.              ║
+  ║  Incluye descripcion del proyecto y enlaces a documentacion.              ║
+  ║                                                                            ║
+  ║  TEMA: Oscuro con acento #277da1                                           ║
+  ╚══════════════════════════════════════════════════════════════════════════════╝
+  -->
+
+  <style>
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #1a1a2e;
+      --bg-card: #16213e;
+      --bg-card-hover: #1b2a4a;
+      --accent: #277da1;
+      --accent-dim: rgba(39, 125, 161, 0.15);
+      --text-primary: #e8e8e8;
+      --text-secondary: #a0a0b8;
+      --text-muted: #6b6b80;
+      --radius: 12px;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .back-link {
+      display: inline-block;
+      padding: 1rem 1.5rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: opacity 0.2s;
+    }
+
+    .back-link:hover { opacity: 0.8; }
+
+    header {
+      text-align: center;
+      padding: 2rem 1.5rem 2.5rem;
+      background: linear-gradient(135deg, #1a1a2e, #0f3460);
+      border-bottom: 3px solid var(--accent);
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.5rem;
+      color: var(--accent);
+    }
+
+    header p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 560px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    .project-info {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .project-info .info-box {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      margin-bottom: 1.5rem;
+    }
+
+    .project-info .info-box h2 {
+      color: var(--accent);
+      font-size: 1.2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .project-info .info-box p {
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    .tech-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .tech-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.25rem 0.65rem;
+      border-radius: 50px;
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      max-width: 1000px;
+      margin: 0 auto 2.5rem;
+      padding: 0 1.5rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-accent {
+      height: 5px;
+      background: var(--accent);
+    }
+
+    .card-body {
+      padding: 1.25rem 1.25rem 0.75rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .card-body h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .card-description {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.75rem;
+      flex: 1;
+      line-height: 1.5;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.2rem 0.6rem;
+      border-radius: 50px;
+      color: #fff;
+      background: var(--accent);
+    }
+
+    .file-count {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      padding: 0 1.25rem 1rem;
+    }
+
+    .tag {
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.2rem 0.55rem;
+      border-radius: 50px;
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .card-link {
+      display: block;
+      text-align: center;
+      padding: 0.75rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-decoration: none;
+      color: var(--accent);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .card-link:hover {
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    @media (max-width: 700px) {
+      header h1 { font-size: 1.6rem; }
+      header p { font-size: 0.95rem; }
+      .grid { padding: 0 1rem; gap: 1rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <a class="back-link" href="../index.html">&larr; Volver al indice</a>
+
+  <header>
+    <h1>Node.js — Challenge API</h1>
+    <p>Proyecto integrador: aplicacion CLI y servidor Express con API REST en Node.js.</p>
+  </header>
+
+  <div class="project-info">
+    <div class="info-box">
+      <h2>Sobre este proyecto</h2>
+      <p>Challenge de Node.js que combina una aplicacion de linea de comandos (CLI) con un servidor Express que expone una API REST. Incluye manejo de rutas, middleware, JSON y paquetes npm. El proyecto demuestra el uso practico de Node.js tanto para scripts como para servicios web.</p>
+      <div class="tech-tags">
+        <span class="tech-tag">Node.js</span>
+        <span class="tech-tag">Express</span>
+        <span class="tech-tag">API REST</span>
+        <span class="tech-tag">CLI</span>
+        <span class="tech-tag">npm</span>
+        <span class="tech-tag">Middleware</span>
+      </div>
+    </div>
+  </div>
+
+  <main class="grid">
+
+    <article class="card">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">01</span>
+          <h2>index.js — CLI App</h2>
+        </div>
+        <p class="card-description">Aplicacion de linea de comandos: interaccion con el usuario desde la terminal usando Node.js.</p>
+        <div class="card-meta">
+          <span class="badge">Intermedio</span>
+          <span class="file-count">1 archivo</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">CLI</span>
+        <span class="tag">process</span>
+        <span class="tag">stdin</span>
+      </div>
+      <a class="card-link" href="index.js">Ver index.js</a>
+    </article>
+
+    <article class="card">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">02</span>
+          <h2>server.js — Express API</h2>
+        </div>
+        <p class="card-description">Servidor Express con endpoints REST: rutas, middleware, manejo de JSON y respuestas HTTP.</p>
+        <div class="card-meta">
+          <span class="badge">Avanzado</span>
+          <span class="file-count">1 archivo</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">express</span>
+        <span class="tag">REST</span>
+        <span class="tag">HTTP</span>
+        <span class="tag">JSON</span>
+      </div>
+      <a class="card-link" href="server.js">Ver server.js</a>
+    </article>
+
+    <article class="card">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">03</span>
+          <h2>Documentacion</h2>
+        </div>
+        <p class="card-description">Conceptos de Express y APIs REST, cheatsheet de npm y referencia del proyecto.</p>
+        <div class="card-meta">
+          <span class="badge">Referencia</span>
+          <span class="file-count">3 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">conceptos</span>
+        <span class="tag">cheatsheet</span>
+        <span class="tag">readme</span>
+      </div>
+      <a class="card-link" href="CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+  </main>
+
+  <footer>
+    <p>DGTIC — Node.js: Challenge API</p>
+  </footer>
+
+</body>
+</html>

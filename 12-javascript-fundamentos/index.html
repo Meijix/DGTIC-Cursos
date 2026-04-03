@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JavaScript — Fundamentos</title>
+
+  <!--
+  ╔══════════════════════════════════════════════════════════════════════════════╗
+  ║  INDEX.HTML — JAVASCRIPT FUNDAMENTOS                                      ║
+  ║                                                                            ║
+  ║  Pagina de navegacion para los ejercicios de JavaScript:                  ║
+  ║  scripts basicos, eventos del DOM y practica final.                       ║
+  ║                                                                            ║
+  ║  TEMA: Oscuro con acento #f77f00                                           ║
+  ╚══════════════════════════════════════════════════════════════════════════════╝
+  -->
+
+  <style>
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #1a1a2e;
+      --bg-card: #16213e;
+      --bg-card-hover: #1b2a4a;
+      --accent: #f77f00;
+      --accent-dim: rgba(247, 127, 0, 0.15);
+      --text-primary: #e8e8e8;
+      --text-secondary: #a0a0b8;
+      --text-muted: #6b6b80;
+      --radius: 12px;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .back-link {
+      display: inline-block;
+      padding: 1rem 1.5rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: opacity 0.2s;
+    }
+
+    .back-link:hover { opacity: 0.8; }
+
+    header {
+      text-align: center;
+      padding: 2rem 1.5rem 2.5rem;
+      background: linear-gradient(135deg, #1a1a2e, #0f3460);
+      border-bottom: 3px solid var(--accent);
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.5rem;
+      color: var(--accent);
+    }
+
+    header p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: 2rem auto 2.5rem;
+      padding: 0 1.5rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-accent {
+      height: 5px;
+      background: var(--accent);
+    }
+
+    .card-body {
+      padding: 1.25rem 1.25rem 0.75rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .card-body h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .card-description {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.75rem;
+      flex: 1;
+      line-height: 1.5;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.2rem 0.6rem;
+      border-radius: 50px;
+      color: #fff;
+      background: var(--accent);
+    }
+
+    .file-count {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      padding: 0 1.25rem 1rem;
+    }
+
+    .tag {
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.2rem 0.55rem;
+      border-radius: 50px;
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .card-link {
+      display: block;
+      text-align: center;
+      padding: 0.75rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-decoration: none;
+      color: var(--accent);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .card-link:hover {
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    @media (max-width: 700px) {
+      header h1 { font-size: 1.6rem; }
+      header p { font-size: 0.95rem; }
+      .grid { padding: 0 1rem; gap: 1rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <a class="back-link" href="../index.html">&larr; Volver al indice</a>
+
+  <header>
+    <h1>JavaScript — Fundamentos</h1>
+    <p>Ejercicios de JavaScript: variables, funciones, eventos del DOM y proyecto final integrador.</p>
+  </header>
+
+  <main class="grid">
+
+    <article class="card">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">01</span>
+          <h2>Script 00 — Introduccion</h2>
+        </div>
+        <p class="card-description">Primeros pasos con JavaScript: variables, tipos de datos y operaciones basicas.</p>
+        <div class="card-meta">
+          <span class="badge">Basico</span>
+          <span class="file-count">1 archivo</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">variables</span>
+        <span class="tag">tipos</span>
+        <span class="tag">operadores</span>
+      </div>
+      <a class="card-link" href="script00.js">Ver script00.js</a>
+    </article>
+
+    <article class="card">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">02</span>
+          <h2>Script 01 — Fundamentos</h2>
+        </div>
+        <p class="card-description">Condicionales, ciclos y funciones. Estructuras de control fundamentales.</p>
+        <div class="card-meta">
+          <span class="badge">Basico</span>
+          <span class="file-count">1 archivo</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">condicionales</span>
+        <span class="tag">ciclos</span>
+        <span class="tag">funciones</span>
+      </div>
+      <a class="card-link" href="script01.js">Ver script01.js</a>
+    </article>
+
+    <article class="card">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">03</span>
+          <h2>Script 02 — Intermedio</h2>
+        </div>
+        <p class="card-description">Arrays, objetos y metodos avanzados de JavaScript.</p>
+        <div class="card-meta">
+          <span class="badge">Intermedio</span>
+          <span class="file-count">1 archivo</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">arrays</span>
+        <span class="tag">objetos</span>
+        <span class="tag">metodos</span>
+      </div>
+      <a class="card-link" href="script02.js">Ver script02.js</a>
+    </article>
+
+    <article class="card">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">04</span>
+          <h2>Eventos del DOM</h2>
+        </div>
+        <p class="card-description">Manejo de eventos en el navegador: listeners, delegacion y manipulacion del DOM.</p>
+        <div class="card-meta">
+          <span class="badge">Intermedio</span>
+          <span class="file-count">2 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">eventos</span>
+        <span class="tag">DOM</span>
+        <span class="tag">listeners</span>
+      </div>
+      <a class="card-link" href="Eventos1/eventos.html">Ver ejercicio</a>
+    </article>
+
+    <article class="card">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">05</span>
+          <h2>Practica Final</h2>
+        </div>
+        <p class="card-description">Proyecto integrador: catalogo con busqueda y formulario. Aplicacion completa con HTML, CSS y JS.</p>
+        <div class="card-meta">
+          <span class="badge">Avanzado</span>
+          <span class="file-count">5+ archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">catalogo</span>
+        <span class="tag">busqueda</span>
+        <span class="tag">formulario</span>
+        <span class="tag">proyecto</span>
+      </div>
+      <a class="card-link" href="PracticaFinalNat/index.html">Ver proyecto</a>
+    </article>
+
+    <article class="card">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">06</span>
+          <h2>Documentacion</h2>
+        </div>
+        <p class="card-description">Notas de conceptos clave y cheatsheet de referencia rapida para JavaScript.</p>
+        <div class="card-meta">
+          <span class="badge">Referencia</span>
+          <span class="file-count">2 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">conceptos</span>
+        <span class="tag">cheatsheet</span>
+      </div>
+      <a class="card-link" href="CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+  </main>
+
+  <footer>
+    <p>DGTIC — JavaScript: Fundamentos</p>
+  </footer>
+
+</body>
+</html>
