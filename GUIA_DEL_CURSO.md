@@ -1,9 +1,9 @@
 # Guia del Curso: Desarrollo Web y Programacion — DGTIC UNAM
 
-> **Cursos:** Ejercicios de Programacion (Python), Desarrollo de Paginas Web (HTML/CSS/JS), Fundamentos de Python, JavaScript, PHP, Laravel, Node.js y CI/CD con GitHub Actions
+> **Cursos:** Ejercicios de Programacion (Python), Desarrollo de Paginas Web (HTML/CSS/JS), Fundamentos de Python, JavaScript, PHP, Laravel, Node.js, CI/CD con GitHub Actions, Estructuras de Datos y Algoritmos de Ordenacion
 > **Institucion:** Direccion General de Computo y de Tecnologias de Informacion y
 > Comunicacion (DGTIC), UNAM
-> **Formato:** 21 modulos progresivos (00-20) en 4 bloques: prerequisito (00), desarrollo web (01-10), programacion y backend (11-19), y DevOps (20)
+> **Formato:** 23 modulos progresivos (00-22) en 5 bloques: prerequisito (00), desarrollo web (01-10), programacion y backend (11-19), DevOps (20), y ciencias de la computacion (21-22)
 
 ---
 
@@ -38,6 +38,8 @@ Al completar este curso seras capaz de:
 - Construir aplicaciones web con Laravel (CRUD, Blade, Livewire, Eloquent).
 - Crear APIs y servicios con Node.js, Express y servicios cloud (AWS, OpenAI).
 - Automatizar pruebas y despliegues con GitHub Actions (CI/CD, workflows, Docker).
+- Comprender estructuras de datos fundamentales (arrays, listas enlazadas, pilas, colas, tablas hash, arboles, heaps, grafos).
+- Implementar y analizar algoritmos de ordenacion clasicos (bubble, selection, insertion, merge, quick, counting, radix sort).
 
 ### Prerequisitos
 
@@ -77,6 +79,9 @@ DGTIC-Cursos/
 │
 ├── 20-github-actions/             ← Bloque 3: DevOps / CI/CD
 │
+├── 21-estructuras-de-datos/       ← Bloque 4: Ciencias de la Computacion
+├── 22-algoritmos-de-ordenacion/
+│
 ├── index.html                     ← Pagina principal del repositorio
 ├── GUIA_DEL_CURSO.md              ← Este archivo (guia general)
 └── README.md
@@ -98,6 +103,7 @@ DGTIC-Cursos/
 | **Desarrollo Web** | 01-10 | HTML semantico, CSS moderno, Flexbox, Grid, responsive, portfolio y landing page |
 | **Programacion y Backend** | 11-19 | Python completo (10 secciones, 55 archivos), JavaScript, PHP, Laravel, Node.js |
 | **DevOps** | 20 | GitHub Actions: CI/CD completo (6 secciones, 34 archivos YAML) |
+| **Ciencias de la Computacion** | 21-22 | Estructuras de datos y algoritmos de ordenacion |
 
 ---
 
@@ -299,6 +305,30 @@ DGTIC-Cursos/
                                 │  CI/CD, workflows, │
                                 │  testing, deploy,  │
                                 │  Docker, seguridad │
+                                └────────┬──────────┘
+                                         │
+                                         ▼
+  FASE 12: CIENCIAS DE          ┌───────────────────┐
+  LA COMPUTACION                │  21                │
+  ──────────────────            │  Estructuras de    │
+                                │  Datos             │
+                                │                    │
+                                │  Arrays, listas,   │
+                                │  pilas, colas,     │
+                                │  hash, arboles,    │
+                                │  heaps, grafos     │
+                                └────────┬──────────┘
+                                         │
+                                         ▼
+                                ┌───────────────────┐
+                                │  22                │
+                                │  Algoritmos de     │
+                                │  Ordenacion        │
+                                │                    │
+                                │  Bubble, selection,│
+                                │  insertion, merge, │
+                                │  quick, counting,  │
+                                │  radix sort        │
                                 └───────────────────┘
 ```
 
@@ -321,6 +351,8 @@ DGTIC-Cursos/
                     └──► 18 Node.js ──► 19 Challenge API
                                               │
                                               └──► 20 GitHub Actions (CI/CD)
+                                                          │
+                                                          └──► 21 Estructuras de Datos ──► 22 Algoritmos de Ordenacion
 ```
 
 ### Que construye cada modulo
@@ -349,6 +381,8 @@ Modulo  Que construyes                         Habilidad principal
   18    Node.js con Express y AWS               Serverless, DynamoDB, Lambda
   19    Challenge: CLI + API OpenAI             Integracion de APIs, JSON
   20    Pipelines CI/CD con GitHub Actions      Workflows, testing, deploy
+  21    Estructuras de datos fundamentales     Arrays, listas, pilas, colas, hash, arboles
+  22    Algoritmos de ordenacion clasicos      Bubble, selection, merge, quick sort
 ```
 
 ---
@@ -378,6 +412,8 @@ Modulo  Que construyes                         Habilidad principal
 | **18** Node.js Intro | `require`/modulos, Express (rutas, middleware, JSON), AWS SDK (DynamoDB DocumentClient), Lambda functions, API Gateway, OpenAI SDK, `dotenv` | `index.js`, `modules.js` | 12 |
 | **19** Node.js Challenge | `readline` (CLI interactivo), `axios` (HTTP client), async/await, Express POST endpoint, integracion OpenAI chat completions | `index.js`, `server.js` | 18 |
 | **20** GitHub Actions | Workflows YAML, eventos (push, PR, schedule, dispatch), jobs y steps, runners, variables y secretos, matrices de estrategia, cache, CI (pytest, Node, PHP, lint), CD (GitHub Pages, Vercel, Docker), releases, acciones compuestas, workflows reutilizables, concurrencia, seguridad, proyectos fullstack y monorepo | 6 secciones, 34 archivos `.yml` + `.md` | 11, 18, 19 |
+| **21** Estructuras de Datos | Arrays, listas enlazadas (simples, dobles, circulares), pilas (stack), colas (queue, deque, priority queue), tablas hash (colisiones, encadenamiento, direccionamiento abierto), arboles (binarios, BST, AVL), heaps (min-heap, max-heap), grafos (dirigidos, no dirigidos, BFS, DFS) | Implementaciones y ejercicios por estructura | 00, 11 |
+| **22** Algoritmos de Ordenacion | Bubble sort, selection sort, insertion sort, merge sort, quick sort, counting sort, radix sort, analisis de complejidad (Big O), estabilidad de algoritmos, comparacion de rendimiento | Implementaciones y visualizaciones por algoritmo | 21 |
 
 ---
 
@@ -546,8 +582,9 @@ aparece por primera vez en el curso.
 
   ┌─────────────────────────────────┐
   │  ESTE CURSO                     │
-  │  00-20: Web + Python + PHP +    │     ← Estas aqui
-  │  Laravel + Node.js + CI/CD      │
+  │  00-22: Web + Python + PHP +    │     ← Estas aqui
+  │  Laravel + Node.js + CI/CD +    │
+  │  Estructuras de datos + Algos   │
   └──────────────┬──────────────────┘
                  │
          ┌───────┴───────┐
@@ -693,6 +730,6 @@ Despues de completar este curso, estos proyectos reforzaran tus habilidades:
 ---
 
 > **Gracias por tomar este curso.** El desarrollo web y la programacion son campos que evolucionan
-> constantemente, y lo que has aprendido aqui — desde HTML basico hasta CI/CD con GitHub Actions —
-> es una base solida sobre la que puedes construir cualquier cosa. Sigue practicando, sigue
-> construyendo, y sigue aprendiendo.
+> constantemente, y lo que has aprendido aqui — desde HTML basico hasta CI/CD con GitHub Actions,
+> estructuras de datos y algoritmos de ordenacion — es una base solida sobre la que puedes construir
+> cualquier cosa. Sigue practicando, sigue construyendo, y sigue aprendiendo.
