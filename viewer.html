@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visor de Archivo</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📄</text></svg>">
+
+  <!-- Prism.js para syntax highlighting -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.css">
+
+  <!-- marked.js para Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@15.0.4/marked.min.js"></script>
+
+  <style>
+    :root { --radio: 12px; }
+
+    [data-theme="light"] {
+      --bg-primary: #f5f7fa;
+      --bg-card: #ffffff;
+      --text-primary: #333333;
+      --text-secondary: #555555;
+      --text-muted: #888888;
+      --border-color: #e2e8f0;
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #1a1a2e;
+      --bg-card: #16213e;
+      --text-primary: #e8e8e8;
+      --text-secondary: #a0a0b8;
+      --text-muted: #6b6b80;
+      --border-color: rgba(255, 255, 255, 0.06);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .toolbar a {
+      color: var(--text-primary);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .toolbar a:hover { opacity: 0.7; }
+
+    .file-path {
+      flex: 1;
+      font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .lang-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.2rem 0.6rem;
+      border-radius: 50px;
+      background: #0f3460;
+      color: #fff;
+    }
+
+    .theme-toggle {
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 50%;
+      background: var(--bg-primary);
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+    }
+    .theme-toggle:hover { opacity: 0.8; }
+
+    .content {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    /* ── Codigo con Prism ── */
+    .code-container pre {
+      border-radius: var(--radio);
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    [data-theme="light"] .code-container pre[class*="language-"] {
+      background: #f8f9fa;
+      color: #333;
+      border: 1px solid var(--border-color);
+    }
+
+    [data-theme="light"] .code-container .token.comment { color: #6a737d; }
+    [data-theme="light"] .code-container .token.keyword { color: #d73a49; }
+    [data-theme="light"] .code-container .token.string { color: #032f62; }
+    [data-theme="light"] .code-container .token.function { color: #6f42c1; }
+    [data-theme="light"] .code-container .token.number { color: #005cc5; }
+    [data-theme="light"] .code-container .token.operator { color: #d73a49; }
+    [data-theme="light"] .code-container .token.class-name { color: #6f42c1; }
+    [data-theme="light"] .code-container .token.builtin { color: #e36209; }
+
+    /* ── Markdown renderizado ── */
+    .md-content h1 { font-size: 1.8rem; margin: 0.5rem 0 1rem; }
+    .md-content h2 { font-size: 1.4rem; margin: 1.5rem 0 0.5rem; padding-bottom: 0.3rem; border-bottom: 1px solid var(--border-color); }
+    .md-content h3 { font-size: 1.15rem; margin: 1.2rem 0 0.4rem; }
+    .md-content p, .md-content li { margin: 0.5rem 0; line-height: 1.65; }
+    .md-content ul, .md-content ol { padding-left: 1.5rem; }
+    .md-content pre { overflow-x: auto; padding: 0.8rem 1rem; border-radius: 8px; background: #1e1e2e; color: #f0f0f0; font-size: 0.82rem; line-height: 1.5; margin: 0.75rem 0; }
+    .md-content code { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: 0.88em; }
+    .md-content :not(pre) > code { padding: 0.15em 0.4em; border-radius: 4px; background: rgba(0,0,0,0.06); }
+    [data-theme="dark"] .md-content :not(pre) > code { background: rgba(255,255,255,0.1); }
+    .md-content table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.85rem; }
+    .md-content th, .md-content td { border: 1px solid var(--border-color); padding: 0.4rem 0.6rem; text-align: left; }
+    .md-content th { background: rgba(0,0,0,0.03); }
+    [data-theme="dark"] .md-content th { background: rgba(255,255,255,0.05); }
+    .md-content blockquote { margin: 0.75rem 0; padding: 0.5rem 1rem; border-left: 4px solid var(--text-muted); background: rgba(0,0,0,0.02); border-radius: 0 4px 4px 0; }
+    [data-theme="dark"] .md-content blockquote { background: rgba(255,255,255,0.03); }
+    .md-content hr { margin: 1.5rem 0; border: none; border-top: 1px solid var(--border-color); }
+    .md-content img { max-width: 100%; border-radius: 8px; }
+
+    .status { text-align: center; padding: 3rem; color: var(--text-muted); font-size: 1.1rem; }
+    .status.error { color: #e63946; }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <a href="javascript:history.back()">&larr; Volver</a>
+    <span class="file-path" id="file-path"></span>
+    <span class="lang-badge" id="lang-badge"></span>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema"></button>
+  </div>
+
+  <div class="content" id="content">
+    <p class="status" id="status">Cargando...</p>
+  </div>
+
+  <script>
+  (function() {
+    // ── Tema ──
+    var toggle = document.getElementById('theme-toggle');
+    var theme = localStorage.getItem('dgtic-theme') || 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    toggle.textContent = theme === 'dark' ? '\u2600' : '\u263E';
+    toggle.addEventListener('click', function() {
+      theme = theme === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('dgtic-theme', theme);
+      toggle.textContent = theme === 'dark' ? '\u2600' : '\u263E';
+    });
+
+    // ── Extensiones a lenguajes Prism ──
+    var langMap = {
+      'py': 'python', 'js': 'javascript', 'ts': 'typescript', 'tsx': 'tsx',
+      'jsx': 'jsx', 'sql': 'sql', 'sh': 'bash', 'bash': 'bash',
+      'php': 'php', 'html': 'html', 'css': 'css', 'json': 'json',
+      'yml': 'yaml', 'yaml': 'yaml', 'xml': 'xml', 'md': 'markdown',
+      'rb': 'ruby', 'go': 'go', 'rs': 'rust', 'java': 'java',
+      'c': 'c', 'cpp': 'cpp', 'cs': 'csharp', 'swift': 'swift',
+      'kt': 'kotlin', 'r': 'r', 'lua': 'lua', 'pl': 'perl',
+      'dockerfile': 'docker', 'toml': 'toml', 'ini': 'ini',
+      'env': 'bash', 'gitignore': 'git'
+    };
+
+    var labelMap = {
+      'python': 'Python', 'javascript': 'JavaScript', 'typescript': 'TypeScript',
+      'jsx': 'React JSX', 'tsx': 'React TSX', 'sql': 'SQL', 'bash': 'Bash',
+      'php': 'PHP', 'html': 'HTML', 'css': 'CSS', 'json': 'JSON',
+      'yaml': 'YAML', 'markdown': 'Markdown', 'docker': 'Dockerfile'
+    };
+
+    // ── Obtener archivo de query param ──
+    var params = new URLSearchParams(window.location.search);
+    var filePath = params.get('file');
+    var pathEl = document.getElementById('file-path');
+    var badgeEl = document.getElementById('lang-badge');
+    var contentEl = document.getElementById('content');
+    var statusEl = document.getElementById('status');
+
+    if (!filePath) {
+      statusEl.textContent = 'No se especifico archivo. Usa ?file=ruta/al/archivo';
+      statusEl.className = 'status error';
+      return;
+    }
+
+    pathEl.textContent = filePath;
+    document.title = filePath.split('/').pop() + ' — Visor DGTIC';
+
+    // ── Detectar lenguaje ──
+    var fileName = filePath.split('/').pop().toLowerCase();
+    var ext = fileName.includes('.') ? fileName.split('.').pop() : fileName;
+    // Archivos sin extension como Dockerfile
+    if (fileName === 'dockerfile' || fileName.startsWith('dockerfile.')) ext = 'dockerfile';
+    if (fileName === '.gitignore') ext = 'gitignore';
+
+    var lang = langMap[ext] || 'plain';
+    var isMarkdown = (ext === 'md');
+
+    badgeEl.textContent = labelMap[lang] || ext.toUpperCase();
+
+    // ── Cargar y renderizar ──
+    fetch(filePath)
+      .then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.text();
+      })
+      .then(function(text) {
+        if (isMarkdown) {
+          contentEl.innerHTML = '<article class="md-content">' + marked.parse(text) + '</article>';
+        } else {
+          var escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          contentEl.innerHTML = '<div class="code-container"><pre class="line-numbers"><code class="language-' + lang + '">' + escaped + '</code></pre></div>';
+          Prism.highlightAll();
+        }
+      })
+      .catch(function(err) {
+        statusEl.textContent = 'No se pudo cargar: ' + filePath;
+        statusEl.className = 'status error';
+        statusEl.innerHTML += '<br><a href="' + filePath + '" style="color:inherit">Descargar archivo</a>';
+      });
+  })();
+  </script>
+
+</body>
+</html>
