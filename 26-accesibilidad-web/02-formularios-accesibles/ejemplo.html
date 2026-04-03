@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejemplo: Formulario de registro accesible</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      line-height: 1.6;
+      padding: 2rem;
+    }
+
+    h1 { text-align: center; margin-bottom: 0.5rem; }
+    .intro { text-align: center; color: #555; margin-bottom: 2rem; }
+
+    /* Formulario */
+    .form-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    /* Indicador de campos requeridos */
+    .required-note {
+      font-size: 0.9rem;
+      color: #555;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #eee;
+    }
+
+    /* Grupos de campos */
+    fieldset {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    legend {
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding: 0 0.5rem;
+      color: #0077b6;
+    }
+
+    /* Campos individuales */
+    .campo {
+      margin-bottom: 1.25rem;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    /* Asterisco visual (oculto para lectores de pantalla) */
+    .asterisco { color: #e63946; }
+
+    /* Instrucciones del campo */
+    .instrucciones {
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 0.35rem;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"] {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: 2px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+
+    input:focus-visible {
+      outline: 3px solid #0077b6;
+      outline-offset: 1px;
+      border-color: #0077b6;
+    }
+
+    /* Campo con error */
+    input[aria-invalid="true"] {
+      border-color: #e63946;
+    }
+    input[aria-invalid="true"]:focus-visible {
+      outline-color: #e63946;
+    }
+
+    /* Mensaje de error */
+    .error-msg {
+      color: #d32f2f;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .error-msg::before { content: "!"; font-weight: 900; }
+
+    /* Radio buttons */
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .radio-group label {
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+
+    /* Boton de envio */
+    .form-actions {
+      margin-top: 1.5rem;
+      display: flex;
+      gap: 1rem;
+    }
+
+    button[type="submit"] {
+      padding: 0.75rem 2rem;
+      background: #0077b6;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button[type="submit"]:focus-visible {
+      outline: 3px solid #005f8a;
+      outline-offset: 2px;
+    }
+
+    button[type="reset"] {
+      padding: 0.75rem 2rem;
+      background: transparent;
+      color: #555;
+      border: 2px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button[type="reset"]:focus-visible {
+      outline: 3px solid #0077b6;
+      outline-offset: 2px;
+    }
+
+    /* Clase para ocultar visualmente pero mantener para lectores */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Formulario de Registro Accesible</h1>
+  <p class="intro">Cada decision de accesibilidad esta explicada con comentarios en el codigo.</p>
+
+  <div class="form-container">
+
+    <!-- Indicar convencion de campos requeridos al inicio del formulario -->
+    <p class="required-note">
+      Los campos marcados con <span class="asterisco" aria-hidden="true">*</span>
+      (<span class="sr-only">asterisco</span>) son obligatorios.
+    </p>
+
+    <!-- El formulario tiene aria-label para describir su proposito -->
+    <form aria-label="Formulario de registro de usuario" novalidate>
+
+      <!-- =============================================
+           SECCION 1: Datos personales
+           fieldset agrupa campos relacionados
+           legend describe el grupo al lector
+           ============================================= -->
+      <fieldset>
+        <legend>Datos personales</legend>
+
+        <!-- Campo: Nombre
+             - label asociado con for/id
+             - required + aria-required para teclado y lector
+             - autocomplete para prellenado automatico -->
+        <div class="campo">
+          <label for="nombre">
+            Nombre <span class="asterisco" aria-hidden="true">*</span>
+          </label>
+          <input
+            type="text"
+            id="nombre"
+            name="nombre"
+            required
+            aria-required="true"
+            autocomplete="given-name"
+          >
+        </div>
+
+        <!-- Campo: Apellido -->
+        <div class="campo">
+          <label for="apellido">
+            Apellido <span class="asterisco" aria-hidden="true">*</span>
+          </label>
+          <input
+            type="text"
+            id="apellido"
+            name="apellido"
+            required
+            aria-required="true"
+            autocomplete="family-name"
+          >
+        </div>
+
+        <!-- Campo: Telefono
+             - type="tel" muestra teclado numerico en movil
+             - instrucciones vinculadas con aria-describedby -->
+        <div class="campo">
+          <label for="telefono">Telefono</label>
+          <p class="instrucciones" id="tel-ayuda">
+            Formato: +52 55 1234 5678 (opcional).
+          </p>
+          <input
+            type="tel"
+            id="telefono"
+            name="telefono"
+            autocomplete="tel"
+            aria-describedby="tel-ayuda"
+          >
+        </div>
+      </fieldset>
+
+      <!-- =============================================
+           SECCION 2: Cuenta
+           ============================================= -->
+      <fieldset>
+        <legend>Datos de la cuenta</legend>
+
+        <!-- Campo: Correo
+             - type="email" valida formato y muestra teclado con @
+             - Ejemplo de campo CON error para demostrar el patron -->
+        <div class="campo">
+          <label for="correo">
+            Correo electronico <span class="asterisco" aria-hidden="true">*</span>
+          </label>
+          <input
+            type="email"
+            id="correo"
+            name="correo"
+            required
+            aria-required="true"
+            autocomplete="email"
+            aria-invalid="true"
+            aria-describedby="correo-error"
+            value="correo-invalido"
+          >
+          <!-- Mensaje de error:
+               - role="alert" anuncia al lector de pantalla inmediatamente
+               - Vinculado al campo via aria-describedby
+               - Texto descriptivo (no solo "Error") -->
+          <p class="error-msg" id="correo-error" role="alert">
+            Ingresa un correo valido (ejemplo: usuario@dominio.com).
+          </p>
+        </div>
+
+        <!-- Campo: Contrasena
+             - Instrucciones de formato ANTES del campo
+             - aria-describedby apunta a las instrucciones -->
+        <div class="campo">
+          <label for="pass">
+            Contrasena <span class="asterisco" aria-hidden="true">*</span>
+          </label>
+          <p class="instrucciones" id="pass-ayuda">
+            Minimo 8 caracteres, una mayuscula y un numero.
+          </p>
+          <input
+            type="password"
+            id="pass"
+            name="pass"
+            required
+            aria-required="true"
+            autocomplete="new-password"
+            aria-describedby="pass-ayuda"
+            minlength="8"
+          >
+        </div>
+      </fieldset>
+
+      <!-- =============================================
+           SECCION 3: Preferencias
+           Radio buttons dentro de fieldset/legend
+           ============================================= -->
+      <fieldset>
+        <legend>Preferencias</legend>
+
+        <!-- Radio group: Idioma
+             - fieldset/legend da contexto al grupo
+             - Cada radio tiene label envolvente -->
+        <div class="campo">
+          <p id="idioma-label" style="font-weight:600; margin-bottom: 0.25rem;">
+            Idioma preferido <span class="asterisco" aria-hidden="true">*</span>
+          </p>
+          <div class="radio-group" role="radiogroup" aria-labelledby="idioma-label">
+            <label>
+              <input type="radio" name="idioma" value="es" checked>
+              Espanol
+            </label>
+            <label>
+              <input type="radio" name="idioma" value="en">
+              Ingles
+            </label>
+            <label>
+              <input type="radio" name="idioma" value="pt">
+              Portugues
+            </label>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Botones de accion -->
+      <div class="form-actions">
+        <button type="submit">Crear cuenta</button>
+        <button type="reset">Limpiar formulario</button>
+      </div>
+
+    </form>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejemplo: Galeria de medios accesible</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      line-height: 1.6;
+      padding: 2rem;
+    }
+
+    h1 { text-align: center; margin-bottom: 0.5rem; }
+    .intro { text-align: center; color: #555; margin-bottom: 2rem; max-width: 700px; margin-left: auto; margin-right: auto; }
+
+    .gallery {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      gap: 2rem;
+    }
+
+    /* Tarjeta de media */
+    .media-card {
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .media-card .media-content {
+      padding: 1.5rem;
+    }
+
+    .media-card h2 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      color: #0077b6;
+    }
+
+    .media-card p { color: #555; margin-bottom: 0.75rem; }
+
+    /* Codigo de ejemplo visible */
+    .code-note {
+      background: #f0f0f0;
+      border-left: 4px solid #0077b6;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      color: #333;
+      margin-top: 0.75rem;
+    }
+
+    /* Imagenes dentro de figure */
+    figure {
+      margin: 0;
+    }
+
+    figure img {
+      width: 100%;
+      display: block;
+    }
+
+    figcaption {
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      color: #555;
+      background: #fafafa;
+      border-top: 1px solid #eee;
+    }
+
+    /* Video */
+    video {
+      width: 100%;
+      display: block;
+      background: #000;
+    }
+
+    /* Transcripcion desplegable */
+    details {
+      margin-top: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    summary {
+      padding: 0.75rem 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: #f9f9f9;
+    }
+    summary:focus-visible {
+      outline: 3px solid #0077b6;
+      outline-offset: -3px;
+    }
+
+    details div {
+      padding: 1rem;
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+    details div p { margin-bottom: 0.5rem; }
+
+    /* Enlace decorativo con icono */
+    .icon-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #0077b6;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.5rem 0;
+    }
+    .icon-link:focus-visible {
+      outline: 3px solid #0077b6;
+      outline-offset: 2px;
+    }
+    .icon-link svg { width: 20px; height: 20px; }
+  </style>
+</head>
+<body>
+
+  <h1>Galeria de Medios Accesible</h1>
+  <p class="intro">
+    Cada elemento multimedia tiene alternativas de texto adecuadas.
+    Revisa el codigo fuente para ver los comentarios explicativos.
+  </p>
+
+  <div class="gallery">
+
+    <!-- =============================================
+         1. IMAGEN INFORMATIVA CON FIGURE Y FIGCAPTION
+         - alt describe el contenido esencial de la imagen
+         - figcaption da contexto adicional (visible para todos)
+         ============================================= -->
+    <div class="media-card">
+      <figure>
+        <!-- alt describe lo que la imagen muestra.
+             Es conciso pero informativo. -->
+        <img
+          src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='300'%3E%3Crect fill='%23e8f4f8' width='900' height='300'/%3E%3Crect x='50' y='200' width='80' height='80' fill='%230077b6'/%3E%3Crect x='180' y='140' width='80' height='140' fill='%230077b6'/%3E%3Crect x='310' y='80' width='80' height='200' fill='%230077b6'/%3E%3Crect x='440' y='50' width='80' height='230' fill='%230077b6'/%3E%3Ctext x='450' y='30' font-size='14' fill='%23333'%3EVentas 2025%3C/text%3E%3Ctext x='60' y='195' font-size='12' fill='%23333'%3EQ1%3C/text%3E%3Ctext x='190' y='135' font-size='12' fill='%23333'%3EQ2%3C/text%3E%3Ctext x='320' y='75' font-size='12' fill='%23333'%3EQ3%3C/text%3E%3Ctext x='450' y='45' font-size='12' fill='%23333'%3EQ4%3C/text%3E%3C/svg%3E"
+          alt="Grafico de barras de ventas 2025: Q1 bajo, Q2 moderado, Q3 alto, Q4 muy alto, mostrando crecimiento constante"
+        >
+        <!-- figcaption es visible para todos y complementa el alt -->
+        <figcaption>
+          Figura 1: Crecimiento de ventas trimestral en 2025. Las ventas
+          aumentaron un 60% entre el primer y cuarto trimestre.
+        </figcaption>
+      </figure>
+      <div class="media-content">
+        <h2>Imagen informativa con datos</h2>
+        <p>El alt text describe los datos esenciales del grafico.
+           El figcaption proporciona contexto adicional visible para todos.</p>
+        <div class="code-note">
+          <strong>Tecnica:</strong> alt describe el contenido visual.
+          figcaption anade interpretacion. Ambos coexisten.
+        </div>
+      </div>
+    </div>
+
+    <!-- =============================================
+         2. IMAGEN DECORATIVA
+         - alt="" porque el icono no agrega informacion
+         - El texto del enlace ya describe la accion
+         ============================================= -->
+    <div class="media-card">
+      <div class="media-content">
+        <h2>Icono decorativo junto a texto</h2>
+        <p>El icono SVG es decorativo porque el texto ya describe la accion.
+           Se usa alt="" (o aria-hidden en SVG inline) para que el lector lo ignore.</p>
+
+        <!-- El SVG tiene aria-hidden="true" porque el texto "Descargar PDF"
+             ya describe la accion completamente. El icono es decorativo. -->
+        <a href="#" class="icon-link">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 2h14v2H5z"/>
+          </svg>
+          Descargar informe en PDF
+        </a>
+
+        <div class="code-note">
+          <strong>Tecnica:</strong> aria-hidden="true" en el SVG.
+          El lector de pantalla solo anuncia "Descargar informe en PDF, enlace".
+        </div>
+      </div>
+    </div>
+
+    <!-- =============================================
+         3. IMAGEN FUNCIONAL (enlace)
+         - alt describe el DESTINO, no la imagen
+         ============================================= -->
+    <div class="media-card">
+      <div class="media-content">
+        <h2>Imagen como enlace</h2>
+        <p>Cuando una imagen es un enlace, el alt describe a donde lleva,
+           no como se ve la imagen.</p>
+
+        <!-- alt describe el destino del enlace, no el aspecto del logo -->
+        <a href="#" style="display:inline-block;">
+          <img
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='60'%3E%3Crect fill='%231a1a2e' width='200' height='60' rx='8'/%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' fill='%230077b6' font-size='20' font-weight='bold'%3EMiSitio%3C/text%3E%3C/svg%3E"
+            alt="Ir a la pagina principal de MiSitio"
+            style="border-radius: 8px;"
+          >
+        </a>
+
+        <div class="code-note">
+          <strong>Tecnica:</strong> El alt dice "Ir a la pagina principal de MiSitio"
+          (destino), no "Logo azul con texto MiSitio" (aspecto).
+        </div>
+      </div>
+    </div>
+
+    <!-- =============================================
+         4. VIDEO CON SUBTITULOS Y TRANSCRIPCION
+         - <track kind="captions"> para subtitulos
+         - Transcripcion como <details> para acceso completo
+         ============================================= -->
+    <div class="media-card">
+      <!-- Video con controles nativos.
+           Nota: sin archivo de video real, se usa un placeholder.
+           En produccion, se incluirian los archivos .mp4 y .vtt -->
+      <div style="background: #1a1a2e; padding: 3rem; text-align: center; color: #e8e8e8;">
+        <p style="font-size: 1.2rem; margin-bottom: 0.5rem;">[Reproductor de video]</p>
+        <p style="font-size: 0.9rem; color: #a0a0b8;">
+          En produccion, aqui estaria el elemento &lt;video&gt; con subtitulos via &lt;track&gt;
+        </p>
+      </div>
+
+      <div class="media-content">
+        <h2>Video con subtitulos y transcripcion</h2>
+        <p>Los subtitulos (captions) incluyen dialogo y sonidos ambientales.
+           La transcripcion ofrece una alternativa texto completa.</p>
+
+        <!-- Transcripcion en un elemento desplegable.
+             Accesible con teclado (Enter en summary).
+             Util para: sordociegos con linea braille, SEO, ambientes ruidosos -->
+        <details>
+          <summary>Ver transcripcion del video</summary>
+          <div>
+            <p><strong>[00:00]</strong> [Musica de introduccion suena]</p>
+            <p><strong>[00:03]</strong> Bienvenidos al tutorial de accesibilidad web.</p>
+            <p><strong>[00:07]</strong> En este video aprenderemos por que la accesibilidad
+               es fundamental para la web moderna.</p>
+            <p><strong>[00:14]</strong> [Se muestra un grafico en pantalla]
+               Segun la OMS, mas de mil millones de personas viven con alguna
+               forma de discapacidad.</p>
+            <p><strong>[00:22]</strong> Eso significa que el 16% de la poblacion
+               mundial podria tener dificultades para usar tu sitio web.</p>
+            <p><strong>[00:30]</strong> Empecemos por los fundamentos.
+               [Musica de transicion]</p>
+          </div>
+        </details>
+
+        <div class="code-note">
+          <strong>Tecnica:</strong> &lt;details&gt;/&lt;summary&gt; es accesible nativamente.
+          Se activa con Enter/Espacio. No requiere JavaScript.
+        </div>
+      </div>
+    </div>
+
+    <!-- =============================================
+         5. IMAGEN COMPLEJA CON DESCRIPCION LARGA
+         - alt breve + descripcion detallada expandible
+         ============================================= -->
+    <div class="media-card">
+      <figure>
+        <img
+          src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='250'%3E%3Crect fill='%23f0f7ff' width='900' height='250'/%3E%3Crect x='50' y='80' width='120' height='80' rx='8' fill='%230077b6'/%3E%3Ctext x='110' y='125' text-anchor='middle' fill='white' font-size='13'%3ECliente%3C/text%3E%3Cline x1='170' y1='120' x2='280' y2='120' stroke='%23333' stroke-width='2'/%3E%3Ctext x='225' y='110' text-anchor='middle' font-size='11' fill='%23333'%3EHTTPS%3C/text%3E%3Crect x='280' y='80' width='120' height='80' rx='8' fill='%232d6a4f'/%3E%3Ctext x='340' y='125' text-anchor='middle' fill='white' font-size='13'%3EServidor%3C/text%3E%3Cline x1='400' y1='120' x2='510' y2='120' stroke='%23333' stroke-width='2'/%3E%3Ctext x='455' y='110' text-anchor='middle' font-size='11' fill='%23333'%3ESQL%3C/text%3E%3Crect x='510' y='80' width='120' height='80' rx='8' fill='%23e76f51'/%3E%3Ctext x='570' y='125' text-anchor='middle' fill='white' font-size='12'%3EBase datos%3C/text%3E%3C/svg%3E"
+          alt="Diagrama de arquitectura: cliente, servidor y base de datos conectados en secuencia"
+        >
+        <figcaption>
+          Figura 2: Arquitectura de tres capas del sistema.
+        </figcaption>
+      </figure>
+      <div class="media-content">
+        <h2>Imagen compleja con descripcion larga</h2>
+        <p>Para diagramas complejos, el alt es breve y se ofrece
+           una descripcion detallada por separado.</p>
+
+        <!-- Descripcion larga expandible para la imagen compleja -->
+        <details>
+          <summary>Descripcion detallada del diagrama</summary>
+          <div>
+            <p>El diagrama muestra tres componentes conectados en secuencia:</p>
+            <p><strong>1. Cliente</strong> (caja azul): Navegador web del usuario.
+               Se conecta al servidor mediante protocolo HTTPS.</p>
+            <p><strong>2. Servidor</strong> (caja verde): Aplicacion backend
+               que procesa las peticiones. Se comunica con la base de datos
+               mediante consultas SQL cifradas.</p>
+            <p><strong>3. Base de datos</strong> (caja naranja): Almacena
+               y gestiona los datos persistentes del sistema.</p>
+            <p>El flujo es unidireccional: cliente envia peticion al servidor,
+               el servidor consulta la base de datos, y la respuesta regresa
+               por el mismo camino.</p>
+          </div>
+        </details>
+
+        <div class="code-note">
+          <strong>Tecnica:</strong> alt breve + details/summary para la descripcion
+          completa. Accesible para lectores de pantalla y util para todos.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

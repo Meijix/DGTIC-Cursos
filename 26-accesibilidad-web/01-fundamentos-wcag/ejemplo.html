@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejemplo: Pagina accesible vs inaccesible</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      line-height: 1.6;
+    }
+
+    /* ============================================
+       SECCION 1: VERSION INACCESIBLE (solo visual)
+       ============================================ */
+    .bad-example {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1.5rem;
+      background: #fff0f0;
+      border: 2px solid #e63946;
+      border-radius: 8px;
+    }
+
+    .bad-example .bad-header { font-size: 1.5rem; font-weight: bold; padding: 1rem 0; }
+    .bad-example .bad-nav span { color: blue; cursor: pointer; margin-right: 1rem; }
+    .bad-example .bad-btn {
+      display: inline-block; padding: 0.5rem 1rem;
+      background: #333; color: #fff; cursor: pointer; border-radius: 4px;
+    }
+
+    /* ============================================
+       SECCION 2: VERSION ACCESIBLE (semantica)
+       ============================================ */
+    .good-example {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0;
+      background: #f0fff0;
+      border: 2px solid #2d6a4f;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    /* Skip link: solo visible cuando tiene foco */
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 0;
+      background: #0077b6;
+      color: #fff;
+      padding: 0.75rem 1.5rem;
+      z-index: 100;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .skip-link:focus {
+      top: 0;
+    }
+
+    .good-example header {
+      background: #2d6a4f;
+      color: #fff;
+      padding: 1rem 1.5rem;
+    }
+
+    .good-example nav { padding: 0.5rem 1.5rem; background: #d8f3dc; }
+    .good-example nav ul { list-style: none; display: flex; gap: 1rem; }
+    .good-example nav a {
+      color: #1b4332;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.25rem 0;
+    }
+    /* Foco visible para todos los enlaces */
+    .good-example nav a:focus-visible {
+      outline: 3px solid #0077b6;
+      outline-offset: 2px;
+    }
+
+    .good-example main { padding: 1.5rem; }
+
+    .good-example button {
+      padding: 0.75rem 1.5rem;
+      background: #2d6a4f;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .good-example button:focus-visible {
+      outline: 3px solid #0077b6;
+      outline-offset: 2px;
+    }
+
+    .good-example footer {
+      background: #d8f3dc;
+      padding: 1rem 1.5rem;
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    /* Estilos compartidos */
+    .section-label {
+      max-width: 800px;
+      margin: 2rem auto 0;
+      padding: 0.5rem 0;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    .section-label.bad { color: #e63946; }
+    .section-label.good { color: #2d6a4f; }
+
+    .comment {
+      max-width: 800px;
+      margin: 0.5rem auto;
+      padding: 0.75rem 1rem;
+      background: #fff;
+      border-left: 4px solid #0077b6;
+      font-size: 0.9rem;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =====================================================
+       Ejemplo comparativo: Pagina INACCESIBLE vs ACCESIBLE
+       Abre este archivo y navega con Tab para ver la diferencia
+       ===================================================== -->
+
+  <div style="max-width: 800px; margin: 2rem auto; text-align: center;">
+    <h1>Comparacion: Inaccesible vs Accesible</h1>
+    <p>Navega con la tecla Tab para experimentar la diferencia.</p>
+  </div>
+
+  <!-- ============================================
+       VERSION INACCESIBLE
+       Problemas: sin landmarks, sin semantica,
+       sin teclado, sin alt text, sin estructura
+       ============================================ -->
+
+  <p class="section-label bad">VERSION INACCESIBLE</p>
+
+  <div class="comment">
+    Problemas: usa divs para todo, onclick en spans, sin alt text,
+    sin encabezados, sin landmarks, sin navegacion por teclado.
+  </div>
+
+  <div class="bad-example">
+    <!-- MAL: div en lugar de header -->
+    <div class="bad-header">Mi Sitio Web</div>
+
+    <!-- MAL: spans con onclick en lugar de enlaces reales -->
+    <div class="bad-nav">
+      <span onclick="location.href='#'">Inicio</span>
+      <span onclick="location.href='#'">Servicios</span>
+      <span onclick="location.href='#'">Contacto</span>
+    </div>
+
+    <!-- MAL: div en lugar de main, sin encabezados -->
+    <div style="padding: 1rem 0;">
+      <div style="font-size: 1.3rem; font-weight: bold;">Bienvenido</div>
+      <div>Este es un sitio de ejemplo.</div>
+
+      <!-- MAL: imagen sin alt text -->
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Crect fill='%23ddd' width='200' height='100'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23666'%3EImagen%3C/text%3E%3C/svg%3E" style="margin: 1rem 0; display: block;">
+
+      <!-- MAL: div como boton, no focusable por teclado -->
+      <div class="bad-btn" onclick="alert('Enviado')">Enviar formulario</div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       VERSION ACCESIBLE
+       Solucion: landmarks, semantica, teclado,
+       alt text, encabezados, skip link
+       ============================================ -->
+
+  <p class="section-label good">VERSION ACCESIBLE</p>
+
+  <div class="comment">
+    Solucion: HTML semantico, landmarks, skip link, alt text descriptivo,
+    jerarquia de encabezados, boton nativo, foco visible.
+  </div>
+
+  <div class="good-example">
+
+    <!-- BIEN: Skip link para saltar la navegacion -->
+    <a href="#contenido-principal" class="skip-link">
+      Saltar al contenido principal
+    </a>
+
+    <!-- BIEN: <header> como landmark banner -->
+    <header>
+      <h2>Mi Sitio Web</h2>
+    </header>
+
+    <!-- BIEN: <nav> con aria-label para diferenciar navegaciones -->
+    <nav aria-label="Principal">
+      <ul>
+        <!-- BIEN: enlaces reales, focusables, con href -->
+        <li><a href="#inicio">Inicio</a></li>
+        <li><a href="#servicios">Servicios</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ul>
+    </nav>
+
+    <!-- BIEN: <main> como landmark principal con id para skip link -->
+    <main id="contenido-principal">
+      <!-- BIEN: encabezado que describe la seccion -->
+      <h3>Bienvenido a nuestro sitio</h3>
+      <p>Este es un sitio de ejemplo construido con HTML semantico.</p>
+
+      <!-- BIEN: imagen con alt descriptivo -->
+      <img
+        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Crect fill='%23d8f3dc' width='200' height='100'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%231b4332'%3ELogo%3C/text%3E%3C/svg%3E"
+        alt="Logo de Mi Sitio Web con fondo verde"
+        style="margin: 1rem 0; display: block;"
+      >
+
+      <!-- BIEN: boton nativo — focusable, activable con Enter/Espacio -->
+      <button type="button" onclick="alert('Formulario enviado correctamente')">
+        Enviar formulario
+      </button>
+    </main>
+
+    <!-- BIEN: <footer> como landmark contentinfo -->
+    <footer>
+      <p>2026 Mi Sitio Web. Todos los derechos reservados.</p>
+    </footer>
+
+  </div>
+
+</body>
+</html>

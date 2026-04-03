@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejemplo: Navegacion accesible con skip link y focus management</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      line-height: 1.6;
+    }
+
+    /* ==============================================
+       SKIP LINK
+       Oculto por defecto, visible al recibir foco
+       con Tab. Permite saltar la navegacion.
+       ============================================== */
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 0;
+      background: #0077b6;
+      color: #fff;
+      padding: 0.75rem 1.5rem;
+      z-index: 1000;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 1rem;
+    }
+    .skip-link:focus {
+      top: 0;
+    }
+
+    /* ==============================================
+       NAVEGACION
+       ============================================== */
+    .site-header {
+      background: #1a1a2e;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .site-header .logo {
+      color: #0077b6;
+      font-size: 1.3rem;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .site-nav ul {
+      list-style: none;
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .site-nav a {
+      color: #e8e8e8;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 0.35rem 0;
+      position: relative;
+    }
+
+    /* Indicador de pagina actual para lectores de pantalla y visual */
+    .site-nav a[aria-current="page"] {
+      color: #0077b6;
+      border-bottom: 2px solid #0077b6;
+    }
+
+    /* ==============================================
+       FOCUS VISIBLE
+       Estilo de foco claro y consistente para todos
+       los elementos interactivos.
+       ============================================== */
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible,
+    [tabindex]:focus-visible {
+      outline: 3px solid #0077b6;
+      outline-offset: 2px;
+    }
+
+    /* ==============================================
+       CONTENIDO PRINCIPAL
+       ============================================== */
+    .main-content {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .main-content h1 { margin-bottom: 1rem; }
+
+    .card-list {
+      display: grid;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .card {
+      background: #fff;
+      padding: 1.25rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .card p { color: #555; font-size: 0.95rem; }
+
+    /* ==============================================
+       BOTON QUE ABRE EL MODAL
+       ============================================== */
+    .open-modal-btn {
+      padding: 0.75rem 1.5rem;
+      background: #0077b6;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 1rem 0;
+    }
+
+    /* ==============================================
+       MODAL ACCESIBLE
+       - role="dialog" y aria-modal="true"
+       - Focus trap con JavaScript
+       - Escape para cerrar
+       ============================================== */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 500;
+    }
+
+    .modal-overlay[hidden] { display: none; }
+
+    .modal {
+      background: #fff;
+      border-radius: 8px;
+      padding: 2rem;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    .modal h2 { margin-bottom: 1rem; }
+    .modal p { margin-bottom: 1rem; color: #555; }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+    }
+
+    .modal-actions button {
+      padding: 0.5rem 1.25rem;
+      border-radius: 4px;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: #0077b6;
+      color: #fff;
+      border: none;
+      font-weight: 600;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #555;
+      border: 2px solid #ccc;
+    }
+
+    /* ==============================================
+       TABS CON ROVING TABINDEX
+       Tab entra/sale con Tab,
+       flechas navegan entre tabs.
+       ============================================== */
+    .tabs-container { margin: 2rem 0; }
+
+    .tab-list {
+      display: flex;
+      border-bottom: 2px solid #ddd;
+      gap: 0;
+    }
+
+    .tab-list button {
+      padding: 0.75rem 1.25rem;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #666;
+      cursor: pointer;
+      position: relative;
+      bottom: -2px;
+    }
+
+    .tab-list button[aria-selected="true"] {
+      color: #0077b6;
+      border-bottom-color: #0077b6;
+    }
+
+    .tab-panel {
+      padding: 1.25rem;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+    }
+
+    .tab-panel[hidden] { display: none; }
+
+    /* Footer */
+    .site-footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: #888;
+      font-size: 0.85rem;
+      border-top: 1px solid #ddd;
+      margin-top: 3rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==============================================
+       SKIP LINK
+       Primer elemento del body. Presiona Tab para
+       verlo. Presiona Enter para saltar al contenido.
+       ============================================== -->
+  <a href="#main" class="skip-link">Saltar al contenido principal</a>
+
+  <!-- ==============================================
+       HEADER con navegacion
+       - <header> = landmark banner
+       - <nav> con aria-label diferencia de otras navs
+       - aria-current="page" indica la pagina actual
+       ============================================== -->
+  <header class="site-header">
+    <a href="#" class="logo">MiSitio</a>
+    <nav aria-label="Principal" class="site-nav">
+      <ul>
+        <li><a href="#" aria-current="page">Inicio</a></li>
+        <li><a href="#">Servicios</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Contacto</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- ==============================================
+       CONTENIDO PRINCIPAL
+       - tabindex="-1" permite que el skip link
+         mueva el foco aqui programaticamente
+       ============================================== -->
+  <main id="main" class="main-content" tabindex="-1">
+
+    <h1>Navegacion por Teclado: Ejemplo Interactivo</h1>
+    <p>Usa Tab para navegar, Enter/Espacio para activar, Escape para cerrar el modal, y flechas para los tabs.</p>
+
+    <!-- Tarjetas de contenido -->
+    <div class="card-list">
+      <div class="card">
+        <h2>Skip Link</h2>
+        <p>Presiona Tab al cargar la pagina. Veras el enlace "Saltar al contenido principal" aparecer arriba.</p>
+      </div>
+      <div class="card">
+        <h2>Focus Visible</h2>
+        <p>Navega con Tab y observa el outline azul en cada elemento interactivo. Nunca se pierde el indicador de foco.</p>
+      </div>
+    </div>
+
+    <!-- ==============================================
+         MODAL
+         - Boton que abre el modal
+         - Focus trap: Tab no sale del modal
+         - Escape cierra y restaura foco
+         ============================================== -->
+    <h2>Modal con Focus Trap</h2>
+    <p>Al abrir el modal, el foco se mueve dentro. Tab cicla entre los elementos del modal. Escape cierra y regresa el foco.</p>
+
+    <button class="open-modal-btn" id="btn-abrir-modal">
+      Abrir modal de ejemplo
+    </button>
+
+    <!-- Modal overlay: hidden por defecto -->
+    <div
+      class="modal-overlay"
+      id="modal-overlay"
+      hidden
+    >
+      <!-- role="dialog" y aria-modal indican al lector que es un dialogo modal
+           aria-labelledby vincula el titulo del modal como nombre accesible -->
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-titulo"
+      >
+        <h2 id="modal-titulo">Confirmar accion</h2>
+        <p>Esta es una ventana modal de ejemplo. El foco esta atrapado aqui. Presiona Escape o el boton Cancelar para cerrar.</p>
+        <div class="modal-actions">
+          <button class="btn-secondary" id="btn-cancelar">Cancelar</button>
+          <button class="btn-primary" id="btn-aceptar">Aceptar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==============================================
+         TABS CON ROVING TABINDEX
+         - role="tablist", role="tab", role="tabpanel"
+         - Solo el tab activo tiene tabindex="0"
+         - Flechas cambian entre tabs
+         ============================================== -->
+    <div class="tabs-container">
+      <h2>Tabs con Roving Tabindex</h2>
+      <p>Tab entra y sale del widget. Usa flechas izquierda/derecha para cambiar entre pestanas.</p>
+
+      <!-- tablist: contenedor de tabs -->
+      <div role="tablist" aria-label="Ejemplo de pestanas" class="tab-list" id="tablist">
+        <!-- Solo el tab activo tiene tabindex="0", los demas tabindex="-1" -->
+        <button role="tab" id="tab-1" aria-selected="true"  aria-controls="panel-1" tabindex="0">HTML</button>
+        <button role="tab" id="tab-2" aria-selected="false" aria-controls="panel-2" tabindex="-1">CSS</button>
+        <button role="tab" id="tab-3" aria-selected="false" aria-controls="panel-3" tabindex="-1">JavaScript</button>
+      </div>
+
+      <!-- Paneles de contenido -->
+      <div role="tabpanel" id="panel-1" aria-labelledby="tab-1" class="tab-panel">
+        <p><strong>HTML</strong> proporciona la estructura semantica del documento. Usa elementos como header, nav, main y footer para crear landmarks accesibles.</p>
+      </div>
+      <div role="tabpanel" id="panel-2" aria-labelledby="tab-2" class="tab-panel" hidden>
+        <p><strong>CSS</strong> controla la presentacion visual. Es crucial para el contraste de color, los estilos de foco visible y los disenos responsivos accesibles.</p>
+      </div>
+      <div role="tabpanel" id="panel-3" aria-labelledby="tab-3" class="tab-panel" hidden>
+        <p><strong>JavaScript</strong> maneja la interactividad: focus management, ARIA dinamico, live regions y el comportamiento de widgets como tabs y modales.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>Ejemplo de navegacion accesible por teclado — Modulo 26 Accesibilidad Web</p>
+  </footer>
+
+  <script>
+    // ==============================================
+    // MODAL: Focus trap y gestion de foco
+    // ==============================================
+
+    const btnAbrir = document.getElementById('btn-abrir-modal');
+    const overlay = document.getElementById('modal-overlay');
+    const btnCancelar = document.getElementById('btn-cancelar');
+    const btnAceptar = document.getElementById('btn-aceptar');
+    let disparadorModal = null; // guardar que elemento abrio el modal
+
+    function abrirModal() {
+      // Guardar el elemento que abrio el modal para restaurar foco despues
+      disparadorModal = document.activeElement;
+      overlay.hidden = false;
+
+      // Mover foco al primer boton interactivo del modal
+      btnCancelar.focus();
+    }
+
+    function cerrarModal() {
+      overlay.hidden = true;
+
+      // Restaurar foco al elemento que abrio el modal
+      if (disparadorModal) {
+        disparadorModal.focus();
+      }
+    }
+
+    btnAbrir.addEventListener('click', abrirModal);
+    btnCancelar.addEventListener('click', cerrarModal);
+    btnAceptar.addEventListener('click', cerrarModal);
+
+    // Focus trap: Tab cicla entre los elementos del modal
+    overlay.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        cerrarModal();
+        return;
+      }
+
+      if (e.key !== 'Tab') return;
+
+      // Obtener elementos focusables dentro del modal
+      const modal = overlay.querySelector('.modal');
+      const focusables = modal.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      const primero = focusables[0];
+      const ultimo = focusables[focusables.length - 1];
+
+      // Shift+Tab en el primer elemento → ir al ultimo
+      if (e.shiftKey && document.activeElement === primero) {
+        e.preventDefault();
+        ultimo.focus();
+      }
+      // Tab en el ultimo elemento → ir al primero
+      else if (!e.shiftKey && document.activeElement === ultimo) {
+        e.preventDefault();
+        primero.focus();
+      }
+    });
+
+    // ==============================================
+    // TABS: Roving tabindex con flechas
+    // ==============================================
+
+    const tablist = document.getElementById('tablist');
+    const tabs = tablist.querySelectorAll('[role="tab"]');
+
+    tabs.forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        activarTab(tab);
+      });
+
+      tab.addEventListener('keydown', function(e) {
+        let index = Array.from(tabs).indexOf(tab);
+
+        // Flecha derecha → siguiente tab
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          index = (index + 1) % tabs.length;
+          activarTab(tabs[index]);
+          tabs[index].focus();
+        }
+        // Flecha izquierda → tab anterior
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          index = (index - 1 + tabs.length) % tabs.length;
+          activarTab(tabs[index]);
+          tabs[index].focus();
+        }
+        // Home → primer tab
+        if (e.key === 'Home') {
+          e.preventDefault();
+          activarTab(tabs[0]);
+          tabs[0].focus();
+        }
+        // End → ultimo tab
+        if (e.key === 'End') {
+          e.preventDefault();
+          activarTab(tabs[tabs.length - 1]);
+          tabs[tabs.length - 1].focus();
+        }
+      });
+    });
+
+    function activarTab(tabSeleccionado) {
+      // Desactivar todos los tabs
+      tabs.forEach(function(t) {
+        t.setAttribute('aria-selected', 'false');
+        t.setAttribute('tabindex', '-1');
+        document.getElementById(t.getAttribute('aria-controls')).hidden = true;
+      });
+
+      // Activar el tab seleccionado
+      tabSeleccionado.setAttribute('aria-selected', 'true');
+      tabSeleccionado.setAttribute('tabindex', '0');
+      document.getElementById(tabSeleccionado.getAttribute('aria-controls')).hidden = false;
+    }
+  </script>
+
+</body>
+</html>

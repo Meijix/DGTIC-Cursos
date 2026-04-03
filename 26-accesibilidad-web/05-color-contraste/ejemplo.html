@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejemplo: Contraste adecuado e indicadores no basados en color</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      line-height: 1.6;
+      padding: 2rem;
+    }
+
+    h1 { text-align: center; margin-bottom: 0.5rem; }
+    .intro { text-align: center; color: #555; margin-bottom: 2rem; max-width: 700px; margin-left: auto; margin-right: auto; }
+
+    .container { max-width: 900px; margin: 0 auto; }
+
+    /* =============================================
+       Seccion de ejemplos
+       ============================================= */
+    .example-section {
+      background: #fff;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .example-section h2 {
+      font-size: 1.2rem;
+      color: #0077b6;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e8f4f8;
+    }
+
+    /* =============================================
+       DEMO 1: Contraste de texto
+       Muestra textos con diferentes ratios
+       ============================================= */
+    .contrast-demo {
+      display: grid;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .contrast-sample {
+      padding: 1rem;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .contrast-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 50px;
+    }
+
+    .pass { background: #d4edda; color: #1B7A3D; }
+    .fail { background: #f8d7da; color: #C7254E; }
+
+    /* =============================================
+       DEMO 2: Estados sin depender del color
+       Muestra como indicar estados accesiblemente
+       ============================================= */
+    .status-list {
+      display: grid;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      border-left: 4px solid;
+    }
+
+    /* Cada estado tiene: color de fondo + borde + icono + texto
+       Triple indicador: no depende solo del color */
+    .status-success {
+      background: #d4edda;
+      border-color: #1B7A3D;
+      color: #1a1a1a;
+    }
+    .status-error {
+      background: #f8d7da;
+      border-color: #C7254E;
+      color: #1a1a1a;
+    }
+    .status-warning {
+      background: #fff3cd;
+      border-color: #856404;
+      color: #1a1a1a;
+    }
+    .status-info {
+      background: #cce5ff;
+      border-color: #004085;
+      color: #1a1a1a;
+    }
+
+    .status-icon {
+      font-size: 1.2rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      width: 24px;
+      text-align: center;
+    }
+
+    /* =============================================
+       DEMO 3: Enlaces accesibles (no solo color)
+       ============================================= */
+    .text-demo {
+      margin: 1rem 0;
+      max-width: 600px;
+    }
+
+    .text-demo p { margin-bottom: 1rem; }
+
+    /* Enlaces con subrayado ademas del color */
+    .text-demo a {
+      color: #0055AA;          /* 7.24:1 sobre blanco — AAA */
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .text-demo a:focus-visible {
+      outline: 3px solid #0077b6;
+      outline-offset: 2px;
+    }
+
+    /* =============================================
+       DEMO 4: Formulario con indicadores multiples
+       ============================================= */
+    .form-demo {
+      max-width: 400px;
+      margin: 1rem 0;
+    }
+
+    .field {
+      margin-bottom: 1.25rem;
+    }
+
+    .field label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: #1a1a1a;         /* 15.9:1 — AAA */
+    }
+
+    .field input {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: 2px solid #767676;  /* 4.54:1 — AA para UI */
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+
+    .field input:focus-visible {
+      outline: 3px solid #0077b6;
+      outline-offset: 1px;
+    }
+
+    /* Campo con error: color + icono + texto descriptivo */
+    .field-error input {
+      border-color: #C7254E;
+    }
+
+    .error-message {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: #C7254E;         /* 5.64:1 — AA */
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 0.35rem;
+    }
+
+    /* Campo correcto: color + icono + texto */
+    .field-success input {
+      border-color: #1B7A3D;
+    }
+
+    .success-message {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: #1B7A3D;         /* 5.11:1 — AA */
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 0.35rem;
+    }
+
+    /* =============================================
+       DEMO 5: Modo oscuro
+       ============================================= */
+    .dark-demo {
+      background: #1a1a2e;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+    }
+
+    .dark-demo .text-primary {
+      color: #e8e8e8;       /* 13.5:1 — AAA */
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .dark-demo .text-secondary {
+      color: #a0a0b8;       /* 5.7:1 — AA */
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .dark-demo .text-muted {
+      color: #6b6b80;       /* 3.1:1 — Solo texto grande */
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .dark-demo .text-link {
+      color: #4da8da;       /* 5.91:1 — AA */
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .dark-demo .dark-btn {
+      display: inline-block;
+      margin-top: 0.75rem;
+      padding: 0.5rem 1.25rem;
+      background: #0077b6;
+      color: #ffffff;       /* 4.56:1 — AA */
+      border: none;
+      border-radius: 4px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .dark-demo .dark-btn:focus-visible {
+      outline: 3px solid #4da8da;
+      outline-offset: 2px;
+    }
+
+    .ratio-label {
+      display: inline-block;
+      font-size: 0.75rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      margin-left: 0.5rem;
+      font-weight: 700;
+    }
+
+    .note {
+      background: #f0f0f0;
+      border-left: 4px solid #0077b6;
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      color: #333;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Color y Contraste Accesible</h1>
+  <p class="intro">
+    Todos los colores en esta pagina cumplen con los ratios de contraste WCAG AA.
+    Los estados usan multiples indicadores, no solo color.
+  </p>
+
+  <div class="container">
+
+    <!-- =============================================
+         DEMO 1: Contraste de texto
+         Muestra la diferencia entre texto con buen
+         y mal contraste
+         ============================================= -->
+    <div class="example-section">
+      <h2>1. Ratios de contraste de texto</h2>
+      <p>Compara textos con diferentes niveles de contraste sobre fondo blanco.</p>
+
+      <div class="contrast-demo">
+        <!-- Texto con contraste AAA -->
+        <div class="contrast-sample" style="background: #ffffff;">
+          <span style="color: #1a1a1a; font-size: 1rem;">
+            Texto #1a1a1a — alta legibilidad
+          </span>
+          <span class="contrast-label pass">15.9:1 AAA</span>
+        </div>
+
+        <!-- Texto con contraste AA -->
+        <div class="contrast-sample" style="background: #ffffff;">
+          <span style="color: #555555; font-size: 1rem;">
+            Texto #555555 — buena legibilidad
+          </span>
+          <span class="contrast-label pass">7.46:1 AAA</span>
+        </div>
+
+        <!-- Texto con contraste minimo AA -->
+        <div class="contrast-sample" style="background: #ffffff;">
+          <span style="color: #767676; font-size: 1rem;">
+            Texto #767676 — minimo aceptable
+          </span>
+          <span class="contrast-label pass">4.54:1 AA</span>
+        </div>
+
+        <!-- Texto con contraste INSUFICIENTE -->
+        <div class="contrast-sample" style="background: #ffffff;">
+          <span style="color: #b0b0b0; font-size: 1rem;">
+            Texto #b0b0b0 — INSUFICIENTE
+          </span>
+          <span class="contrast-label fail">2.23:1 FALLA</span>
+        </div>
+      </div>
+
+      <div class="note">
+        <strong>Nota:</strong> El ultimo ejemplo falla WCAG AA.
+        No uses grises tan claros para texto informativo sobre fondo blanco.
+      </div>
+    </div>
+
+    <!-- =============================================
+         DEMO 2: Estados con indicadores multiples
+         Color + icono + texto = triple indicador
+         ============================================= -->
+    <div class="example-section">
+      <h2>2. Estados sin depender solo del color</h2>
+      <p>Cada estado usa tres indicadores: color de fondo, icono y texto descriptivo.
+         Un usuario daltonico puede distinguirlos sin ver el color.</p>
+
+      <div class="status-list">
+        <!-- Exito: verde + check + texto -->
+        <div class="status-item status-success" role="status">
+          <span class="status-icon" aria-hidden="true">&#10003;</span>
+          <span><strong>Exito:</strong> Tu cuenta ha sido creada correctamente.</span>
+        </div>
+
+        <!-- Error: rojo + X + texto -->
+        <div class="status-item status-error" role="alert">
+          <span class="status-icon" aria-hidden="true">&#10007;</span>
+          <span><strong>Error:</strong> No se pudo procesar el pago. Verifica los datos.</span>
+        </div>
+
+        <!-- Advertencia: amarillo + ! + texto -->
+        <div class="status-item status-warning" role="status">
+          <span class="status-icon" aria-hidden="true">&#9888;</span>
+          <span><strong>Advertencia:</strong> Tu sesion expira en 5 minutos.</span>
+        </div>
+
+        <!-- Informacion: azul + i + texto -->
+        <div class="status-item status-info" role="status">
+          <span class="status-icon" aria-hidden="true">&#8505;</span>
+          <span><strong>Informacion:</strong> El mantenimiento sera el domingo a las 3am.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- =============================================
+         DEMO 3: Enlaces distinguibles
+         Color + subrayado (no solo color)
+         ============================================= -->
+    <div class="example-section">
+      <h2>3. Enlaces distinguibles en texto</h2>
+      <p>Los enlaces usan color <strong>y</strong> subrayado para diferenciarse del texto normal.</p>
+
+      <div class="text-demo">
+        <p>
+          La accesibilidad web beneficia a todos los usuarios. Segun el
+          <a href="#">informe de la OMS sobre discapacidad</a>, mas de mil millones
+          de personas en el mundo tienen alguna forma de discapacidad. Puedes aprender
+          mas sobre los estandares en la <a href="#">documentacion oficial de WCAG 2.1</a>
+          publicada por el W3C.
+        </p>
+      </div>
+
+      <div class="note">
+        <strong>Tecnica:</strong> Los enlaces tienen color #0055AA (7.24:1)
+        y text-decoration: underline. El subrayado es el indicador no-color.
+      </div>
+    </div>
+
+    <!-- =============================================
+         DEMO 4: Campos de formulario con indicadores
+         Color + icono + texto (triple indicador)
+         ============================================= -->
+    <div class="example-section">
+      <h2>4. Formulario con indicadores multiples</h2>
+      <p>Los campos con error y exito usan borde de color, icono y texto descriptivo.</p>
+
+      <div class="form-demo">
+        <!-- Campo con error: borde rojo + icono X + mensaje -->
+        <div class="field field-error">
+          <label for="demo-email">Correo electronico</label>
+          <input
+            type="email"
+            id="demo-email"
+            value="correo-invalido"
+            aria-invalid="true"
+            aria-describedby="demo-email-error"
+          >
+          <!-- Icono + texto como indicador adicional al borde rojo -->
+          <p class="error-message" id="demo-email-error" role="alert">
+            <span aria-hidden="true">&#10007;</span>
+            Ingresa un correo valido (ejemplo: usuario@dominio.com).
+          </p>
+        </div>
+
+        <!-- Campo correcto: borde verde + icono check + mensaje -->
+        <div class="field field-success">
+          <label for="demo-name">Nombre completo</label>
+          <input
+            type="text"
+            id="demo-name"
+            value="Maria Garcia"
+            aria-invalid="false"
+            aria-describedby="demo-name-success"
+          >
+          <p class="success-message" id="demo-name-success">
+            <span aria-hidden="true">&#10003;</span>
+            Campo correcto.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- =============================================
+         DEMO 5: Modo oscuro con contraste verificado
+         Todos los colores cumplen AA sobre el fondo
+         ============================================= -->
+    <div class="example-section">
+      <h2>5. Modo oscuro con contraste verificado</h2>
+      <p>Todos los colores del modo oscuro estan verificados contra el fondo #1a1a2e.</p>
+
+      <div class="dark-demo">
+        <p class="text-primary">
+          Texto principal #e8e8e8
+          <span class="ratio-label pass">13.5:1</span>
+        </p>
+        <p class="text-secondary">
+          Texto secundario #a0a0b8
+          <span class="ratio-label pass">5.7:1</span>
+        </p>
+        <p class="text-muted">
+          Texto auxiliar #6b6b80 (solo para texto grande)
+          <span class="ratio-label" style="background:#fff3cd;color:#856404;">3.1:1</span>
+        </p>
+        <p>
+          <a href="#" class="text-link">
+            Enlace #4da8da con subrayado
+          </a>
+          <span class="ratio-label pass">5.91:1</span>
+        </p>
+        <div>
+          <button class="dark-btn">Boton de accion</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
