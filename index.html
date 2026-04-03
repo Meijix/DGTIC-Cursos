@@ -3,6 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Ejercicios y proyectos progresivos de HTML, CSS, JavaScript, Python, PHP, Laravel, Node.js, GitHub Actions, estructuras de datos y algoritmos. DGTIC — UNAM.">
+  <meta property="og:title" content="DGTIC Cursos — Desarrollo Web y Programacion">
+  <meta property="og:description" content="23 modulos progresivos: desde fundamentos HTML/CSS hasta estructuras de datos, algoritmos y CI/CD con GitHub Actions.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
   <title>DGTIC Cursos — Tabla de Contenidos</title>
 
   <!--
@@ -310,6 +316,7 @@
        Las 4 reglas de abajo aplican --accent a 4 elementos diferentes,
        pero funcionan para las 10 tarjetas con un solo bloque de código:
     */
+    .c0  { --accent: #8338ec; }
     .c1  { --accent: #e63946; }
     .c2  { --accent: #f4a261; }
     .c3  { --accent: #2a9d8f; }
@@ -631,6 +638,25 @@
   -->
   <main class="grid">
 
+    <!-- 00 — Prerequisito: ejercicios de programación con Python -->
+    <article class="card c0">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-number">00</div>
+        <h2>Ejercicios de Programacion</h2>
+        <p>15 ejercicios de logica con Python: condicionales, ciclos, funciones, validacion y juegos. Prerequisito del curso.</p>
+      </div>
+      <div class="card-tags">
+        <span class="tag">Python</span>
+        <span class="tag">Logica</span>
+        <span class="tag">Prerequisito</span>
+      </div>
+      <div class="card-actions">
+        <a class="card-link" href="00-ejercicios-programacion/index.html">Ver ejercicios</a>
+        <button type="button" class="card-conceptos-btn" data-md="00-ejercicios-programacion/CHEATSHEET.md" data-title="Cheatsheet — Ejercicios">Cheatsheet</button>
+      </div>
+    </article>
+
     <!-- 01 — Fundamentos HTML: el punto de partida, solo estructura -->
     <article class="card c1">
       <div class="card-accent"></div>
@@ -865,7 +891,7 @@
         <span class="tag">API</span>
       </div>
       <div class="card-actions">
-        <a class="card-link" href="12-javascript-fundamentos/PracticaFinalNat/index.html">Ver proyecto</a>
+        <a class="card-link" href="12-javascript-fundamentos/index.html">Ver curso</a>
         <button type="button" class="card-conceptos-btn" data-md="12-javascript-fundamentos/CONCEPTOS.md" data-title="JavaScript — Fundamentos">Conceptos</button>
         <button type="button" class="card-conceptos-btn" data-md="12-javascript-fundamentos/CHEATSHEET.md" data-title="Cheatsheet — JavaScript — Fundamentos">Cheatsheet</button>
       </div>
@@ -885,7 +911,7 @@
         <span class="tag">Sesiones</span>
       </div>
       <div class="card-actions">
-        <a class="card-link" href="13-php-fundamentos/TareaFormulario_NEMB/formulario.php">Ver proyecto</a>
+        <a class="card-link" href="13-php-fundamentos/index.html">Ver curso</a>
         <button type="button" class="card-conceptos-btn" data-md="13-php-fundamentos/CONCEPTOS.md" data-title="PHP — Fundamentos">Conceptos</button>
         <button type="button" class="card-conceptos-btn" data-md="13-php-fundamentos/CHEATSHEET.md" data-title="Cheatsheet — PHP — Fundamentos">Cheatsheet</button>
       </div>
@@ -905,7 +931,7 @@
         <span class="tag">Herencia</span>
       </div>
       <div class="card-actions">
-        <a class="card-link" href="14-php-orientado-a-objetos/index.php">Ver ejercicios</a>
+        <a class="card-link" href="14-php-orientado-a-objetos/index.html">Ver curso</a>
         <button type="button" class="card-conceptos-btn" data-md="14-php-orientado-a-objetos/CONCEPTOS.md" data-title="PHP — Orientado a Objetos">Conceptos</button>
         <button type="button" class="card-conceptos-btn" data-md="14-php-orientado-a-objetos/CHEATSHEET.md" data-title="Cheatsheet — PHP — Orientado a Objetos">Cheatsheet</button>
       </div>
@@ -925,7 +951,7 @@
         <span class="tag">Eloquent</span>
       </div>
       <div class="card-actions">
-        <a class="card-link" href="15-laravel-crud/">Ver proyecto</a>
+        <a class="card-link" href="15-laravel-crud/index.html">Ver curso</a>
         <button type="button" class="card-conceptos-btn" data-md="15-laravel-crud/CONCEPTOS.md" data-title="Laravel — CRUD">Conceptos</button>
         <button type="button" class="card-conceptos-btn" data-md="15-laravel-crud/CHEATSHEET.md" data-title="Cheatsheet — Laravel — CRUD">Cheatsheet</button>
       </div>
@@ -945,7 +971,7 @@
         <span class="tag">Tailwind</span>
       </div>
       <div class="card-actions">
-        <a class="card-link" href="16-laravel-livewire/">Ver proyecto</a>
+        <a class="card-link" href="16-laravel-livewire/index.html">Ver curso</a>
         <button type="button" class="card-conceptos-btn" data-md="16-laravel-livewire/CONCEPTOS.md" data-title="Laravel — Livewire">Conceptos</button>
         <button type="button" class="card-conceptos-btn" data-md="16-laravel-livewire/CHEATSHEET.md" data-title="Cheatsheet — Laravel — Livewire">Cheatsheet</button>
       </div>
@@ -965,7 +991,7 @@
         <span class="tag">Testing</span>
       </div>
       <div class="card-actions">
-        <a class="card-link" href="17-laravel-evaluacion/">Ver proyecto</a>
+        <a class="card-link" href="17-laravel-evaluacion/index.html">Ver curso</a>
         <button type="button" class="card-conceptos-btn" data-md="17-laravel-evaluacion/CONCEPTOS.md" data-title="Laravel — Evaluación">Conceptos</button>
         <button type="button" class="card-conceptos-btn" data-md="17-laravel-evaluacion/CHEATSHEET.md" data-title="Cheatsheet — Laravel — Evaluación">Cheatsheet</button>
       </div>
@@ -985,7 +1011,7 @@
         <span class="tag">AWS</span>
       </div>
       <div class="card-actions">
-        <a class="card-link" href="18-nodejs-intro/">Ver proyecto</a>
+        <a class="card-link" href="18-nodejs-intro/index.html">Ver curso</a>
         <button type="button" class="card-conceptos-btn" data-md="18-nodejs-intro/CONCEPTOS.md" data-title="Node.js — Introducción">Conceptos</button>
         <button type="button" class="card-conceptos-btn" data-md="18-nodejs-intro/CHEATSHEET.md" data-title="Cheatsheet — Node.js — Introducción">Cheatsheet</button>
       </div>
@@ -1005,7 +1031,7 @@
         <span class="tag">API REST</span>
       </div>
       <div class="card-actions">
-        <a class="card-link" href="19-nodejs-challenge-api/">Ver proyecto</a>
+        <a class="card-link" href="19-nodejs-challenge-api/index.html">Ver curso</a>
         <button type="button" class="card-conceptos-btn" data-md="19-nodejs-challenge-api/CONCEPTOS.md" data-title="Node.js — Challenge API">Conceptos</button>
         <button type="button" class="card-conceptos-btn" data-md="19-nodejs-challenge-api/CHEATSHEET.md" data-title="Cheatsheet — Node.js — Challenge API">Cheatsheet</button>
       </div>
@@ -1047,7 +1073,7 @@
       </div>
       <div class="card-actions">
         <a class="card-link" href="21-estructuras-de-datos/index.html">Ver curso</a>
-        <button type="button" class="card-conceptos-btn" data-md="21-estructuras-de-datos/CHEATSHEET.md" data-title="Estructuras de Datos">Conceptos</button>
+        <button type="button" class="card-conceptos-btn" data-md="21-estructuras-de-datos/CONCEPTOS.md" data-title="Estructuras de Datos">Conceptos</button>
         <button type="button" class="card-conceptos-btn" data-md="21-estructuras-de-datos/CHEATSHEET.md" data-title="Cheatsheet — Estructuras de Datos">Cheatsheet</button>
       </div>
     </article>
@@ -1067,7 +1093,7 @@
       </div>
       <div class="card-actions">
         <a class="card-link" href="22-algoritmos-ordenacion/index.html">Ver curso</a>
-        <button type="button" class="card-conceptos-btn" data-md="22-algoritmos-ordenacion/CHEATSHEET.md" data-title="Algoritmos de Ordenacion">Conceptos</button>
+        <button type="button" class="card-conceptos-btn" data-md="22-algoritmos-ordenacion/CONCEPTOS.md" data-title="Algoritmos de Ordenacion">Conceptos</button>
         <button type="button" class="card-conceptos-btn" data-md="22-algoritmos-ordenacion/CHEATSHEET.md" data-title="Cheatsheet — Algoritmos de Ordenacion">Cheatsheet</button>
       </div>
     </article>
@@ -1100,7 +1126,7 @@
          Otras comunes: &amp; (&), &lt; (<), &gt; (>), &copy; (©) -->
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@15.0.4/marked.min.js"></script>
   <script>
   (function () {
     var modal = document.getElementById('conceptos-modal');
