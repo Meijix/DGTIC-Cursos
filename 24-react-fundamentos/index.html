@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>React Fundamentos — Guia Completa</title>
+
+  <style>
+
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #1a1a2e;
+      --bg-card: #16213e;
+      --bg-card-hover: #1b2a4a;
+      --accent: #61dafb;
+      --accent-dim: rgba(97, 218, 251, 0.15);
+      --text-primary: #e8e8e8;
+      --text-secondary: #a0a0b8;
+      --text-muted: #6b6b80;
+      --badge-basico: #2d6a4f;
+      --badge-intermedio: #e76f51;
+      --badge-avanzado: #e63946;
+      --radius: 12px;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .back-link {
+      display: inline-block;
+      padding: 1rem 1.5rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: opacity 0.2s;
+    }
+
+    .back-link:hover { opacity: 0.8; }
+
+    header {
+      text-align: center;
+      padding: 2rem 1.5rem 2.5rem;
+      background: linear-gradient(135deg, #1a1a2e, #0f3460);
+      border-bottom: 3px solid var(--accent);
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.5rem;
+      color: var(--accent);
+    }
+
+    header p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 560px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* Barra de progresion */
+    .progression {
+      max-width: 1000px;
+      margin: 2rem auto 1rem;
+      padding: 1.5rem;
+    }
+
+    .progression h2 {
+      text-align: center;
+      font-size: 1.3rem;
+      color: var(--text-primary);
+      margin-bottom: 1.5rem;
+    }
+
+    .progression-path {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+
+    .path-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 1rem;
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      min-width: 160px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .path-node .node-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    .path-node .node-label {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .path-node .node-sections {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .node-basico .node-number { background: var(--badge-basico); }
+    .node-intermedio .node-number { background: var(--badge-intermedio); }
+    .node-avanzado .node-number { background: var(--badge-avanzado); }
+
+    .path-arrow {
+      display: flex;
+      align-items: center;
+      padding: 0 0.5rem;
+      color: var(--text-muted);
+      font-size: 1.4rem;
+    }
+
+    /* Grid de tarjetas */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: 1.5rem auto 2.5rem;
+      padding: 0 1.5rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-accent { height: 5px; }
+    .card-accent.basico { background: var(--badge-basico); }
+    .card-accent.intermedio { background: var(--badge-intermedio); }
+    .card-accent.avanzado { background: var(--badge-avanzado); }
+
+    .card-body {
+      padding: 1.25rem 1.25rem 0.75rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .card-body h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .card-description {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.75rem;
+      flex: 1;
+      line-height: 1.5;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.2rem 0.6rem;
+      border-radius: 50px;
+      color: #fff;
+    }
+
+    .badge.basico { background: var(--badge-basico); }
+    .badge.intermedio { background: var(--badge-intermedio); }
+    .badge.avanzado { background: var(--badge-avanzado); }
+
+    .file-count {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      padding: 0 1.25rem 1rem;
+    }
+
+    .tag {
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.2rem 0.55rem;
+      border-radius: 50px;
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .card-link {
+      display: block;
+      text-align: center;
+      padding: 0.75rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-decoration: none;
+      color: var(--accent);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .card-link:hover {
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
+
+    /* Cheatsheet banner */
+    .cheatsheet-banner {
+      max-width: 1200px;
+      margin: 0 auto 1rem;
+      padding: 0 1.5rem;
+    }
+
+    .cheatsheet-banner a {
+      display: block;
+      padding: 1rem 1.5rem;
+      background: linear-gradient(135deg, var(--accent-dim), rgba(97, 218, 251, 0.08));
+      border: 1px solid rgba(97, 218, 251, 0.25);
+      border-radius: var(--radius);
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-align: center;
+      transition: background 0.2s;
+    }
+
+    .cheatsheet-banner a:hover {
+      background: rgba(97, 218, 251, 0.2);
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    @media (max-width: 700px) {
+      header h1 { font-size: 1.6rem; }
+      header p { font-size: 0.95rem; }
+      .grid { padding: 0 1rem; gap: 1rem; }
+      .progression-path { flex-direction: column; align-items: center; }
+      .path-arrow { transform: rotate(90deg); padding: 0.25rem 0; }
+      .path-node { min-width: 200px; width: 100%; max-width: 280px; }
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <a class="back-link" href="../index.html">&larr; Volver al indice</a>
+
+  <header>
+    <h1>React Fundamentos</h1>
+    <p>Guia completa de React: componentes, hooks, rutas y proyecto integrador con ejemplos practicos en JSX.</p>
+  </header>
+
+  <section class="progression">
+    <h2>Ruta de aprendizaje</h2>
+    <div class="progression-path">
+
+      <div class="path-node node-basico">
+        <div class="node-number">1</div>
+        <div class="node-label">Bases</div>
+        <div class="node-sections">Secciones 01 – 02</div>
+      </div>
+
+      <div class="path-arrow">&rarr;</div>
+
+      <div class="path-node node-intermedio">
+        <div class="node-number">2</div>
+        <div class="node-label">Hooks y Rutas</div>
+        <div class="node-sections">Secciones 03 – 05</div>
+      </div>
+
+      <div class="path-arrow">&rarr;</div>
+
+      <div class="path-node node-avanzado">
+        <div class="node-number">3</div>
+        <div class="node-label">Formularios y Proyecto</div>
+        <div class="node-sections">Secciones 06 – 07</div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="cheatsheet-banner">
+    <a href="CHEATSHEET.md">Ver Cheatsheet — Referencia rapida de React, Hooks y JSX</a>
+  </div>
+
+  <main class="grid">
+
+    <article class="card">
+      <div class="card-accent basico"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">01</span>
+          <h2>JSX y Componentes</h2>
+        </div>
+        <p class="card-description">Sintaxis JSX, expresiones, componentes funcionales, composicion, fragments y children prop.</p>
+        <div class="card-meta">
+          <span class="badge basico">Basico</span>
+          <span class="file-count">3 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">JSX</span>
+        <span class="tag">componentes</span>
+        <span class="tag">fragments</span>
+      </div>
+      <a class="card-link" href="01-jsx-componentes/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <article class="card">
+      <div class="card-accent basico"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">02</span>
+          <h2>Props y Estado</h2>
+        </div>
+        <p class="card-description">Paso de datos con props, destructuring, valores por defecto, useState y elevacion de estado.</p>
+        <div class="card-meta">
+          <span class="badge basico">Basico</span>
+          <span class="file-count">3 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">props</span>
+        <span class="tag">useState</span>
+        <span class="tag">lifting state</span>
+      </div>
+      <a class="card-link" href="02-props-estado/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <article class="card">
+      <div class="card-accent intermedio"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">03</span>
+          <h2>Efectos y Ciclo de Vida</h2>
+        </div>
+        <p class="card-description">useEffect, arreglo de dependencias, cleanup, fetching de datos, suscripciones y ciclo de vida.</p>
+        <div class="card-meta">
+          <span class="badge intermedio">Intermedio</span>
+          <span class="file-count">3 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">useEffect</span>
+        <span class="tag">lifecycle</span>
+        <span class="tag">fetch</span>
+      </div>
+      <a class="card-link" href="03-efectos-ciclo/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <article class="card">
+      <div class="card-accent intermedio"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">04</span>
+          <h2>Hooks Avanzados</h2>
+        </div>
+        <p class="card-description">useContext, useReducer, useMemo, useCallback, useRef y creacion de custom hooks reutilizables.</p>
+        <div class="card-meta">
+          <span class="badge intermedio">Intermedio</span>
+          <span class="file-count">3 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">context</span>
+        <span class="tag">reducer</span>
+        <span class="tag">custom hooks</span>
+      </div>
+      <a class="card-link" href="04-hooks-avanzados/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <article class="card">
+      <div class="card-accent intermedio"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">05</span>
+          <h2>Rutas y Navegacion</h2>
+        </div>
+        <p class="card-description">React Router v6: BrowserRouter, Routes, Link, NavLink, parametros dinamicos y rutas protegidas.</p>
+        <div class="card-meta">
+          <span class="badge intermedio">Intermedio</span>
+          <span class="file-count">3 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">react router</span>
+        <span class="tag">SPA</span>
+        <span class="tag">navegacion</span>
+      </div>
+      <a class="card-link" href="05-rutas-navegacion/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <article class="card">
+      <div class="card-accent avanzado"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">06</span>
+          <h2>Formularios</h2>
+        </div>
+        <p class="card-description">Componentes controlados, validacion, formularios multi-campo, select, checkbox y React Hook Form.</p>
+        <div class="card-meta">
+          <span class="badge avanzado">Avanzado</span>
+          <span class="file-count">3 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">forms</span>
+        <span class="tag">validacion</span>
+        <span class="tag">controlados</span>
+      </div>
+      <a class="card-link" href="06-formularios/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <article class="card">
+      <div class="card-accent avanzado"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">07</span>
+          <h2>Proyecto Integrador</h2>
+        </div>
+        <p class="card-description">Gestor de tareas SPA completo: React Router, Context API, custom hooks y formularios en un solo proyecto.</p>
+        <div class="card-meta">
+          <span class="badge avanzado">Avanzado</span>
+          <span class="file-count">3 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">proyecto</span>
+        <span class="tag">integrador</span>
+        <span class="tag">SPA</span>
+      </div>
+      <a class="card-link" href="07-proyecto/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+  </main>
+
+  <footer>
+    <p>DGTIC — React Fundamentos: Guia Completa</p>
+  </footer>
+
+</body>
+</html>
