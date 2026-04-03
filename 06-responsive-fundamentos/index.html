@@ -330,7 +330,7 @@ con fines didacticos.
 <script>
 (function(){
   var toggle=document.getElementById('theme-toggle');
-  var theme=localStorage.getItem('dgtic-theme')||'dark';
+  var theme=localStorage.getItem('dgtic-theme')||'light';
   document.documentElement.setAttribute('data-theme',theme);
   toggle.textContent=theme==='dark'?'\u2600':'\u263E';
   toggle.addEventListener('click',function(){
