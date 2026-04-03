@@ -1,0 +1,99 @@
+# ============================================================================
+# DOCKER-COMPOSE.YML — Ejemplo: Express + PostgreSQL + Redis
+# ============================================================================
+# Aplicacion multi-contenedor tipica:
+# - web:      Servidor Express (Node.js) en el puerto 3000
+# - postgres: Base de datos PostgreSQL con datos persistentes
+# - redis:    Cache en memoria para sesiones o datos temporales
+#
+# Levantar:   docker compose up -d
+# Detener:    docker compose down
+# Logs:       docker compose logs -f
+# ============================================================================
+
+services:
+
+  # ── Servicio web (Express / Node.js) ────────────────────────────────────
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app-web
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: postgres://admin:secreto123@postgres:5432/mi_app
+      REDIS_URL: redis://redis:6379
+    volumes:
+      # Bind mount: sincronizar codigo fuente para hot reload
+      - ./src:/app/src
+      # Volume anonimo: proteger node_modules del contenedor
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  # ── Servicio PostgreSQL ─────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: app-postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secreto123
+      POSTGRES_DB: mi_app
+    ports:
+      # Solo exponer en localhost (seguridad)
+      - "127.0.0.1:5432:5432"
+    volumes:
+      # Named volume para persistir datos de la base de datos
+      - pgdata:/var/lib/postgresql/data
+      # Script SQL de inicializacion (se ejecuta al crear la BD)
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d mi_app"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  # ── Servicio Redis ──────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: app-redis
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      # Persistir datos de Redis (opcional, depende del caso de uso)
+      - redisdata:/data
+    # Habilitar persistencia AOF en Redis
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - app-network
+
+# ── Volumenes nombrados ──────────────────────────────────────────────────
+# Docker gestiona la ubicacion en disco de estos volumenes.
+# Los datos sobreviven a docker compose down (pero no a down -v).
+volumes:
+  pgdata:
+    name: app-pgdata
+  redisdata:
+    name: app-redisdata
+
+# ── Red personalizada ───────────────────────────────────────────────────
+# Todos los servicios en esta red pueden comunicarse por nombre:
+# web -> postgres:5432
+# web -> redis:6379
+networks:
+  app-network:
+    name: app-network
+    driver: bridge

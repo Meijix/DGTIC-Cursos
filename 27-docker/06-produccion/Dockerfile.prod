@@ -1,0 +1,99 @@
+# ============================================================================
+# DOCKERFILE.PROD — Imagen Optimizada para Produccion
+# ============================================================================
+# Este Dockerfile implementa todas las mejores practicas de produccion:
+# - Multi-stage build para minimizar tamanio
+# - Imagen Alpine como base
+# - Usuario no-root
+# - Health check
+# - Solo dependencias de produccion
+# - Metadata con labels
+#
+# Construir:  docker build -t mi-app:prod -f Dockerfile.prod .
+# Ejecutar:   docker run -d -p 3000:3000 mi-app:prod
+# Tamanio estimado: ~80-100 MB (vs ~1.1 GB sin optimizar)
+# ============================================================================
+
+# ── Stage 1: Dependencias ──────────────────────────────────────────────────
+# Instalar dependencias en un stage separado para cachear eficientemente
+FROM node:20-alpine AS deps
+
+WORKDIR /app
+
+# Copiar solo archivos de dependencias (cache: si no cambian, no reinstala)
+COPY package.json package-lock.json ./
+
+# Instalar TODAS las dependencias (necesarias para el build)
+RUN npm ci
+
+# ── Stage 2: Build ─────────────────────────────────────────────────────────
+# Compilar la aplicacion (TypeScript, webpack, etc.)
+FROM node:20-alpine AS build
+
+WORKDIR /app
+
+# Copiar dependencias del stage anterior
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copiar codigo fuente
+COPY . .
+
+# Compilar la aplicacion
+# (descomentar segun el framework):
+# RUN npm run build           # Para aplicaciones con build step
+# RUN npx tsc                 # Para TypeScript puro
+
+# ── Stage 3: Produccion ───────────────────────────────────────────────────
+# Imagen final minima, solo con lo necesario para ejecutar
+FROM node:20-alpine AS production
+
+# Metadata de la imagen
+LABEL maintainer="dgtic-cursos"
+LABEL version="1.0"
+LABEL description="Imagen de produccion optimizada"
+
+# Instalar SOLO las utilidades minimas necesarias
+# (dumb-init para manejo correcto de seniales PID 1)
+RUN apk add --no-cache dumb-init
+
+# Crear directorio de trabajo
+WORKDIR /app
+
+# Copiar package.json para instalar solo deps de produccion
+COPY package.json package-lock.json ./
+
+# Instalar SOLO dependencias de produccion
+# --omit=dev excluye devDependencies
+RUN npm ci --omit=dev && \
+    npm cache clean --force
+
+# Copiar codigo compilado desde el stage de build
+COPY --from=build /app/ ./
+
+# Crear usuario y grupo sin privilegios
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -S -u 1001 -G appgroup appuser
+
+# Cambiar propiedad de archivos al usuario de la app
+RUN chown -R appuser:appgroup /app
+
+# Cambiar al usuario sin privilegios
+USER appuser
+
+# Documentar el puerto
+EXPOSE 3000
+
+# Variables de entorno de produccion
+ENV NODE_ENV=production
+ENV PORT=3000
+
+# Health check: verificar que la app responde cada 30 segundos
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+
+# Usar dumb-init como PID 1 para manejo correcto de seniales
+# (SIGTERM, SIGINT se reenvian correctamente al proceso Node)
+ENTRYPOINT ["dumb-init", "--"]
+
+# Comando de ejecucion
+CMD ["node", "server.js"]

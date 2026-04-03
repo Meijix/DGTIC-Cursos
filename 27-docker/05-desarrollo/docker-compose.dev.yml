@@ -1,0 +1,86 @@
+# ============================================================================
+# DOCKER-COMPOSE.DEV.YML — Override para Desarrollo
+# ============================================================================
+# Este archivo sobreescribe la configuracion base (docker-compose.yml) con
+# opciones especificas para desarrollo local:
+# - Bind mounts para hot reload
+# - Puertos de debugging
+# - Variables de entorno de desarrollo
+# - Comando con nodemon para auto-reinicio
+#
+# Uso:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# O definir COMPOSE_FILE en .env:
+#   COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml
+#   docker compose up
+# ============================================================================
+
+services:
+
+  # ── Web: override para desarrollo ────────────────────────────────────────
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Usar target del stage de desarrollo (si el Dockerfile lo tiene)
+      # target: development
+
+    # Sobreescribir el comando para usar nodemon (auto-reinicio)
+    command: npx nodemon --watch src --ext js,json src/server.js
+
+    # Variables de entorno para desarrollo
+    environment:
+      NODE_ENV: development
+      DEBUG: "app:*"
+      LOG_LEVEL: debug
+
+    # Puertos adicionales para debugging
+    ports:
+      - "3000:3000"
+      - "9229:9229"     # Node.js Inspector (debugging remoto)
+
+    volumes:
+      # Sincronizar codigo fuente para hot reload
+      - ./src:/app/src
+      - ./package.json:/app/package.json
+
+      # Proteger node_modules del contenedor
+      # (evita que el bind mount sobreescriba las dependencias)
+      - /app/node_modules
+
+    # En desarrollo no necesitamos que la BD este healthy para empezar
+    depends_on:
+      - postgres
+      - redis
+
+  # ── PostgreSQL: override para desarrollo ─────────────────────────────────
+  postgres:
+    # En desarrollo, exponer el puerto para acceder con un cliente SQL
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: mi_app_dev
+
+  # ── Redis: override para desarrollo ─────────────────────────────────────
+  redis:
+    # En desarrollo, exponer el puerto para inspeccion con redis-cli
+    ports:
+      - "6379:6379"
+
+  # ── Adminer: cliente web para la base de datos (solo en desarrollo) ──────
+  adminer:
+    image: adminer:latest
+    container_name: app-adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    # Acceder en http://localhost:8080
+    # Sistema: PostgreSQL
+    # Servidor: postgres
+    # Usuario: admin
+    # Password: dev_password
+    # Base de datos: mi_app_dev

@@ -1,0 +1,66 @@
+# ============================================================================
+# DOCKERFILE.PYTHON — Ejemplo: Aplicacion Python (Flask/FastAPI)
+# ============================================================================
+# Este Dockerfile construye una imagen para una aplicacion Python tipica.
+# Usa una imagen slim para reducir tamanio y un usuario no-root.
+#
+# Construir:  docker build -t mi-python-app:1.0 -f Dockerfile.python .
+# Ejecutar:   docker run -d -p 8000:8000 mi-python-app:1.0
+# ============================================================================
+
+# ── Imagen base ─────────────────────────────────────────────────────────────
+# python:3.12-slim es basada en Debian pero sin paquetes extra (~150 MB)
+FROM python:3.12-slim
+
+# Metadata
+LABEL maintainer="dgtic-cursos"
+LABEL description="Aplicacion Python de ejemplo"
+
+# ── Variables de entorno ────────────────────────────────────────────────────
+# Evitar que Python genere archivos .pyc (innecesarios en contenedor)
+ENV PYTHONDONTWRITEBYTECODE=1
+# Evitar que Python bufferee la salida (logs en tiempo real)
+ENV PYTHONUNBUFFERED=1
+
+# ── Directorio de trabajo ──────────────────────────────────────────────────
+WORKDIR /app
+
+# ── Dependencias del sistema (si se necesitan) ─────────────────────────────
+# Combinar en un solo RUN para reducir capas y limpiar cache de apt
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        gcc \
+        libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# ── Dependencias de Python ─────────────────────────────────────────────────
+# Copiar requirements.txt primero para aprovechar el cache de Docker
+COPY requirements.txt ./
+
+# Instalar dependencias de Python
+# --no-cache-dir reduce el tamanio de la imagen
+RUN pip install --no-cache-dir -r requirements.txt
+
+# ── Codigo fuente ──────────────────────────────────────────────────────────
+# Copiar todo el codigo de la aplicacion
+COPY . .
+
+# ── Seguridad: usuario no-root ─────────────────────────────────────────────
+RUN addgroup --system appgroup && \
+    adduser --system --ingroup appgroup appuser
+
+USER appuser
+
+# ── Puerto ─────────────────────────────────────────────────────────────────
+EXPOSE 8000
+
+# ── Health check ───────────────────────────────────────────────────────────
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
+
+# ── Comando de ejecucion ──────────────────────────────────────────────────
+# Para Flask:
+# CMD ["python", "-m", "flask", "run", "--host=0.0.0.0", "--port=8000"]
+
+# Para FastAPI con Uvicorn:
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
