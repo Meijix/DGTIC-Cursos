@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicio: Encuentra y corrige los problemas de accesibilidad</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      line-height: 1.6;
+    }
+
+    .exercise-header {
+      background: #1a1a2e;
+      color: #e8e8e8;
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+    .exercise-header h1 {
+      color: #0077b6;
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+    }
+    .exercise-header p {
+      color: #a0a0b8;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .instructions {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .instructions h2 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      color: #0077b6;
+    }
+
+    .instructions ol {
+      padding-left: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .instructions li {
+      margin-bottom: 0.5rem;
+    }
+
+    /* ==============================================
+       PAGINA CON PROBLEMAS DE ACCESIBILIDAD
+       Los problemas estan marcados con comentarios
+       ============================================== */
+    .broken-page {
+      max-width: 900px;
+      margin: 0 auto 2rem;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+      border: 3px solid #e63946;
+    }
+
+    .broken-label {
+      background: #e63946;
+      color: #fff;
+      text-align: center;
+      padding: 0.5rem;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .broken-header {
+      background: #333;
+      color: #fff;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .broken-header .logo-text {
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .broken-nav span {
+      color: #aaa;
+      margin-left: 1.5rem;
+      cursor: pointer;
+    }
+
+    .broken-content {
+      padding: 1.5rem;
+    }
+
+    .broken-content .big-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+
+    .broken-img {
+      width: 100%;
+      height: 150px;
+      background: #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+
+    .broken-form { margin: 1.5rem 0; }
+    .broken-form .form-row {
+      margin-bottom: 1rem;
+    }
+    .broken-form input {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    .broken-form .submit-div {
+      display: inline-block;
+      padding: 0.6rem 1.5rem;
+      background: #333;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .broken-footer {
+      background: #f0f0f0;
+      padding: 1rem 1.5rem;
+      font-size: 0.85rem;
+      color: #999;
+    }
+
+    /* ==============================================
+       PAGINA CORREGIDA
+       ============================================== */
+    .fixed-page {
+      max-width: 900px;
+      margin: 0 auto 2rem;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+      border: 3px solid #2d6a4f;
+    }
+
+    .fixed-label {
+      background: #2d6a4f;
+      color: #fff;
+      text-align: center;
+      padding: 0.5rem;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .fixed-page header {
+      background: #1a1a2e;
+      color: #e8e8e8;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .fixed-page header a.logo {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #0077b6;
+      text-decoration: none;
+    }
+
+    .fixed-page nav ul {
+      list-style: none;
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .fixed-page nav a {
+      color: #e8e8e8;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .fixed-page nav a:focus-visible,
+    .fixed-page header a:focus-visible {
+      outline: 3px solid #0077b6;
+      outline-offset: 2px;
+    }
+
+    .fixed-page main {
+      padding: 1.5rem;
+    }
+
+    .fixed-page main h1 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .fixed-page main p { margin-bottom: 0.75rem; color: #555; }
+
+    .fixed-page figure {
+      margin: 1rem 0;
+    }
+    .fixed-page figure img {
+      width: 100%;
+      display: block;
+      border-radius: 4px;
+    }
+    .fixed-page figcaption {
+      font-size: 0.85rem;
+      color: #555;
+      padding: 0.5rem 0;
+    }
+
+    .fixed-page form { margin: 1.5rem 0; }
+    .fixed-page .form-field { margin-bottom: 1rem; }
+    .fixed-page label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    .fixed-page input {
+      width: 100%;
+      padding: 0.6rem;
+      border: 2px solid #767676;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    .fixed-page input:focus-visible {
+      outline: 3px solid #0077b6;
+      outline-offset: 1px;
+    }
+    .fixed-page button[type="submit"] {
+      padding: 0.7rem 1.5rem;
+      background: #0077b6;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .fixed-page button[type="submit"]:focus-visible {
+      outline: 3px solid #005f8a;
+      outline-offset: 2px;
+    }
+
+    .fixed-page footer {
+      background: #f0f7ff;
+      padding: 1rem 1.5rem;
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    /* Skip link para la pagina corregida */
+    .fixed-page .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 0;
+      background: #0077b6;
+      color: #fff;
+      padding: 0.5rem 1rem;
+      z-index: 100;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .fixed-page .skip-link:focus { top: auto; position: relative; }
+
+    /* Status message */
+    .status-msg {
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    /* Tabla de problemas */
+    .issues-table {
+      max-width: 900px;
+      margin: 0 auto 2rem;
+      padding: 0 1.5rem;
+    }
+
+    .issues-table h2 {
+      font-size: 1.2rem;
+      color: #0077b6;
+      margin-bottom: 1rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid #ddd;
+    }
+    th {
+      background: #f0f7ff;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+    tr:nth-child(even) { background: #fafafa; }
+
+    .severity-critico { color: #e63946; font-weight: 700; }
+    .severity-serio { color: #e76f51; font-weight: 700; }
+    .severity-moderado { color: #856404; font-weight: 700; }
+  </style>
+</head>
+<body>
+
+  <!-- ==============================================
+       INSTRUCCIONES DEL EJERCICIO
+       ============================================== -->
+  <div class="exercise-header">
+    <h1>Ejercicio: Auditoria de Accesibilidad</h1>
+    <p>Compara la pagina con problemas y la version corregida. Usa las herramientas de testing para encontrar cada problema.</p>
+  </div>
+
+  <div class="instructions">
+    <h2>Instrucciones</h2>
+    <ol>
+      <li>Ejecuta <strong>Lighthouse</strong> (DevTools → Lighthouse → Accessibility) en esta pagina.</li>
+      <li>Usa la extension <strong>axe DevTools</strong> para un analisis mas detallado.</li>
+      <li>Navega la "pagina con problemas" usando solo el <strong>teclado</strong> (Tab, Enter, Escape).</li>
+      <li>Activa <strong>VoiceOver</strong> (Cmd+F5 en Mac) y navega ambas versiones.</li>
+      <li>Identifica los 8 problemas listados en la tabla de abajo.</li>
+    </ol>
+  </div>
+
+  <!-- ==============================================
+       PAGINA CON PROBLEMAS (8 errores intencionales)
+       Cada error esta marcado con un comentario
+       ============================================== -->
+  <div class="broken-page">
+    <div class="broken-label">PAGINA CON PROBLEMAS — 8 errores de accesibilidad</div>
+
+    <!-- PROBLEMA 1: No hay landmarks (<header>, <nav>, <main>, <footer>)
+         Todo son divs sin semantica -->
+    <div class="broken-header">
+      <!-- PROBLEMA 2: Logo no es enlace, solo texto visual -->
+      <div class="logo-text">TiendaOnline</div>
+
+      <!-- PROBLEMA 3: Navegacion con spans onclick en vez de enlaces reales
+           No focusable por teclado, sin rol de navegacion -->
+      <div class="broken-nav">
+        <span onclick="void(0)">Inicio</span>
+        <span onclick="void(0)">Productos</span>
+        <span onclick="void(0)">Contacto</span>
+      </div>
+    </div>
+
+    <div class="broken-content">
+      <!-- PROBLEMA 4: Titulo sin elemento de encabezado semantico -->
+      <div class="big-title">Bienvenido a nuestra tienda</div>
+
+      <p>Ofrecemos los mejores productos al mejor precio.</p>
+
+      <!-- PROBLEMA 5: Imagen sin atributo alt -->
+      <div class="broken-img">[Imagen de productos sin alt text]</div>
+
+      <!-- PROBLEMA 6: Formulario sin labels en los inputs -->
+      <div class="broken-form">
+        <div class="form-row">
+          <!-- PROBLEMA 6a: Input sin label, solo placeholder -->
+          <input type="text" placeholder="Tu nombre">
+        </div>
+        <div class="form-row">
+          <!-- PROBLEMA 6b: Input sin label, solo placeholder -->
+          <input type="text" placeholder="Tu correo">
+        </div>
+        <!-- PROBLEMA 7: Div como boton — no focusable, no activable con teclado -->
+        <div class="submit-div" onclick="void(0)">Suscribirse</div>
+      </div>
+    </div>
+
+    <!-- PROBLEMA 8: Texto con contraste insuficiente (#999 sobre #f0f0f0 = 2.8:1) -->
+    <div class="broken-footer">
+      2026 TiendaOnline. Todos los derechos reservados.
+    </div>
+  </div>
+
+  <!-- ==============================================
+       TABLA DE PROBLEMAS ENCONTRADOS
+       ============================================== -->
+  <div class="issues-table">
+    <h2>Problemas encontrados y sus correcciones</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Problema</th>
+          <th>WCAG</th>
+          <th>Severidad</th>
+          <th>Correccion</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>Sin landmarks semanticos</td>
+          <td>1.3.1 (A)</td>
+          <td class="severity-serio">Serio</td>
+          <td>Usar header, nav, main, footer</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Logo no es un enlace</td>
+          <td>2.4.5 (AA)</td>
+          <td class="severity-moderado">Moderado</td>
+          <td>Envolver en &lt;a href="/"&gt;</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Navegacion con spans onclick</td>
+          <td>2.1.1 (A)</td>
+          <td class="severity-critico">Critico</td>
+          <td>Usar &lt;nav&gt; con &lt;a href&gt; reales</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Titulo sin encabezado semantico</td>
+          <td>1.3.1 (A)</td>
+          <td class="severity-serio">Serio</td>
+          <td>Usar &lt;h1&gt; en lugar de &lt;div&gt;</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Imagen sin alt text</td>
+          <td>1.1.1 (A)</td>
+          <td class="severity-critico">Critico</td>
+          <td>Agregar alt descriptivo a &lt;img&gt;</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>Inputs sin labels asociados</td>
+          <td>1.3.1 (A)</td>
+          <td class="severity-critico">Critico</td>
+          <td>Agregar &lt;label for="id"&gt;</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>Div como boton (no focusable)</td>
+          <td>2.1.1 (A)</td>
+          <td class="severity-critico">Critico</td>
+          <td>Usar &lt;button type="submit"&gt;</td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td>Contraste insuficiente en footer</td>
+          <td>1.4.3 (AA)</td>
+          <td class="severity-serio">Serio</td>
+          <td>Color de texto con ratio >= 4.5:1</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ==============================================
+       PAGINA CORREGIDA (todos los problemas resueltos)
+       ============================================== -->
+  <div class="fixed-page">
+    <div class="fixed-label">PAGINA CORREGIDA — Todos los problemas resueltos</div>
+
+    <!-- CORRECCION: Skip link como primer elemento -->
+    <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+    <!-- CORRECCION 1: Usar <header> como landmark banner -->
+    <header>
+      <!-- CORRECCION 2: Logo como enlace con texto accesible -->
+      <a href="#" class="logo">TiendaOnline</a>
+
+      <!-- CORRECCION 3: <nav> con <a href> reales, focusables -->
+      <nav aria-label="Principal">
+        <ul>
+          <li><a href="#" aria-current="page">Inicio</a></li>
+          <li><a href="#">Productos</a></li>
+          <li><a href="#">Contacto</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- CORRECCION 1: Usar <main> como landmark -->
+    <main id="main-content">
+      <!-- CORRECCION 4: Encabezado semantico <h1> -->
+      <h1>Bienvenido a nuestra tienda</h1>
+      <p>Ofrecemos los mejores productos al mejor precio.</p>
+
+      <!-- CORRECCION 5: Imagen con alt descriptivo + figure/figcaption -->
+      <figure>
+        <img
+          src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='150'%3E%3Crect fill='%23e8f4f8' width='900' height='150'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%230077b6' font-size='18'%3EProductos destacados%3C/text%3E%3C/svg%3E"
+          alt="Catalogo de productos destacados: electronica, hogar y deportes"
+        >
+        <figcaption>Nuestras tres categorias mas populares de productos.</figcaption>
+      </figure>
+
+      <!-- CORRECCION 6: Formulario con labels asociados -->
+      <form aria-label="Suscripcion al boletin">
+        <h2>Suscribete a nuestro boletin</h2>
+
+        <div class="form-field">
+          <!-- Label asociado con for/id -->
+          <label for="subs-nombre">Nombre</label>
+          <input type="text" id="subs-nombre" name="nombre" autocomplete="given-name">
+        </div>
+
+        <div class="form-field">
+          <label for="subs-correo">Correo electronico</label>
+          <input type="email" id="subs-correo" name="correo" autocomplete="email" required aria-required="true">
+        </div>
+
+        <!-- CORRECCION 7: Boton nativo — focusable y activable con teclado -->
+        <button type="submit">Suscribirse</button>
+
+        <!-- Live region para anunciar el resultado -->
+        <div role="status" class="status-msg" id="form-status" aria-live="polite"></div>
+      </form>
+    </main>
+
+    <!-- CORRECCION 1+8: <footer> como landmark + contraste corregido -->
+    <footer>
+      <!-- Color #555 sobre #f0f7ff = 6.89:1 — cumple AAA -->
+      <p>2026 TiendaOnline. Todos los derechos reservados.</p>
+    </footer>
+  </div>
+
+  <script>
+    // Prevenir el envio del formulario y mostrar mensaje accesible
+    var form = document.querySelector('.fixed-page form');
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        // Usar la live region para anunciar el resultado
+        var status = document.getElementById('form-status');
+        status.textContent = 'Suscripcion exitosa. Revisa tu correo para confirmar.';
+        status.style.color = '#1B7A3D';
+      });
+    }
+  </script>
+
+</body>
+</html>
