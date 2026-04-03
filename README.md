@@ -55,6 +55,21 @@ El repositorio esta organizado en modulos progresivos, desde los fundamentos has
 | 21 | [Estructuras de Datos](21-estructuras-de-datos/) | Arrays, listas enlazadas, pilas, colas, tablas hash, arboles, heaps, grafos | 8 secciones con diagramas y ejemplos Python |
 | 22 | [Algoritmos de Ordenacion](22-algoritmos-ordenacion/) | Bubble, Selection, Insertion, Merge, Quick, Counting, Radix Sort | 7 secciones con visualizaciones y analisis Big O |
 
+### Bloque 5 — Frontend Avanzado
+
+| # | Modulo | Temas principales | Contenido |
+|---|--------|-------------------|-----------|
+| 23 | [TypeScript](23-typescript/) | Tipos basicos, interfaces, genericos, clases, utility types, configuracion | 7 secciones con ejemplos .ts |
+| 24 | [React — Fundamentos](24-react-fundamentos/) | JSX, componentes, hooks, React Router, formularios, proyecto SPA | 7 secciones con ejemplos .jsx |
+
+### Bloque 6 — Bases de Datos, Accesibilidad y DevOps
+
+| # | Modulo | Temas principales | Contenido |
+|---|--------|-------------------|-----------|
+| 25 | [SQL y Bases de Datos](25-sql-bases-de-datos/) | SELECT, JOINs, normalizacion, indices, transacciones, proyecto e-commerce | 7 secciones con ejemplos .sql |
+| 26 | [Accesibilidad Web](26-accesibilidad-web/) | WCAG, ARIA, formularios, teclado, contraste, testing con screen readers | 6 secciones con ejemplos HTML |
+| 27 | [Docker](27-docker/) | Contenedores, Dockerfile, Compose, desarrollo local, produccion | 6 secciones con Dockerfiles y scripts |
+
 ---
 
 ## Material de aprendizaje
@@ -116,6 +131,22 @@ Los modulos 11-13 incluyen sus propios enunciados y documentacion dentro de cada
 │  21 Estructuras de Datos ──► 22 Algoritmos Ordenacion   │
 │                                                         │
 └─────────────────────────────────────────────────────────┘
+                         │
+                         ▼
+            BLOQUE 5: Frontend Avanzado
+┌─────────────────────────────────────────────────────────┐
+│                                                         │
+│  23 TypeScript ──► 24 React Fundamentos                 │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+                         │
+                         ▼
+      BLOQUE 6: BD, Accesibilidad y DevOps
+┌─────────────────────────────────────────────────────────┐
+│                                                         │
+│  25 SQL y BD    26 Accesibilidad    27 Docker           │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -132,6 +163,11 @@ Los modulos 11-13 incluyen sus propios enunciados y documentacion dentro de cada
 - **GitHub Actions** — CI/CD, workflows, testing automatizado, deploy, seguridad
 - **Estructuras de datos** — arrays, listas enlazadas, pilas, colas, tablas hash, arboles, heaps, grafos
 - **Algoritmos de ordenacion** — bubble, selection, insertion, merge, quick, counting, radix sort
+- **TypeScript** — tipos, interfaces, genericos, clases tipadas, utility types
+- **React** — componentes funcionales, hooks, React Router, estado, formularios
+- **SQL** — consultas, JOINs, normalizacion, indices, transacciones, diseno de esquemas
+- **Accesibilidad web** — WCAG 2.1, ARIA, navegacion por teclado, contraste, testing
+- **Docker** — contenedores, Dockerfile, Docker Compose, desarrollo y produccion
 
 ## Como usar
 
