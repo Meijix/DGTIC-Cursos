@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estructuras de Datos — Guia Completa</title>
+
+  <style>
+
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #1a1a2e;
+      --bg-card: #16213e;
+      --bg-card-hover: #1b2a4a;
+      --accent: #06d6a0;
+      --accent-dim: rgba(6, 214, 160, 0.15);
+      --text-primary: #e8e8e8;
+      --text-secondary: #a0a0b8;
+      --text-muted: #6b6b80;
+      --badge-basico: #2d6a4f;
+      --badge-intermedio: #e76f51;
+      --badge-avanzado: #e63946;
+      --radius: 12px;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .back-link {
+      display: inline-block;
+      padding: 1rem 1.5rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: opacity 0.2s;
+    }
+
+    .back-link:hover { opacity: 0.8; }
+
+    header {
+      text-align: center;
+      padding: 2rem 1.5rem 2.5rem;
+      background: linear-gradient(135deg, #1a1a2e, #0f3460);
+      border-bottom: 3px solid var(--accent);
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.5rem;
+      color: var(--accent);
+    }
+
+    header p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 560px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* Barra de progresion */
+    .progression {
+      max-width: 1000px;
+      margin: 2rem auto 1rem;
+      padding: 1.5rem;
+    }
+
+    .progression h2 {
+      text-align: center;
+      font-size: 1.3rem;
+      color: var(--text-primary);
+      margin-bottom: 1.5rem;
+    }
+
+    .progression-path {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+
+    .path-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 1rem;
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      min-width: 160px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .path-node .node-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    .path-node .node-label {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .path-node .node-sections {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .node-basico .node-number { background: var(--badge-basico); }
+    .node-intermedio .node-number { background: var(--badge-intermedio); }
+    .node-avanzado .node-number { background: var(--badge-avanzado); }
+
+    .path-arrow {
+      display: flex;
+      align-items: center;
+      padding: 0 0.5rem;
+      color: var(--text-muted);
+      font-size: 1.4rem;
+    }
+
+    /* Grid de tarjetas */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: 1.5rem auto 2.5rem;
+      padding: 0 1.5rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-accent { height: 5px; }
+    .card-accent.basico { background: var(--badge-basico); }
+    .card-accent.intermedio { background: var(--badge-intermedio); }
+    .card-accent.avanzado { background: var(--badge-avanzado); }
+
+    .card-body {
+      padding: 1.25rem 1.25rem 0.75rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .card-body h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .card-description {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.75rem;
+      flex: 1;
+      line-height: 1.5;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.2rem 0.6rem;
+      border-radius: 50px;
+      color: #fff;
+    }
+
+    .badge.basico { background: var(--badge-basico); }
+    .badge.intermedio { background: var(--badge-intermedio); }
+    .badge.avanzado { background: var(--badge-avanzado); }
+
+    .file-count {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      padding: 0 1.25rem 1rem;
+    }
+
+    .tag {
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.2rem 0.55rem;
+      border-radius: 50px;
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .card-link {
+      display: block;
+      text-align: center;
+      padding: 0.75rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-decoration: none;
+      color: var(--accent);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .card-link:hover {
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
+
+    /* Cheatsheet banner */
+    .cheatsheet-banner {
+      max-width: 1200px;
+      margin: 0 auto 1rem;
+      padding: 0 1.5rem;
+    }
+
+    .cheatsheet-banner a {
+      display: block;
+      padding: 1rem 1.5rem;
+      background: linear-gradient(135deg, var(--accent-dim), rgba(6, 214, 160, 0.08));
+      border: 1px solid rgba(6, 214, 160, 0.25);
+      border-radius: var(--radius);
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-align: center;
+      transition: background 0.2s;
+    }
+
+    .cheatsheet-banner a:hover {
+      background: rgba(6, 214, 160, 0.2);
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    @media (max-width: 700px) {
+      header h1 { font-size: 1.6rem; }
+      header p { font-size: 0.95rem; }
+      .grid { padding: 0 1rem; gap: 1rem; }
+      .progression-path { flex-direction: column; align-items: center; }
+      .path-arrow { transform: rotate(90deg); padding: 0.25rem 0; }
+      .path-node { min-width: 200px; width: 100%; max-width: 280px; }
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <a class="back-link" href="../index.html">&larr; Volver al indice</a>
+
+  <header>
+    <h1>Estructuras de Datos</h1>
+    <p>Guia completa con explicaciones, diagramas y ejemplos en Python. Desde arrays hasta grafos.</p>
+  </header>
+
+  <section class="progression">
+    <h2>Ruta de aprendizaje</h2>
+    <div class="progression-path">
+
+      <div class="path-node node-basico">
+        <div class="node-number">1</div>
+        <div class="node-label">Lineales</div>
+        <div class="node-sections">Secciones 01 – 04</div>
+      </div>
+
+      <div class="path-arrow">&rarr;</div>
+
+      <div class="path-node node-intermedio">
+        <div class="node-number">2</div>
+        <div class="node-label">Asociativas</div>
+        <div class="node-sections">Seccion 05</div>
+      </div>
+
+      <div class="path-arrow">&rarr;</div>
+
+      <div class="path-node node-avanzado">
+        <div class="node-number">3</div>
+        <div class="node-label">Jerarquicas</div>
+        <div class="node-sections">Secciones 06 – 07</div>
+      </div>
+
+      <div class="path-arrow">&rarr;</div>
+
+      <div class="path-node node-avanzado">
+        <div class="node-number">4</div>
+        <div class="node-label">Grafos</div>
+        <div class="node-sections">Seccion 08</div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="cheatsheet-banner">
+    <a href="CHEATSHEET.md">Ver Cheatsheet — Referencia rapida de todas las estructuras</a>
+  </div>
+
+  <main class="grid">
+
+    <article class="card">
+      <div class="card-accent basico"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">01</span>
+          <h2>Arrays (Arreglos)</h2>
+        </div>
+        <p class="card-description">Coleccion ordenada de elementos en memoria contigua. Acceso por indice en O(1), base de muchas otras estructuras.</p>
+        <div class="card-meta">
+          <span class="badge basico">Basico</span>
+          <span class="file-count">2 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">indices</span>
+        <span class="tag">memoria contigua</span>
+        <span class="tag">listas</span>
+      </div>
+      <a class="card-link" href="01-arrays/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <article class="card">
+      <div class="card-accent basico"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">02</span>
+          <h2>Listas Enlazadas</h2>
+        </div>
+        <p class="card-description">Nodos conectados por punteros. Insercion y eliminacion en O(1), sin necesidad de memoria contigua.</p>
+        <div class="card-meta">
+          <span class="badge basico">Basico</span>
+          <span class="file-count">2 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">nodos</span>
+        <span class="tag">punteros</span>
+        <span class="tag">simple</span>
+        <span class="tag">doble</span>
+      </div>
+      <a class="card-link" href="02-listas-enlazadas/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <article class="card">
+      <div class="card-accent basico"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">03</span>
+          <h2>Pilas (Stacks)</h2>
+        </div>
+        <p class="card-description">Estructura LIFO: el ultimo en entrar es el primero en salir. Fundamental para call stack, undo y parseo.</p>
+        <div class="card-meta">
+          <span class="badge basico">Basico</span>
+          <span class="file-count">2 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">LIFO</span>
+        <span class="tag">push</span>
+        <span class="tag">pop</span>
+        <span class="tag">call stack</span>
+      </div>
+      <a class="card-link" href="03-pilas/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <article class="card">
+      <div class="card-accent basico"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">04</span>
+          <h2>Colas (Queues)</h2>
+        </div>
+        <p class="card-description">Estructura FIFO: el primero en entrar es el primero en salir. Usada en BFS, colas de impresion y schedulers.</p>
+        <div class="card-meta">
+          <span class="badge basico">Basico</span>
+          <span class="file-count">2 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">FIFO</span>
+        <span class="tag">enqueue</span>
+        <span class="tag">dequeue</span>
+        <span class="tag">prioridad</span>
+      </div>
+      <a class="card-link" href="04-colas/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <article class="card">
+      <div class="card-accent intermedio"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">05</span>
+          <h2>Tablas Hash</h2>
+        </div>
+        <p class="card-description">Acceso promedio O(1) mediante funciones hash. Base de diccionarios, sets y caches. Manejo de colisiones.</p>
+        <div class="card-meta">
+          <span class="badge intermedio">Intermedio</span>
+          <span class="file-count">2 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">hash</span>
+        <span class="tag">colisiones</span>
+        <span class="tag">dict</span>
+        <span class="tag">O(1)</span>
+      </div>
+      <a class="card-link" href="05-tablas-hash/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <article class="card">
+      <div class="card-accent avanzado"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">06</span>
+          <h2>Arboles (BST)</h2>
+        </div>
+        <p class="card-description">Estructura jerarquica con nodos padre-hijo. BST para busqueda en O(log n), recorridos inorder, preorder, postorder.</p>
+        <div class="card-meta">
+          <span class="badge avanzado">Avanzado</span>
+          <span class="file-count">2 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">BST</span>
+        <span class="tag">recorridos</span>
+        <span class="tag">balanceo</span>
+        <span class="tag">jerarquia</span>
+      </div>
+      <a class="card-link" href="06-arboles/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <article class="card">
+      <div class="card-accent avanzado"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">07</span>
+          <h2>Heaps (Monticulos)</h2>
+        </div>
+        <p class="card-description">Arbol binario completo con propiedad de heap. Base de colas de prioridad y heapsort. Min-heap y max-heap.</p>
+        <div class="card-meta">
+          <span class="badge avanzado">Avanzado</span>
+          <span class="file-count">2 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">min-heap</span>
+        <span class="tag">max-heap</span>
+        <span class="tag">heapq</span>
+        <span class="tag">prioridad</span>
+      </div>
+      <a class="card-link" href="07-heaps/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+    <article class="card">
+      <div class="card-accent avanzado"></div>
+      <div class="card-body">
+        <div class="card-header">
+          <span class="card-number">08</span>
+          <h2>Grafos</h2>
+        </div>
+        <p class="card-description">Vertices y aristas para modelar relaciones. Dirigidos, no dirigidos, ponderados. BFS, DFS y caminos mas cortos.</p>
+        <div class="card-meta">
+          <span class="badge avanzado">Avanzado</span>
+          <span class="file-count">2 archivos</span>
+        </div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">BFS</span>
+        <span class="tag">DFS</span>
+        <span class="tag">Dijkstra</span>
+        <span class="tag">adyacencia</span>
+      </div>
+      <a class="card-link" href="08-grafos/CONCEPTOS.md">Ver CONCEPTOS.md</a>
+    </article>
+
+  </main>
+
+  <footer>
+    <p>DGTIC — Estructuras de Datos: Guia Completa</p>
+  </footer>
+
+</body>
+</html>
