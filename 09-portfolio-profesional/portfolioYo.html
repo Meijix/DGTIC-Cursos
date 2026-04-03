@@ -45,6 +45,17 @@
            para que el skip-link se muestre ENCIMA de la barra de
            navegacion cuando esta activo.
            ================================================================ */
+        .back-link {
+            display: inline-block;
+            padding: 1rem 1.5rem;
+            color: #0f3460;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: opacity 0.2s;
+        }
+        .back-link:hover { opacity: 0.7; }
+
         .skip-link {
             position: absolute;
             top: -100%;
@@ -410,6 +421,7 @@
     </style>
 </head>
 <body>
+    <a class="back-link" href="../index.html">&larr; Volver al indice</a>
     <!-- ================================================================
          SKIP LINK — Primer elemento del body
          ================================================================
