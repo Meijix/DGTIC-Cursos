@@ -1,0 +1,53 @@
+name: CI — Validar contenido
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verificar sintaxis Python
+        run: |
+          echo "Verificando sintaxis de archivos Python..."
+          find . -name "*.py" -not -path "*/vendor/*" -not -path "*/node_modules/*" | while read f; do
+            python3 -c "import py_compile; py_compile.compile('$f', doraise=True)" || exit 1
+          done
+          echo "Todos los archivos Python son validos."
+
+      - name: Verificar que CONCEPTOS.md y CHEATSHEET.md existen
+        run: |
+          echo "Verificando documentacion..."
+          errors=0
+          for dir in 0[0-9]-* 1[0-9]-* 2[0-2]-*; do
+            [ -d "$dir" ] || continue
+            if [ ! -f "$dir/CHEATSHEET.md" ]; then
+              echo "FALTA: $dir/CHEATSHEET.md"
+              errors=$((errors+1))
+            fi
+          done
+          if [ $errors -gt 0 ]; then
+            echo "$errors archivo(s) faltante(s)"
+            exit 1
+          fi
+          echo "Toda la documentacion esta completa."
+
+      - name: Verificar que no haya secretos expuestos
+        run: |
+          echo "Buscando posibles API keys expuestas..."
+          if grep -rn "api_key=[a-f0-9]\{32\}" --include="*.js" --include="*.py" --include="*.php" . 2>/dev/null | grep -v "TU_API_KEY"; then
+            echo "Se encontraron posibles API keys expuestas"
+            exit 1
+          fi
+          echo "No se encontraron secretos expuestos."
